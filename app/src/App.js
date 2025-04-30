@@ -1,23 +1,24 @@
 import React from "react";
-import logo from "./logo.svg";
-import "./App.css";
+import "./assets/App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./Components/Layout.js"
+import NoPage from "./pages/NoPage.js"
+import Users from "./pages/Users.js"
+import Schedule from "./pages/Schedule.js"
+import Home from "./pages/Home.js";
 
 function App() {
-  const [data, setData] = React.useState(null);
-
-  React.useEffect(() => {
-    fetch("/api")
-      .then((res) => res.json())
-      .then((data) => setData(data.message));
-  }, []);
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>{!data ? "Loading..." : data}</p>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="users" element={<Users />} />
+          <Route path="schedule" element={<Schedule />} />
+          <Route path="*" element={<NoPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
