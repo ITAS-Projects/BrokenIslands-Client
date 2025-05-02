@@ -3,22 +3,26 @@ import axios from 'axios';
 
 const PeopleList = () => {
   const [people, setPeople] = useState([]);
+  const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch people from the backend
   useEffect(() => {
-    axios.get('http://localhost:8081/people')
-      .then(response => {
-        setPeople(response.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching people:', error);
-        setLoading(false);
-      });
+    // Fetch people and schedules at the same time
+    Promise.all([
+      axios.get('http://localhost:8081/people'),
+      axios.get('http://localhost:8081/schedules')
+    ])
+    .then(([peopleResponse, schedulesResponse]) => {
+      setPeople(peopleResponse.data);
+      setSchedules(schedulesResponse.data);
+      setLoading(false);
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+      setLoading(false);
+    });
   }, []);
 
-  // Handle delete of a person
   const handleDelete = (id) => {
     axios.delete(`http://localhost:8081/people/${id}`)
       .then(response => {
@@ -28,6 +32,12 @@ const PeopleList = () => {
       .catch(error => console.error("Error deleting person:", error));
   };
 
+  const getSchedules = (data) => {
+    return data.map(schedule => {
+      return schedule.costOverride;
+    }).join(', ');
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -35,15 +45,12 @@ const PeopleList = () => {
   return (
     <div>
       <h1>People List</h1>
-      
-      {/* Add Person Form */}
-      <button onClick={() => window.location.href = `/data/new`}>Add New Person</button>
-
+      <button onClick={() => window.location.href = `/users/new`}>Add New Person</button>
       <table>
         <thead>
           <tr>
             <th>Name</th>
-            <th>Email</th>
+            <th>Schedules</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -51,9 +58,9 @@ const PeopleList = () => {
           {people.map(person => (
             <tr key={person.id}>
               <td>{person.name}</td>
-              <td>{person.email}</td>
+              <td>{getSchedules(person.Schedules)}</td>
               <td>
-                <button onClick={() => window.location.href = `/data/edit/${person.id}`}>Edit</button>
+                <button onClick={() => window.location.href = `/users/edit/${person.id}`}>Edit</button>
                 <button onClick={() => handleDelete(person.id)}>Delete</button>
               </td>
             </tr>
