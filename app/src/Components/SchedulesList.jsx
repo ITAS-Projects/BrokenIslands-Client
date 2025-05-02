@@ -3,17 +3,12 @@ import axios from 'axios';
 
 const SchedulesList = () => {
   const [schedules, setSchedules] = useState([]);
-  const [people, setPeople] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch people and schedules at the same time
-    Promise.all([
-      axios.get('http://localhost:8081/people'),
-      axios.get('http://localhost:8081/schedules')
-    ])
-    .then(([peopleResponse, schedulesResponse]) => {
-      setPeople(peopleResponse.data);
+    axios.get('http://localhost:8081/schedules')
+    .then(schedulesResponse => {
       setSchedules(schedulesResponse.data);
       setLoading(false);
     })
@@ -26,14 +21,14 @@ const SchedulesList = () => {
   const handleDelete = (id) => {
     axios.delete(`http://localhost:8081/schedules/${id}`)
       .then(response => {
-        alert("Schedule deleted successfully");
+        alert(`${response.data.message} successfully`);
         setSchedules(schedules.filter(schedule => schedule.id !== id)); // Update state to remove deleted person
       })
       .catch(error => console.error("Error deleting schedule:", error));
   };
 
   const getPeople = (data) => {
-    return [data.length, data.map(person => person.name).join(', ')].join(': ');
+    return [`${data.People.length}/${data.numberOfPeople}`, data.People.map(person => person.name).join(', ')].join(': ');
   };
 
   if (loading) {
@@ -67,7 +62,7 @@ const SchedulesList = () => {
               <td>{schedule.toPlace}</td>
               <td>{schedule.costOverride}</td>
               <td>{schedule.reason}</td>
-              <td>{getPeople(schedule.People)}</td>
+              <td>{getPeople(schedule)}</td>
               <td>
                 <button onClick={() => window.location.href = `/schedule/edit/${schedule.id}`}>Edit</button>
                 <button onClick={() => handleDelete(schedule.id)}>Delete</button>
