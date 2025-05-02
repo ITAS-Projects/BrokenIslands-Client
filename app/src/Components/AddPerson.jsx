@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const AddPerson = () => {
   const [name, setName] = useState('');
+  const [allergies, setAllergies] = useState('');
   const [selectedSchedules, setSelectedSchedules] = useState([]);
   const [schedules, setSchedules] = useState([]);
 
@@ -15,7 +16,8 @@ const AddPerson = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios.post('http://localhost:8081/people', {
-      name,
+      name: name,
+      allergies: allergies,
       scheduleIds: selectedSchedules
     })
     .then(() => {
@@ -30,7 +32,9 @@ const AddPerson = () => {
       <h2>Add New Person</h2>
       <form onSubmit={handleSubmit}>
         <label>Name: </label>
-        <input value={name} onChange={e => setName(e.target.value)} required />
+        <input value={name} onChange={e => setName(e.target.value)} />
+        <label>Allergies: </label>
+        <input value={allergies} onChange={e => setAllergies(e.target.value)} />
         <br /><br />
         <label>Select Schedules:</label>
         <select multiple value={selectedSchedules} onChange={e => {
@@ -38,7 +42,7 @@ const AddPerson = () => {
           setSelectedSchedules(options);
         }}>
           {schedules.map(s => (
-            <option key={s.id} value={s.id}>{s.costOverride}</option>
+            <option key={s.id} value={s.id}>{s.timeStart}</option>
           ))}
         </select>
         <br /><br />

@@ -33,9 +33,7 @@ const PeopleList = () => {
   };
 
   const getSchedules = (data) => {
-    return data.map(schedule => {
-      return schedule.costOverride;
-    }).join(', ');
+    return [data.length, data.map(schedule => schedule.timeStart).join(', ')].join(': ');
   };
 
   if (loading) {
@@ -50,6 +48,7 @@ const PeopleList = () => {
         <thead>
           <tr>
             <th>Name</th>
+            <th>Allergies</th>
             <th>Schedules</th>
             <th>Actions</th>
           </tr>
@@ -58,6 +57,7 @@ const PeopleList = () => {
           {people.map(person => (
             <tr key={person.id}>
               <td>{person.name}</td>
+              <td>{person.allergies}</td>
               <td>{getSchedules(person.Schedules)}</td>
               <td>
                 <button onClick={() => window.location.href = `/users/edit/${person.id}`}>Edit</button>

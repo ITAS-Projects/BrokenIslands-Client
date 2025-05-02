@@ -5,6 +5,7 @@ import axios from 'axios';
 const EditPerson = () => {
   const { id } = useParams();
   const [name, setName] = useState('');
+  const [allergies, setAllergies] = useState('');
   const [selectedSchedules, setSelectedSchedules] = useState([]);
   const [schedules, setSchedules] = useState([]);
 
@@ -14,6 +15,7 @@ const EditPerson = () => {
         .then(response => response.data)
         .then(data => {
           setName(data.name);
+          setAllergies(data.allergies);
           setSelectedSchedules(data.Schedules.map(schedule => schedule.id));
         })
         .catch(error => console.error(`Error fetching person ${id}:`, error))
@@ -26,7 +28,8 @@ const EditPerson = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios.put(`http://localhost:8081/people/${id}`, {
-      name,
+      name: name,
+      allergies: allergies,
       scheduleIds: selectedSchedules
     })
     .then(() => {
@@ -41,7 +44,9 @@ const EditPerson = () => {
       <h2>Edit Person</h2>
       <form onSubmit={handleSubmit}>
         <label>Name: </label>
-        <input value={name} onChange={e => setName(e.target.value)} required />
+        <input value={name} onChange={e => setName(e.target.value)} />
+        <label>Allergies: </label>
+        <input value={allergies} onChange={e => setAllergies(e.target.value)} />
         <br /><br />
         <label>Select Schedules:</label>
         <select multiple value={selectedSchedules} onChange={e => {
@@ -49,7 +54,7 @@ const EditPerson = () => {
           setSelectedSchedules(options);
         }}>
           {schedules.map(s => (
-            <option key={s.id} value={s.id}>{s.costOverride}</option>
+            <option key={s.id} value={s.id}>{s.timeStart}</option>
           ))}
         </select>
         <br /><br />
