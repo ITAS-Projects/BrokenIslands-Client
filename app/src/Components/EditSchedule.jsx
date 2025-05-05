@@ -9,7 +9,6 @@ const EditSchedule = () => {
   const [day, setDay] = useState('');
   const [fromPlace, setFromPlace] = useState('');
   const [toPlace, setToPlace] = useState('');
-  const [costOverride, setCostOverride] = useState('');
   const [reason, setReason] = useState('');
   const [numberOfPeople, setNumberOfPeopleHidden] = useState(1);
   let setNumberOfPeople = (number) => {
@@ -37,7 +36,6 @@ const EditSchedule = () => {
           setDay(data.day.split('T')[0]);
           setFromPlace(data.fromPlace);
           setToPlace(data.toPlace);
-          setCostOverride(data.costOverride);
           setReason(data.reason);
           setNumberOfPeople(data.numberOfPeople);
           setSelectedPeople(data.People.map(person => person.id));
@@ -63,7 +61,6 @@ const EditSchedule = () => {
       day: day,
       fromPlace: fromPlace,
       toPlace: toPlace,
-      costOverride: costOverride,
       reason: reason,
       personIds: selectedPeople,
       boatsIds: selectedBoats,
@@ -91,8 +88,6 @@ const EditSchedule = () => {
         <input value={fromPlace} onChange={e => setFromPlace(e.target.value)} required />
         <label>To: </label>
         <input value={toPlace} onChange={e => setToPlace(e.target.value)} required />
-        <label>Cost: </label>
-        <input value={costOverride} onChange={e => setCostOverride(e.target.value)} />
         <label>Reason (Notes): </label>
         <input value={reason} onChange={e => setReason(e.target.value)} />
         <label>Number Of People: </label>

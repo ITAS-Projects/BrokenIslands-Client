@@ -10,6 +10,9 @@ import EditSchedule from "./Components/EditSchedule.jsx";
 import PeopleList from "./Components/PeopleList.jsx";
 import AddPerson from "./Components/AddPerson.jsx";
 import AddSchedule from "./Components/AddSchedule.jsx";
+import TripsList from "./Components/TripsList.jsx";
+import AddTrip from "./Components/AddTrip.jsx";
+import EditTrip from "./Components/EditTrip.jsx";
 
 function App() {
   return (
@@ -23,6 +26,9 @@ function App() {
           <Route exact path="schedule" element={<SchedulesList />} />
           <Route path="schedule/new" element={<AddSchedule />} />
           <Route path="schedule/edit/:id" element={<EditSchedule />} />
+          <Route exact path="trips" element={<TripsList />} />
+          <Route path="trips/new" element={<AddTrip />} />
+          <Route path="trips/edit/:id" element={<EditTrip />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>
