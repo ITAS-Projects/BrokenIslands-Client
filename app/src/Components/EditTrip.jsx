@@ -155,7 +155,7 @@ const EditTrip = () => {
             <option value="" disabled>-- Select a Taxi --</option>
             {taxis.map(taxi => (
               <option key={taxi.id} value={taxi.id}>
-                {taxi.id}: {taxi.spaceForKayaks}
+                id:{taxi.id}, space:{taxi.spaceForKayaks}
               </option>
             ))}
           </select>

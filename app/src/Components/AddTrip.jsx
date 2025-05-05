@@ -10,14 +10,14 @@ const AddTrip = () => {
   const [toPlace, setToPlace] = useState('');
   const [numberOfPeople, setNumberOfPeopleHidden] = useState(1);
   let setNumberOfPeople = (number) => {
-    setNumberOfPeopleHidden(Math.max(1,number));
+    setNumberOfPeopleHidden(Math.max(1, number));
   }
   const [numberOfBoats, setNumberOfBoatsHidden] = useState(0);
   let setNumberOfBoats = (number) => {
-    setNumberOfBoatsHidden(Math.max(0,number));
+    setNumberOfBoatsHidden(Math.max(0, number));
   }
 
-  
+
   const [selectedPeople, setSelectedPeople] = useState([]);
   const [selectedBoats, setSelectedBoats] = useState([]);
   const [selectedTaxi, setSelectedTaxi] = useState("");
@@ -33,7 +33,7 @@ const AddTrip = () => {
     axios.get('http://localhost:8081/boats')
       .then(response => setBoats(response.data))
       .catch(error => console.error('Error fetching boats:', error));
-      axios.get('http://localhost:8081/taxis')
+    axios.get('http://localhost:8081/taxis')
       .then(response => setTaxis(response.data))
       .catch(error => console.error('Error fetching taxis:', error));
   }, []);
@@ -52,12 +52,25 @@ const AddTrip = () => {
       numberOfPeople: numberOfPeople,
       numberOfBoats: numberOfBoats
     })
-    .then(() => {
-      alert('trip added successfully!');
-      window.location.href = '/';
-    })
-    .catch(error => console.error('Error adding trip:', error));
+      .then(() => {
+        alert('trip added successfully!');
+        window.location.href = '/';
+      })
+      .catch(error => console.error('Error adding trip:', error));
   };
+
+  function trimUndefined(arr) {
+    let movingIndex = arr.length - 1;
+  
+    while (movingIndex >= 0) {
+      if (arr[movingIndex] === undefined) {
+        arr.splice(movingIndex, 1); // Remove the undefined value at this index
+      }
+      movingIndex--;
+    }
+    
+    return arr;
+  }
 
   return (
     <div className="trip-form-container">
@@ -76,7 +89,8 @@ const AddTrip = () => {
         <div className="form-group">
           <label>Day:</label>
           <input type='date' value={day} onChange={e => setDay(e.target.value)} required />
-        </div><br></br>
+        </div>
+        <br />
 
         <div className="form-group">
           <label>From:</label>
@@ -110,29 +124,71 @@ const AddTrip = () => {
           </select>
         </div>
 
-        <div className="form-group">
-          <label>Select Boats:</label>
-          <select multiple value={selectedBoats} onChange={e => {
-            const options = Array.from(e.target.selectedOptions, option => option.value);
-            setSelectedBoats(options);
-          }}>
-            {boats.map(b => (
-              <option key={b.id} value={b.id}>{b.type}</option>
+        {numberOfBoats > 0 && (
+          <div className="form-group">
+            {numberOfBoats < selectedBoats.length && (
+            <label className='error-message'>Too Many Boats, please increase the number of boats, or remove some</label>
+            ) || (
+            <label>Select Boat{numberOfBoats > 1 && "s"}:</label>
+            )}
+            {Array.from({ length: numberOfBoats }).map((_, index) => (
+              <select
+                key={index}
+                value={selectedBoats[index] || ""}
+                onChange={(e) => {
+                  const newSelectedBoats = [...selectedBoats];
+                  let value = e.target.value;
+                  if (value == "") {
+                    value = undefined;
+                  }
+                  newSelectedBoats[index] = value;
+                  setSelectedBoats(trimUndefined(newSelectedBoats));
+                }}
+              >
+                <option value="">-- Select a boat --</option>
+                {boats.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.type}
+                  </option>
+                ))}
+              </select>
             ))}
-          </select>
-        </div>
+            {selectedBoats.slice(numberOfBoats).map((_, index) => (
+              <select
+                key={index + numberOfBoats}
+                value={selectedBoats[index + numberOfBoats] || undefined}
+                onChange={(e) => {
+                  const newSelectedBoats = [...selectedBoats];
+                  let value = e.target.value;
+                  if (value == "") {
+                    value = undefined;
+                  }
+                  newSelectedBoats[index + numberOfBoats] = value;
+                  setSelectedBoats(trimUndefined(newSelectedBoats));
+                }}
+              >
+                <option value="">-- Select a boat --</option>
+                {boats.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.type}
+                  </option>
+                ))}
+              </select>
+            ))}
+          </div>
+        )}
 
         <div className="form-group">
           <label>Select Taxi:</label>
-          <select 
-            value={selectedTaxi} 
+          <select
+            value={selectedTaxi}
             onChange={e => setSelectedTaxi(e.target.value)}
             required
           >
             <option value="" disabled>-- Select a Taxi --</option>
             {taxis.map(b => (
               <option key={b.id} value={b.id}>
-                {b.id} - {b.spaceForKayaks}
+                id:{b.id}, space:{b.spaceForKayaks}
               </option>
             ))}
           </select>
