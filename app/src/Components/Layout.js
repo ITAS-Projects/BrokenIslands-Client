@@ -7,18 +7,15 @@ const Layout = () => {
     <>
       <header className="layout-header">
         <nav className="layout-nav">
-          {/* Logo on the left */}
           <img
             src="/logo192.png"
             alt="Logo"
             className="layout-logo"
           />
 
-          {/* Navigation links */}
           <ul className="layout-nav-list">
             <li><Link to="/">Home</Link></li>
-            <li><Link to="/users">Users</Link></li>
-            <li><Link to="/schedule">Schedule</Link></li>
+            <li><Link to="/taxis">Taxis</Link></li>
             <li><Link to="/trips">Trips</Link></li>
           </ul>
         </nav>

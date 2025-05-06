@@ -1,0 +1,47 @@
+/* NewTaxi.css */
+
+.newTaxiForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.newTaxiFormField {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+.newTaxiLabel {
+    font-weight: bold;
+    width: 150px;
+    margin-right: 10px;
+}
+
+.newTaxiInputNumber {
+    padding: 8px;
+    font-size: 16px;
+    flex: 1;
+}
+
+.newTaxiCheckbox {
+    width: auto;
+    margin-left: 5px;
+    transform: scale(1.2); /* optional: makes checkbox easier to see/click */
+}
+
+.newTaxiButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.newTaxiButton:hover {
+    background-color: #45a049;
+}
