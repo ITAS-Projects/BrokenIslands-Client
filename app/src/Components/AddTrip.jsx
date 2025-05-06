@@ -8,21 +8,48 @@ const AddTrip = () => {
   const [day, setDay] = useState('');
   const [fromPlace, setFromPlace] = useState('');
   const [toPlace, setToPlace] = useState('');
+  const [numberOfBoats, setNumberOfBoatsHidden] = useState(1);
+  let updateNumberOfBoats = (additive = 0, selectedTaxiTemp = selectedTaxi) => {
+    let totalBoats = (numberOfCanoes + numberOfSingleKayaks + numberOfDoubleKayaks + additive);
+    let maxSpace = taxis.find(t => t.id == selectedTaxiTemp)?.spaceForKayaks || 0;
+    if(totalBoats > maxSpace){
+      if (numberOfCanoes + numberOfSingleKayaks + numberOfDoubleKayaks > maxSpace) {
+        setNumberOfCanoesHidden(0);
+        setNumberOfSingleKayaksHidden(0);
+        setNumberOfDoubleKayaksHidden(0);
+      }
+      return false
+    }
+    setNumberOfBoatsHidden(Math.max(0, (numberOfCanoes + numberOfSingleKayaks + numberOfDoubleKayaks + additive)));
+    return true;
+  }
   const [numberOfPeople, setNumberOfPeopleHidden] = useState(1);
   let setNumberOfPeople = (number) => {
     setNumberOfPeopleHidden(Math.max(1, number));
   }
-  const [numberOfBoats, setNumberOfBoatsHidden] = useState(0);
-  let setNumberOfBoats = (number) => {
-    setNumberOfBoatsHidden(Math.max(0, number));
+  const [numberOfSingleKayaks, setNumberOfSingleKayaksHidden] = useState(0);
+  let setNumberOfSingleKayaks = (number) => {
+    if (updateNumberOfBoats(number - numberOfSingleKayaks)) {
+      setNumberOfSingleKayaksHidden(Math.max(0, number));
+    }
+  }
+  const [numberOfDoubleKayaks, setNumberOfDoubleKayaksHidden] = useState(0);
+  let setNumberOfDoubleKayaks = (number) => {
+    if (updateNumberOfBoats(number - numberOfDoubleKayaks)) {
+      setNumberOfDoubleKayaksHidden(Math.max(0, number));
+    }
+  }
+  const [numberOfCanoes, setNumberOfCanoesHidden] = useState(0);
+  let setNumberOfCanoes = (number) => {
+    if (updateNumberOfBoats(number - numberOfCanoes)) {
+      setNumberOfCanoesHidden(Math.max(0, number));
+    }
   }
 
 
   const [selectedPeople, setSelectedPeople] = useState([]);
-  const [selectedBoats, setSelectedBoats] = useState([]);
   const [selectedTaxi, setSelectedTaxi] = useState("");
   const [people, setPeople] = useState([]);
-  const [boats, setBoats] = useState([]);
   const [taxis, setTaxis] = useState([]);
 
   useEffect(() => {
@@ -30,9 +57,6 @@ const AddTrip = () => {
       .then(response => setPeople(response.data))
       .catch(error => console.error('Error fetching people:', error));
 
-    axios.get('http://localhost:8081/boats')
-      .then(response => setBoats(response.data))
-      .catch(error => console.error('Error fetching boats:', error));
     axios.get('http://localhost:8081/taxis')
       .then(response => setTaxis(response.data))
       .catch(error => console.error('Error fetching taxis:', error));
@@ -40,37 +64,47 @@ const AddTrip = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post('http://localhost:8081/trips', {
-      timeStart: timeStart,
-      timeEnd: timeEnd,
-      day: day,
-      fromPlace: fromPlace,
-      toPlace: toPlace,
-      personIds: selectedPeople,
-      boatsIds: selectedBoats,
-      TaxiId: selectedTaxi,
-      numberOfPeople: numberOfPeople,
-      numberOfBoats: numberOfBoats
-    })
-      .then(() => {
-        alert('trip added successfully!');
-        window.location.href = '/';
-      })
-      .catch(error => console.error('Error adding trip:', error));
-  };
-
-  function trimUndefined(arr) {
-    let movingIndex = arr.length - 1;
-  
-    while (movingIndex >= 0) {
-      if (arr[movingIndex] === undefined) {
-        arr.splice(movingIndex, 1); // Remove the undefined value at this index
-      }
-      movingIndex--;
-    }
+    const boats = [
+      { number: numberOfCanoes, type: "Canoes" },
+      { number: numberOfDoubleKayaks, type: "Double Kayaks" },
+      { number: numberOfSingleKayaks, type: "Single Kayaks" }
+    ];
     
-    return arr;
-  }
+    const validBoats = boats.filter(boat => boat.number > 0);
+    
+    Promise.all(
+      validBoats.map(boat =>
+        axios.post('http://localhost:8081/boats', {
+          type: boat.type,
+          numberOf: boat.number,
+          isRented: false
+        })
+        .then(responce => responce.data.id)
+      )
+    )
+    .then(results => {
+      axios.post('http://localhost:8081/trips', {
+        timeStart: timeStart,
+        timeEnd: timeEnd,
+        day: day,
+        fromPlace: fromPlace,
+        toPlace: toPlace,
+        personIds: selectedPeople,
+        boatsIds: results,
+        TaxiId: selectedTaxi,
+        numberOfPeople: numberOfPeople,
+        numberOfBoats: numberOfBoats
+      })
+        .then(() => {
+          alert('trip added successfully!');
+          window.location.href = '/';
+        })
+        .catch(error => console.error('Error adding trip:', error));
+    })
+    .catch(error => {
+      console.error('Error with one of the fetches:', error);
+    });
+  };
 
   return (
     <div className="trip-form-container">
@@ -108,8 +142,23 @@ const AddTrip = () => {
         </div>
 
         <div className="form-group">
-          <label>Number Of Boats:</label>
-          <input type='number' value={numberOfBoats} onChange={e => setNumberOfBoats(e.target.value)} required />
+          <label>Boats:</label>
+          <div>
+            <label>
+            number of single kayaks:
+            </label>
+            <input type='number' value={numberOfSingleKayaks} onChange={e => setNumberOfSingleKayaks(e.target.value)} required />
+            <br/>
+            <label>  
+            number of double kayaks:
+            </label>
+            <input type='number' value={numberOfDoubleKayaks} onChange={e => setNumberOfDoubleKayaks(e.target.value)} required />
+            <br/>
+            <label>
+            number of canoes:
+            </label>
+            <input type='number' value={numberOfCanoes} onChange={e => setNumberOfCanoes(e.target.value)} required />
+          </div>
         </div>
 
         <div className="form-group">
@@ -124,65 +173,14 @@ const AddTrip = () => {
           </select>
         </div>
 
-        {numberOfBoats > 0 && (
-          <div className="form-group">
-            {numberOfBoats < selectedBoats.length && (
-            <label className='error-message'>Too Many Boats, please increase the number of boats, or remove some</label>
-            ) || (
-            <label>Select Boat{numberOfBoats > 1 && "s"}:</label>
-            )}
-            {Array.from({ length: numberOfBoats }).map((_, index) => (
-              <select
-                key={index}
-                value={selectedBoats[index] || ""}
-                onChange={(e) => {
-                  const newSelectedBoats = [...selectedBoats];
-                  let value = e.target.value;
-                  if (value == "") {
-                    value = undefined;
-                  }
-                  newSelectedBoats[index] = value;
-                  setSelectedBoats(trimUndefined(newSelectedBoats));
-                }}
-              >
-                <option value="">-- Select a boat --</option>
-                {boats.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.type}
-                  </option>
-                ))}
-              </select>
-            ))}
-            {selectedBoats.slice(numberOfBoats).map((_, index) => (
-              <select
-                key={index + numberOfBoats}
-                value={selectedBoats[index + numberOfBoats] || undefined}
-                onChange={(e) => {
-                  const newSelectedBoats = [...selectedBoats];
-                  let value = e.target.value;
-                  if (value == "") {
-                    value = undefined;
-                  }
-                  newSelectedBoats[index + numberOfBoats] = value;
-                  setSelectedBoats(trimUndefined(newSelectedBoats));
-                }}
-              >
-                <option value="">-- Select a boat --</option>
-                {boats.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.type}
-                  </option>
-                ))}
-              </select>
-            ))}
-          </div>
-        )}
-
         <div className="form-group">
           <label>Select Taxi:</label>
           <select
             value={selectedTaxi}
-            onChange={e => setSelectedTaxi(e.target.value)}
+            onChange={e => {
+              setSelectedTaxi(e.target.value);
+              updateNumberOfBoats(0, e.target.value);
+            }}
             required
           >
             <option value="" disabled>-- Select a Taxi --</option>
