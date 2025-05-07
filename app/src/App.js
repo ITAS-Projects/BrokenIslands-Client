@@ -13,6 +13,9 @@ import EditTrip from "./Components/Trips/EditTrip.js";
 import BoatList from "./Components/Boats/BoatList.js";
 import NewBoat from "./Components/Boats/NewBoat.js";
 import EditBoat from "./Components/Boats/EditBoat.js";
+import NewPerson from "./Components/People/NewPerson.js";
+import PersonList from "./Components/People/PersonList.js";
+import EditPerson from "./Components/People/EditPerson.js";
 
 function App() {
   return (
@@ -29,6 +32,9 @@ function App() {
           <Route path="/boats" element={<BoatList />} />
           <Route path="/boats/new" element={<NewBoat />} />
           <Route path="/boats/edit/:id" element={<EditBoat />} />
+          <Route path="/people" element={<PersonList />} />
+          <Route path="/people/new" element={<NewPerson />} />
+          <Route path="/people/edit/:id" element={<EditPerson />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>

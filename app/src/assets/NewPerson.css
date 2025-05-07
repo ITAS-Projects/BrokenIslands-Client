@@ -1,0 +1,41 @@
+/* NewPerson.css */
+
+.newPersonForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.newPersonFormField {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+.newPersonLabel {
+    font-weight: bold;
+    width: 150px;
+    margin-right: 10px;
+}
+
+.newPersonInputText {
+    padding: 8px;
+    font-size: 16px;
+    flex: 1;
+}
+
+.newPersonButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.newPersonButton:hover {
+    background-color: #45a049;
+}

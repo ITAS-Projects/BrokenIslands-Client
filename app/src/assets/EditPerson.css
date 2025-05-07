@@ -1,0 +1,41 @@
+/* NewPerson.css */
+
+.editPersonForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.editPersonFormField {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+.editPersonLabel {
+    font-weight: bold;
+    width: 150px;
+    margin-right: 10px;
+}
+
+.editPersonInputText {
+    padding: 8px;
+    font-size: 16px;
+    flex: 1;
+}
+
+.editPersonButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.editPersonButton:hover {
+    background-color: #45a049;
+}
