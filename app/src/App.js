@@ -10,6 +10,9 @@ import EditTaxi from "./Components/Taxis/EditTaxi.js";
 import TripList from "./Components/Trips/TripList.js";
 import NewTrip from "./Components/Trips/NewTrip.js";
 import EditTrip from "./Components/Trips/EditTrip.js";
+import BoatList from "./Components/Boats/BoatList.js";
+import NewBoat from "./Components/Boats/NewBoat.js";
+import EditBoat from "./Components/Boats/EditBoat.js";
 
 function App() {
   return (
@@ -23,6 +26,9 @@ function App() {
           <Route path="/trips" element={<TripList />} />
           <Route path="/trips/new" element={<NewTrip />} />
           <Route path="/trips/edit/:id" element={<EditTrip />} />
+          <Route path="/boats" element={<BoatList />} />
+          <Route path="/boats/new" element={<NewBoat />} />
+          <Route path="/boats/edit/:id" element={<EditBoat />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>

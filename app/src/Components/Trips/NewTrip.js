@@ -148,7 +148,7 @@ function NewTrip() {
                         onChange={e => setTaxiId(e.target.value)}
                     >
                         {taxis.map(taxi => (
-                            <option value={taxi.id}>Space:{taxi.spaceForKayaks}, Running:{taxi.running ? "Yes" : "No"}</option>
+                            <option key={taxi.id} value={taxi.id}>Space:{taxi.spaceForKayaks}, Running:{taxi.running ? "Yes" : "No"}</option>
                         ))}
                     </select>
                 </div>

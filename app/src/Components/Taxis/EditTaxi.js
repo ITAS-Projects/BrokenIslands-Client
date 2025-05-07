@@ -21,7 +21,7 @@ function EditTaxi() {
                 console.error('Error fetching data:', error);
                 setLoading(false);
             });
-    }, []);
+    }, [id]);
 
     const handleSubmit = (e) => {
         e.preventDefault();

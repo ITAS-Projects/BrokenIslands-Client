@@ -1,0 +1,67 @@
+/* NewBoat.css */
+
+.newBoatForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.newBoatFormField {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+.newBoatLabel {
+    font-weight: bold;
+    width: 150px;
+    margin-right: 10px;
+}
+
+.newBoatInputNumber {
+    padding: 8px;
+    font-size: 16px;
+    flex: 1;
+}
+
+.newBoatCheckbox {
+    width: auto;
+    margin-left: 5px;
+    transform: scale(1.2); /* optional: makes checkbox easier to see/click */
+}
+
+.newBoatInputTime {
+    padding: 8px;
+    font-size: 16px;
+}
+
+.newBoatInputDay {
+    padding: 8px;
+    font-size: 16px;
+}
+
+.newBoatInputText {
+    padding: 8px;
+    font-size: 16px;
+}
+
+.newBoatInputSelect{
+    padding: 8px;
+    font-size: 16px;
+}
+
+.newBoatButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.newBoatButton:hover {
+    background-color: #45a049;
+}

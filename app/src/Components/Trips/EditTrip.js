@@ -50,7 +50,7 @@ function EditTrip() {
           });
 
         
-    }, []);
+    }, [id]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
