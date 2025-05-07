@@ -1,0 +1,67 @@
+/* EditTrip.css */
+
+.editTripForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.editTripFormField {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+.editTripLabel {
+    font-weight: bold;
+    width: 150px;
+    margin-right: 10px;
+}
+
+.editTripInputNumber {
+    padding: 8px;
+    font-size: 16px;
+    flex: 1;
+}
+
+.editTripCheckbox {
+    width: auto;
+    margin-left: 5px;
+    transform: scale(1.2); /* optional: makes checkbox easier to see/click */
+}
+
+.editTripInputTime {
+    padding: 8px;
+    font-size: 16px;
+}
+
+.editTripInputDay {
+    padding: 8px;
+    font-size: 16px;
+}
+
+.editTripInputText {
+    padding: 8px;
+    font-size: 16px;
+}
+
+.editTripInputSelect{
+    padding: 8px;
+    font-size: 16px;
+}
+
+.editTripButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.editTripButton:hover {
+    background-color: #45a049;
+}

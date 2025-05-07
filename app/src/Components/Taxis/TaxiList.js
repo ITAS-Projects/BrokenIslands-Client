@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
-import "../assets/TaxiList.css";
+import "../../assets/TaxiList.css";
 
 function TaxiList() {
     const [taxis, setTaxis] = useState([]);
@@ -41,6 +41,7 @@ function TaxiList() {
               <th>Id</th>
               <th>Space for kayaks</th>
               <th>Running</th>
+              <th>Management</th>
             </tr>
           </thead>
           <tbody>

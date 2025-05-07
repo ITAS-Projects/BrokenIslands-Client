@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from 'axios';
-import "../assets/NewTaxi.css";
+import "../../assets/NewTaxi.css";
 
 function NewTaxi() {
     const [spaceForKayaks, setSpaceForKayaks] = useState(0);

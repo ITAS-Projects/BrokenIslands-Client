@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from 'axios';
-import "../assets/EditTaxi.css";
+import "../../assets/EditTaxi.css";
 
 function EditTaxi() {
     const { id } = useParams();
     const [spaceForKayaks, setSpaceForKayaks] = useState(0);
     const [running, setRunning] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         axios.get(`http://localhost:8081/taxis/${id}`)
@@ -14,12 +15,13 @@ function EditTaxi() {
             .then(data => {
                 setSpaceForKayaks(data.spaceForKayaks);
                 setRunning(data.running);
+                setLoading(false);
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
+                setLoading(false);
             });
     }, []);
-  
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -42,6 +44,10 @@ function EditTaxi() {
             alert('There was an error while editing the taxi. Please try again.');
         });
     };
+  
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div>

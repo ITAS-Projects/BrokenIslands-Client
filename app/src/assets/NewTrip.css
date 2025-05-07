@@ -1,0 +1,67 @@
+/* NewTrip.css */
+
+.newTripForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.newTripFormField {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+.newTripLabel {
+    font-weight: bold;
+    width: 150px;
+    margin-right: 10px;
+}
+
+.newTripInputNumber {
+    padding: 8px;
+    font-size: 16px;
+    flex: 1;
+}
+
+.newTripCheckbox {
+    width: auto;
+    margin-left: 5px;
+    transform: scale(1.2); /* optional: makes checkbox easier to see/click */
+}
+
+.newTripInputTime {
+    padding: 8px;
+    font-size: 16px;
+}
+
+.newTripInputDay {
+    padding: 8px;
+    font-size: 16px;
+}
+
+.newTripInputText {
+    padding: 8px;
+    font-size: 16px;
+}
+
+.newTripInputSelect{
+    padding: 8px;
+    font-size: 16px;
+}
+
+.newTripButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.newTripButton:hover {
+    background-color: #45a049;
+}
