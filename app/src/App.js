@@ -16,6 +16,8 @@ import EditBoat from "./Components/Boats/EditBoat.js";
 import NewPerson from "./Components/People/NewPerson.js";
 import PersonList from "./Components/People/PersonList.js";
 import EditPerson from "./Components/People/EditPerson.js";
+import GroupList from "./Components/Groups/GroupList.js";
+import NewGroup from "./Components/Groups/NewGroup.js";
 
 function App() {
   return (
@@ -35,6 +37,8 @@ function App() {
           <Route path="/people" element={<PersonList />} />
           <Route path="/people/new" element={<NewPerson />} />
           <Route path="/people/edit/:id" element={<EditPerson />} />
+          <Route path="/groups" element={<GroupList />} />
+          <Route path="/groups/new" element={<NewGroup />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>
