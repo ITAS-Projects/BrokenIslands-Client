@@ -52,4 +52,11 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 
-  
+  .nav-list-2{
+    background-color: gray;
+    padding: 10px;
+    height: 100%;
+  }
+  .nav-list-2 * {
+    color: white !important;
+  }

@@ -5,12 +5,10 @@ import "../../assets/QuickTaxi.css";
 function QuickTaxi() {
     const [taxis, setTaxis] = useState([]);
     const [selectedTaxiID, setSelectedTaxiID] = useState(null);
-    const [trips, setTrips] = useState([]);
-    const [taxi, setTaxi] = useState();
+    const [taxi, setTaxi] = useState(null);
     const [loading, setLoading] = useState(true);
     const [tripsLoading, setTripsLoading] = useState(false);
 
-    // Fetch all taxis on component mount
     useEffect(() => {
         axios.get("http://localhost:8081/taxis")
             .then((response) => {
@@ -23,59 +21,63 @@ function QuickTaxi() {
             });
     }, []);
 
-    // Fetch trips for the selected taxi
     useEffect(() => {
         if (selectedTaxiID) {
             setTripsLoading(true);
             axios.get(`http://localhost:8081/taxis/${selectedTaxiID}`)
                 .then((response) => {
-                    setTrips(response.data.Trips);
                     setTaxi(response.data);
                     setTripsLoading(false);
                 })
                 .catch(error => {
-                    console.error('Error fetching trips:', error);
+                    console.error('Error fetching taxi trips:', error);
                     setTripsLoading(false);
                 });
         }
     }, [selectedTaxiID]);
 
-    if (loading) {
-        return <div>Loading taxis...</div>;
-    }
+    if (loading) return <div>Loading taxis...</div>;
 
     return (
-        <div>
-            <h1>Quick Taxi View</h1>
-
-            <label>Select a Taxi: </label>
-            <select onChange={e => setSelectedTaxiID(e.target.value)} defaultValue="">
-                <option value="" disabled>Select taxi</option>
-                {taxis.map((taxi) => (
-                    <option key={taxi.id} value={taxi.id}>
-                        {taxi.name || `Taxi #${taxi.id}, Max Space: ${taxi.spaceForPeople} people and ${taxi.spaceForKayaks} boats`}
-                    </option>
+        <div className="taxi-container">
+            {/* Taxi List */}
+            <div className="taxi-list">
+                {taxis.map((t) => (
+                    <div
+                        key={t.id}
+                        className={`taxi-item ${t.id === selectedTaxiID ? "active" : ""}`}
+                        onClick={() => setSelectedTaxiID(t.id)}
+                    >
+                        {t.name || `Taxi #${t.id}`}  
+                        <br />
+                        <small>People: {t.spaceForPeople}, Boats: {t.spaceForKayaks}</small>
+                    </div>
                 ))}
-            </select>
+            </div>
 
-            {tripsLoading ? (
-                <p>Loading trips...</p>
-            ) : (
-                trips.length > 0 && (
-                    <div>
-                        <h2>Trips for Taxi {selectedTaxiID}</h2>
+            {/* Taxi Detail Panel */}
+            <div className="taxi-details">
+                {!selectedTaxiID ? (
+                    <p>Select a taxi to view trips</p>
+                ) : tripsLoading ? (
+                    <p>Loading trips...</p>
+                ) : taxi ? (
+                    <>
+                        <h2>{taxi.name || `Taxi #${taxi.id}`}</h2>
+                        <p>Capacity: {taxi.spaceForPeople} people & {taxi.spaceForKayaks} boats</p>
+
                         <table className="trips-table">
                             <thead>
                                 <tr>
                                     <th>Day</th>
                                     <th>Time Frame</th>
                                     <th>Custom Time</th>
-                                    <th>Space For People Used</th>
-                                    <th>Space For Boats Used</th>
+                                    <th>People Used</th>
+                                    <th>Boats Used</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {trips.map((trip) => {
+                                {taxi.Trips?.map((trip) => {
                                     const date = trip.day?.split('T')[0] || 'N/A';
                                     const isCustom = trip.timeFrame.startsWith("Custom");
 
@@ -87,16 +89,10 @@ function QuickTaxi() {
                                         return `${formattedHour}:${minute} ${period}`;
                                     };
 
-                                    const peopleUsed =
-                                        trip.Reservations?.reduce(
-                                            (total, res) => total + (res.Group?.numberOfPeople || 0),
-                                            0
-                                        ) ??
-                                        trip.Groups?.reduce(
-                                            (total, group) => total + (group.numberOfPeople || 0),
-                                            0
-                                        ) ??
-                                        0;
+                                    const peopleUsed = trip.Reservations?.reduce(
+                                        (total, res) => total + (res.Group?.numberOfPeople || 0),
+                                        0
+                                    ) ?? 0;
 
                                     const boatsUsed = trip.Reservations?.reduce((resTotal, res) => {
                                         return (
@@ -109,13 +105,13 @@ function QuickTaxi() {
                                     }, 0) ?? 0;
 
                                     return (
-                                        <tr 
-                                        key={trip.id}
-                                        className={
-                                            peopleUsed > taxi.spaceForPeople || boatsUsed > taxi.spaceForKayaks
-                                                ? "over-capacity"
-                                                : ""
-                                        }
+                                        <tr
+                                            key={trip.id}
+                                            className={
+                                                peopleUsed > taxi.spaceForPeople || boatsUsed > taxi.spaceForKayaks
+                                                    ? "over-capacity"
+                                                    : ""
+                                            }
                                         >
                                             <td>{date}</td>
                                             <td>{trip.timeFrame}</td>
@@ -127,12 +123,9 @@ function QuickTaxi() {
                                 })}
                             </tbody>
                         </table>
-                    </div>
-                )
-            )}
-
-
-
+                    </>
+                ) : null}
+            </div>
         </div>
     );
 }

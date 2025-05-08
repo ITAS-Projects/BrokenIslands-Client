@@ -1,34 +1,45 @@
-li {
-    font-style: none;
+.taxi-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+
+.taxi-list {
+    width: 250px;
+    border-right: 1px solid #ccc;
+}
+
+.taxi-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.taxi-item:hover {
+    background-color: #f9f9f9;
+}
+
+.taxi-item.active {
+    background-color: #d0f0fd;
+    font-weight: bold;
+}
+
+.taxi-details {
+    flex-grow: 1;
 }
 
 .trips-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
-    font-family: Arial, sans-serif;
+    margin-top: 15px;
 }
 
-.trips-table th,
-.trips-table td {
-    border: 1px solid #ddd;
+.trips-table th, .trips-table td {
     padding: 8px;
+    border: 1px solid #ddd;
     text-align: center;
 }
 
-.trips-table th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-
-.trips-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.trips-table tr:hover {
-    background-color: #e0f7fa;
-}
-
 .over-capacity {
-    background-color: #ffe5e5 !important; /* light red background */
+    background-color: #ffdddd;
 }

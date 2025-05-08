@@ -23,6 +23,7 @@ import ReservationList from "./Components/Groups copy/ReservationList.js";
 import QuickTaxi from "./Components/QuickView/QuickTaxi.js";
 import Quick from "./Components/QuickView/Quick.js";
 import QuickReservation from "./Components/QuickView/QuickReservation.js";
+import QuickTrip from "./Components/QuickView/QuickTrip.js";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
           <Route path="/quick" element={<Quick />} />
           <Route path="/quick/taxi" element={<QuickTaxi />} />
           <Route path="/quick/reservation" element={<QuickReservation />} />
+          <Route path="/quick/trip" element={<QuickTrip />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>

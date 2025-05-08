@@ -96,7 +96,7 @@ function Review({ data, onBack }) {
       let MostSpace = 0;
       let BackupTaxiId = null;
       for (let taxi of Taxis) {
-        if (taxi.spaceForKayaks >= numOfBoats && (taxi.spaceForKayaks < leastSpace || leastSpace === 0)) {
+        if (taxi.spaceForKayaks >= numOfBoats && (taxi.spaceForKayaks < leastSpace || leastSpace === 0) && taxi.spaceForPeople >= data.NumberOfPeople) {
           leastSpace = taxi.spaceForKayaks;
           usedTaxiId = taxi.id;
         } else if (leastSpace === 0 && taxi.spaceForKayaks > MostSpace) {
