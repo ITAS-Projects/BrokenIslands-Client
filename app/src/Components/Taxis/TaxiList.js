@@ -40,6 +40,7 @@ function TaxiList() {
             <tr>
               <th>Id</th>
               <th>Space for kayaks</th>
+              <th>Space for people</th>
               <th>Running</th>
               <th>Management</th>
             </tr>
@@ -49,6 +50,7 @@ function TaxiList() {
               <tr key={taxi.id}>
                 <td>{taxi.id}</td>
                 <td>{taxi.spaceForKayaks}</td>
+                <td>{taxi.spaceForPeople}</td>
                 <td>{taxi.running ? "yes" : "no"}</td>
                 <td>
                   <button onClick={() => window.location.href = `/taxis/edit/${taxi.id}`}>Edit</button>

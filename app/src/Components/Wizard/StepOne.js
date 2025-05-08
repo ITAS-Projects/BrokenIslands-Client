@@ -33,10 +33,8 @@ function StepOne({ data, onNext, updateFormData }) {
                 >
                     <option value="" disabled>-- Select Arrival Schedule --</option>
                     <option value="Custom AM">Custom AM</option>
-                    <option value="Lodge to Secret AM">Lodge to Secret AM</option>
                     <option value="Secret to Lodge AM">Secret to Lodge AM</option>
                     <option value="Custom">Custom</option>
-                    <option value="Lodge to Secret PM">Lodge to Secret PM</option>
                     <option value="Secret to Lodge PM">Secret to Lodge PM</option>
                     <option value="Custom PM">Custom PM</option>
                 </select>
@@ -67,10 +65,8 @@ function StepOne({ data, onNext, updateFormData }) {
                     <option value="" disabled>-- Select Departure Schedule --</option>
                     <option value="Custom AM">Custom AM</option>
                     <option value="Lodge to Secret AM">Lodge to Secret AM</option>
-                    <option value="Secret to Lodge AM">Secret to Lodge AM</option>
                     <option value="Custom">Custom</option>
                     <option value="Lodge to Secret PM">Lodge to Secret PM</option>
-                    <option value="Secret to Lodge PM">Secret to Lodge PM</option>
                     <option value="Custom PM">Custom PM</option>
                 </select>
 

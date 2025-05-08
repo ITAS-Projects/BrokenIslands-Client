@@ -16,13 +16,13 @@ function BoatList() {
                     if (boat.ReservationId == null) {
                       boatSource = 'Not Assigned'
                     } else {
-                      boatSource = `Reservation Leader: ${boat.Reservation.Group.leader.name}`;
+                      boatSource = `Reservation Leader: ${boat.Reservation?.Group?.leader?.name}`;
                     }
                   } else {
                     if (boat.Group.seperatePeople) {
-                      boatSource = `People in Group: ${boat.Group.numberOfPeople}`;
+                      boatSource = `People in Group: ${boat.Group?.numberOfPeople}`;
                     } else {
-                      boatSource = `Group Leader: ${boat.Group.leader.name}`;
+                      boatSource = `Group Leader: ${boat.Group?.leader?.name}`;
                     }
                   }
                   boat.chosenGroup = boatSource;

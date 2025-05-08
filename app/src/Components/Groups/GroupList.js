@@ -57,7 +57,7 @@ function GroupList() {
                   return trip.timeFrame;
                 }).join(", ")}</td>
                 <td>
-                  <button onClick={() => window.location.href = `/groups/edit/${group.id}`}>Edit</button>
+                  {/* <button onClick={() => window.location.href = `/groups/edit/${group.id}`}>Edit</button> */}
                   <button onClick={() => handleDelete(group.id)}>Delete</button>
                 </td>
               </tr>

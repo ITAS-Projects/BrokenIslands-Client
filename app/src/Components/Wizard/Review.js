@@ -4,12 +4,13 @@ import axios from 'axios';
 function Review({ data, onBack }) {
 
   const compareTimes = (t1, t2) => {
-    const [h1, m1] = t1.split(':').map(Number);
-    const [h2, m2] = t2.split(':').map(Number);
-
+    const [h1, m1] = t1.split(':').slice(0, 2).map(Number);
+    const [h2, m2] = t2.split(':').slice(0, 2).map(Number);
+  
     if (h1 !== h2) return h1 - h2;
     return m1 - m2;
-  }
+  };
+  
 
   const handleSubmit = () => {
     let arrivalCustom = false;
@@ -63,42 +64,152 @@ function Review({ data, onBack }) {
       }
     }
 
+    let numOfBoats = 0;
     for (let boat of data.Boats) {
+      numOfBoats += Number(boat.numberOf);
       if (boat.type === "") {alert('There is a group of boats without a type');return null}
       if ((boat.numberOf || 0) <= 0) {alert('There is a group of boats with less than one boat in it');return null}
     }  
 
-    return null;
 
-    // Promise.all([
-    //   data.
-    // ])
-
-    let trips;
-    let groupId;
     Promise.all([
       Promise.all(
         data.People.map(person =>
           axios.post('http://localhost:8081/people', {
             name: person.name,
             allergies: person.allergies
-          }).then(response => response.data.id)
+          }).then(response => response.data)
         )
       ),
-      Promise.all(
-        data.Boats.map(boat =>
-          axios.post('http://localhost:8081/boats', {
-            type: boat.type,
-            numberOf: boat.numberOf,
-            rented: boat.rented
-          }).then(response => response.data.id)
-        )
-      )
+      
+      axios.get('http://localhost:8081/taxis')
+      .then((response) => response.data),
+
+      axios.get('http://localhost:8081/trips')
+        .then((response) => response.data)
     ])
-    .then(([PeopleIds, BoatIds]) => {
-      console.log('People IDs:', PeopleIds);
-      console.log('Boat IDs:', BoatIds);
-      // continue logic here
+    .then(([PeopleData, Taxis, Trips]) => {
+      console.log("Created people, found taxis, and looked for trips");
+
+      let leastSpace = 0;
+      let usedTaxiId = null;
+      let MostSpace = 0;
+      let BackupTaxiId = null;
+      for (let taxi of Taxis) {
+        if (taxi.spaceForKayaks >= numOfBoats && (taxi.spaceForKayaks < leastSpace || leastSpace === 0)) {
+          leastSpace = taxi.spaceForKayaks;
+          usedTaxiId = taxi.id;
+        } else if (leastSpace === 0 && taxi.spaceForKayaks > MostSpace) {
+          MostSpace = taxi.spaceForKayaks;
+          BackupTaxiId = taxi.id;
+        }
+      }
+
+      let arrivalTrip = null;
+      let departureTrip = null;
+      for (let trip of Trips) {
+        if (trip.timeFrame === data.ArrivalSchedule) {
+          if (trip.day.split('T')[0] === data.ArrivalDay.split('T')[0]) {
+            if (arrivalCustom) {
+              if (compareTimes(data.ArrivalTime, trip.timeStart) === 0) {
+              arrivalTrip = trip.id;
+              }
+            } else {
+              arrivalTrip = trip.id;
+            }
+          }
+        } else if (trip.timeFrame === data.DepartureSchedule) {
+          if (trip.day.split('T')[0] === data.DepartureDay.split('T')[0]) {
+            if (departureCustom) {
+              if (compareTimes(data.DepartureTime, trip.timeStart) === 0) {
+                departureTrip = trip.id;
+                }
+            } else {
+              departureTrip = trip.id;
+            }
+          }
+        }
+      }
+
+      let leaderId = null;
+      let PeopleIds = PeopleData.map(personData => {
+        if (personData.name === data.People?.[0]?.name) {
+          leaderId = personData.id;
+        }
+        return personData.id;
+      })
+      if (leaderId === null) {alert("Creaded person wasnt created?"); return null}
+      let TaxiIdForTrips;
+      if (leastSpace === 0) {
+        TaxiIdForTrips = BackupTaxiId;
+      } else {
+        TaxiIdForTrips = usedTaxiId;
+      }
+
+      let arrivalData = {
+        day: data.ArrivalDay,
+        timeFrame: data.ArrivalSchedule,
+        TaxiId: TaxiIdForTrips,
+      }
+
+      if (arrivalCustom) {
+        arrivalData.timeStart = data.ArrivalTime;
+      }
+
+      let departureData = {
+        day: data.DepartureDay,
+        timeFrame: data.DepartureSchedule,
+        TaxiId: TaxiIdForTrips,
+      }
+
+      if (departureCustom) {
+        departureData.timeStart = data.DepartureTime;
+      }
+
+      Promise.all([
+        arrivalTrip !== null 
+          ? Promise.resolve(arrivalTrip) 
+          : axios.post('http://localhost:8081/trips', arrivalData)
+          .then(response => response.data.id),
+
+        departureTrip !== null 
+          ? Promise.resolve(departureTrip) 
+          : axios.post('http://localhost:8081/trips', departureData)
+          .then(response => response.data.id),
+
+        axios.post('http://localhost:8081/groups', {
+            seperatePeople: false,
+            numberOfPeople: data.NumberOfPeople,
+            PersonIds: PeopleIds,
+            GroupLeader: leaderId
+          }).then(response => response.data.id)
+      ])
+      .then(([arrivalId, departureId, groupId]) => {
+        console.log("Created arrival, departure and group");
+        console.log(`Arrivel: ${arrivalId}, Departure: ${departureId}`);
+        axios.post('http://localhost:8081/reservations', {
+          TripIds: [arrivalId, departureId],
+          GroupId: groupId
+        })
+        .then(response => response.data.id)
+        .then(reservationId => {
+          console.log("Created Reservation");
+          Promise.all(
+            data.Boats.map(boat =>
+              axios.post('http://localhost:8081/boats', {
+                type: boat.type,
+                numberOf: boat.numberOf,
+                isRented: boat.rented,
+                ReservationId: reservationId
+              }).then(response => response.data.id)
+            )
+          ).then(response => {
+            console.log("Created Boats");
+            console.log("All data created");
+          })
+        })
+      });
+
     })    
     .catch(error => {
         console.error('Error adding people:', error);
@@ -106,18 +217,6 @@ function Review({ data, onBack }) {
     });
 
     
-    // axios.post('http://localhost:8081/reservations', {
-    //   TripIds: trips,
-    //   GroupId: groupId
-    // })
-    // .then(() => {
-    //     alert('Trip added successfully!');
-    //     window.location.href = '/trips';
-    // })
-    // .catch(error => {
-    //     console.error('Error adding trip:', error);
-    //     alert('There was an error while adding the trip. Please try again.');
-    // });
   };
 
     return (
@@ -140,6 +239,17 @@ function Review({ data, onBack }) {
                         )
                       }
                     })}
+                    <br />
+                    <strong>Other People:</strong>
+                    {value.map((person, index) => {
+                      if (person.name && !person.allergies) {
+                        return (
+                          <span key={index} className="indent">
+                            Name: {person.name}, Allergies: {person.allergies}
+                          </span>
+                        )
+                      }
+                    })}
                   </p>
                 );
               }
@@ -151,7 +261,7 @@ function Review({ data, onBack }) {
                     {value.map((boat, index) => {
                         return (
                           <span key={index} className="indent">
-                            {boat.numberOf > 0 ? boat.numberOf : "0"}, {boat.rented ? "rented," : ""} {boat.type || "Unselecteds"}
+                            {boat.numberOf > 0 ? boat.numberOf : "0"}, {boat.rented ? "rented" : "personal"}, {boat.type || "Unselecteds"}
                           </span>
                         )
                     })}

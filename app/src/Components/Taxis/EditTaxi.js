@@ -6,6 +6,7 @@ import "../../assets/EditTaxi.css";
 function EditTaxi() {
     const { id } = useParams();
     const [spaceForKayaks, setSpaceForKayaks] = useState(0);
+    const [spaceForPeople, setSpaceForPeople] = useState(0);
     const [running, setRunning] = useState(true);
     const [loading, setLoading] = useState(true);
 
@@ -14,6 +15,7 @@ function EditTaxi() {
             .then((response) => response.data)
             .then(data => {
                 setSpaceForKayaks(data.spaceForKayaks);
+                setSpaceForPeople(data.spaceForPeople);
                 setRunning(data.running);
                 setLoading(false);
             })
@@ -31,8 +33,14 @@ function EditTaxi() {
             return;
         }
 
+        if (spaceForPeople <= 0) {
+            alert("Please provide a valid number of spaces for people (greater than 0).");
+            return;
+        }
+        
         axios.put(`http://localhost:8081/taxis/${id}`, {
             spaceForKayaks: spaceForKayaks,
+            spaceForPeople: spaceForPeople,
             running: running
         })
         .then(() => {
@@ -61,6 +69,19 @@ function EditTaxi() {
                         id="spaceForKayaks"
                         value={spaceForKayaks}
                         onChange={e => setSpaceForKayaks(Number(e.target.value))}
+                        min="1"
+                        required
+                    />
+                </div>
+                <br />
+                <div className="newTaxiFormField">
+                    <label className="newTaxiLabel" htmlFor="spaceForPeople">Space For People:</label>
+                    <input
+                        className="newTaxiInputNumber"
+                        type="number"
+                        id="spaceForPeople"
+                        value={spaceForPeople}
+                        onChange={e => setSpaceForPeople(Number(e.target.value))}
                         min="1"
                         required
                     />

@@ -19,6 +19,10 @@ import EditPerson from "./Components/People/EditPerson.js";
 import GroupList from "./Components/Groups/GroupList.js";
 import NewGroup from "./Components/Groups/NewGroup.js";
 import Wizard from "./Components/Wizard/Wizard.js";
+import ReservationList from "./Components/Groups copy/ReservationList.js";
+import QuickTaxi from "./Components/QuickView/QuickTaxi.js";
+import Quick from "./Components/QuickView/Quick.js";
+import QuickReservation from "./Components/QuickView/QuickReservation.js";
 
 function App() {
   return (
@@ -41,6 +45,10 @@ function App() {
           <Route path="/people/edit/:id" element={<EditPerson />} />
           <Route path="/groups" element={<GroupList />} />
           <Route path="/groups/new" element={<NewGroup />} />
+          <Route path="/reservations" element={<ReservationList />} />
+          <Route path="/quick" element={<Quick />} />
+          <Route path="/quick/taxi" element={<QuickTaxi />} />
+          <Route path="/quick/reservation" element={<QuickReservation />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>

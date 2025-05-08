@@ -15,11 +15,13 @@ const Layout = () => {
 
           <ul className="layout-nav-list">
             <li><Link to="/">Home</Link></li>
+            <li><Link to="/quick">Quick Veiw</Link></li>
             <li><Link to="/taxis">Taxis</Link></li>
             <li><Link to="/trips">Trips</Link></li>
             <li><Link to="/boats">Boats</Link></li>
             <li><Link to="/people">People</Link></li>
             <li><Link to="/groups">Groups</Link></li>
+            <li><Link to="/reservations">Reservations</Link></li>
           </ul>
         </nav>
       </header>

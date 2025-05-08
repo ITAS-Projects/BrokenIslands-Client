@@ -4,6 +4,7 @@ import "../../assets/NewTaxi.css";
 
 function NewTaxi() {
     const [spaceForKayaks, setSpaceForKayaks] = useState(0);
+    const [spaceForPeople, setSpaceForPeople] = useState(0);
     const [running, setRunning] = useState(true);
 
     const handleSubmit = (e) => {
@@ -14,8 +15,14 @@ function NewTaxi() {
             return;
         }
 
+        if (spaceForPeople <= 0) {
+            alert("Please provide a valid number of spaces for people (greater than 0).");
+            return;
+        }
+
         axios.post('http://localhost:8081/taxis', {
             spaceForKayaks: spaceForKayaks,
+            spaceForPeople: spaceForPeople,
             running: running
         })
         .then(() => {
@@ -40,6 +47,19 @@ function NewTaxi() {
                         id="spaceForKayaks"
                         value={spaceForKayaks}
                         onChange={e => setSpaceForKayaks(Number(e.target.value))}
+                        min="1"
+                        required
+                    />
+                </div>
+                <br />
+                <div className="newTaxiFormField">
+                    <label className="newTaxiLabel" htmlFor="spaceForPeople">Space For People:</label>
+                    <input
+                        className="newTaxiInputNumber"
+                        type="number"
+                        id="spaceForPeople"
+                        value={spaceForPeople}
+                        onChange={e => setSpaceForPeople(Number(e.target.value))}
                         min="1"
                         required
                     />
