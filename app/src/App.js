@@ -18,6 +18,7 @@ import PersonList from "./Components/People/PersonList.js";
 import EditPerson from "./Components/People/EditPerson.js";
 import GroupList from "./Components/Groups/GroupList.js";
 import NewGroup from "./Components/Groups/NewGroup.js";
+import Wizard from "./Components/Wizard/Wizard.js";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="/wizard" element={<Wizard />} />
           <Route path="/taxis" element={<TaxiList />} />
           <Route path="/taxis/new" element={<NewTaxi />} />
           <Route path="/taxis/edit/:id" element={<EditTaxi />} />
