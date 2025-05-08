@@ -4,7 +4,7 @@ import "../../assets/QuickTaxi.css";
 
 function QuickTaxi() {
     const [taxis, setTaxis] = useState([]);
-    const [selectedTaxiID, setSelectedTaxiID] = useState(null);
+    const [selectedTaxiIndex, setSelectedTaxiIndex] = useState(0);
     const [taxi, setTaxi] = useState(null);
     const [loading, setLoading] = useState(true);
     const [tripsLoading, setTripsLoading] = useState(false);
@@ -13,7 +13,6 @@ function QuickTaxi() {
         axios.get("http://localhost:8081/taxis")
             .then((response) => {
                 setTaxis(response.data);
-                setSelectedTaxiID(response.data[0]?.id || null);
                 setLoading(false);
             })
             .catch(error => {
@@ -23,19 +22,8 @@ function QuickTaxi() {
     }, []);
 
     useEffect(() => {
-        if (selectedTaxiID) {
-            setTripsLoading(true);
-            axios.get(`http://localhost:8081/taxis/${selectedTaxiID}`)
-                .then((response) => {
-                    setTaxi(response.data);
-                    setTripsLoading(false);
-                })
-                .catch(error => {
-                    console.error('Error fetching taxi trips:', error);
-                    setTripsLoading(false);
-                });
-        }
-    }, [selectedTaxiID]);
+        setTaxi(taxis[selectedTaxiIndex]);
+    })
 
     if (loading) return <div>Loading taxis...</div>;
 
@@ -43,11 +31,11 @@ function QuickTaxi() {
         <div className="taxi-container">
             {/* Taxi List */}
             <div className="taxi-list">
-                {taxis.map((t) => (
+                {taxis.map((t, idx) => (
                     <div
                         key={t.id}
-                        className={`taxi-item ${t.id === selectedTaxiID ? "active" : ""}`}
-                        onClick={() => setSelectedTaxiID(t.id)}
+                        className={`taxi-item ${idx === selectedTaxiIndex ? "active" : ""}`}
+                        onClick={() => setSelectedTaxiIndex(idx)}
                     >
                         {t.name || `Taxi #${t.id}`}  
                         <br />
@@ -58,9 +46,7 @@ function QuickTaxi() {
 
             {/* Taxi Detail Panel */}
             <div className="taxi-details">
-                {!selectedTaxiID ? (
-                    <p>Select a taxi to view trips</p>
-                ) : tripsLoading ? (
+                {tripsLoading ? (
                     <p>Loading trips...</p>
                 ) : taxi ? (
                     <>

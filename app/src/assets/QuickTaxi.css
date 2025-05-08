@@ -40,6 +40,6 @@
     text-align: center;
 }
 
-.over-capacity {
+tr.over-capacity {
     background-color: #ffdddd;
 }

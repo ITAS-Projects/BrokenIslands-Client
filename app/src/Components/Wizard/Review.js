@@ -206,6 +206,8 @@ function Review({ data, onBack }) {
           ).then(response => {
             console.log("Created Boats");
             console.log("All data created");
+            alert("The full reservation was created sucessfully, redirecting...");
+            window.location.href = '/quick';
           })
         })
       });

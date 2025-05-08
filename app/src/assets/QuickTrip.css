@@ -27,3 +27,15 @@
 .trip-details {
     flex-grow: 1;
 }
+
+.trip-item:hover.over-capacity {
+    background-color: #ffd0d0;
+}
+
+.trip-item.over-capacity {
+    background-color: #ffe0e0;
+}
+
+.trip-item.active.over-capacity {
+    background-color: #ffc0c0;
+}

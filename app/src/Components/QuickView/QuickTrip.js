@@ -47,15 +47,33 @@ function QuickTrip() {
         <div className="trip-container">
             {/* Left Panel: List of trips */}
             <div className="trip-list">
-                {trips.map((trip) => (
+                {trips.map((trip) => {
+                    let isOverCapacity = false
+
+                    let currentPeople = trip.Reservations?.reduce((sum, res) => {
+                        return sum + (res.Group?.numberOfPeople || 0);
+                    }, 0) ?? 0;
+                    let currentPeopleCapacity = trip.Taxi?.spaceForPeople || 0;
+
+                    if (currentPeople > currentPeopleCapacity) {isOverCapacity = true}
+
+                    let currentBoats = trip.Reservations?.reduce((resTotal, res) => {
+                        return resTotal + (res.Boats?.reduce((bSum, boat) => bSum + (boat.numberOf || 0), 0) || 0);
+                    }, 0) ?? 0;
+                    let currentBoatsCapacity = trip.Taxi?.spaceForKayaks || 0;
+
+                    if (currentBoats > currentBoatsCapacity) {isOverCapacity = true}
+
+                    
+                    return (
                     <div
                         key={trip.id}
-                        className={`trip-item ${trip.id === selectedTripId ? "active" : ""}`}
+                        className={`trip-item ${trip.id === selectedTripId ? "active" : ""} ${isOverCapacity ? "over-capacity": ""}`}
                         onClick={() => setSelectedTripId(trip.id)}
                     >
                         {formatDate(trip.day)} – {trip.timeFrame}
                     </div>
-                ))}
+                )})}
             </div>
 
             {/* Right Panel: Selected Trip Details */}
