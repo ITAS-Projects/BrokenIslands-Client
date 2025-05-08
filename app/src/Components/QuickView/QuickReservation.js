@@ -55,6 +55,7 @@ function QuickReservation() {
                         </li>
                     ))}
                 </ul>
+                {selectedReservation.Boats?.length > 0 && (<>
                 <h4>Boats:</h4>
                 <ul>
                     {selectedReservation.Boats?.map((boat, i) => (
@@ -63,6 +64,7 @@ function QuickReservation() {
                         </li>
                     ))}
                 </ul>
+                </>)}
             </div>
         </div>
     );
