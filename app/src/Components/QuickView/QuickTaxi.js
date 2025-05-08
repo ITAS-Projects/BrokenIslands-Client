@@ -13,6 +13,7 @@ function QuickTaxi() {
         axios.get("http://localhost:8081/taxis")
             .then((response) => {
                 setTaxis(response.data);
+                setSelectedTaxiID(response.data[0]?.id || null);
                 setLoading(false);
             })
             .catch(error => {
