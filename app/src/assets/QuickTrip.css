@@ -1,0 +1,29 @@
+.trip-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+
+.trip-list {
+    width: 250px;
+    border-right: 1px solid #ccc;
+}
+
+.trip-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.trip-item:hover {
+    background-color: #f5f5f5;
+}
+
+.trip-item.active {
+    background-color: #d0f0fd;
+    font-weight: bold;
+}
+
+.trip-details {
+    flex-grow: 1;
+}
