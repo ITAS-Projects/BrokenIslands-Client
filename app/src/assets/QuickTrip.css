@@ -5,7 +5,7 @@
 }
 
 .trip-list {
-    width: 250px;
+    width: max-content;
     border-right: 1px solid #ccc;
 }
 
@@ -70,4 +70,12 @@ option:disabled {
     padding: 5px;
     border-radius: 10px;
     margin-bottom: 10px;
+    position: relative;
+}
+
+svg {
+    width: 30px;
+    right: 10px;
+    top: 10px;
+    position: absolute;
 }
