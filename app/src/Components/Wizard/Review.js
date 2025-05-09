@@ -247,7 +247,7 @@ function Review({ data, onBack }) {
                       if (person.name && !person.allergies) {
                         return (
                           <span key={index} className="indent">
-                            Name: {person.name}, Allergies: {person.allergies}
+                            Name: {person.name}
                           </span>
                         )
                       }
