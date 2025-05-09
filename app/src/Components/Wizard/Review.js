@@ -29,8 +29,8 @@ function Review({ data, onBack }) {
     if (data.ArrivalDay === "") {alert('The Arrival Day doesnt exist');return null}
     if (data.DepartureDay === "") {alert('The Departure Day doesnt exist');return null}
 
-    if (data.ArrivalSchedule.split(" ")[0] == "Custom") {arrivalCustom = true}
-    if (data.DepartureSchedule.split(" ")[0] == "Custom") {departureCustom = true}
+    if (data.ArrivalSchedule.split(" ")[0] === "Custom") {arrivalCustom = true}
+    if (data.DepartureSchedule.split(" ")[0] === "Custom") {departureCustom = true}
     if (arrivalCustom && data.ArrivalTime === "") {alert('The Arrival time doesnt exist');return null}
     if (departureCustom && data.DepartureTime === "") {alert('The Departure time doesnt exist');return null}
 
@@ -240,6 +240,7 @@ function Review({ data, onBack }) {
                           </span>
                         )
                       }
+                      return null;
                     })}
                     <br />
                     <strong>Other People:</strong>
@@ -251,6 +252,7 @@ function Review({ data, onBack }) {
                           </span>
                         )
                       }
+                      return null;
                     })}
                   </p>
                 );

@@ -51,7 +51,7 @@ function NewGroup() {
             setSelectedTrips([`${selectedTrips}`]);
         }
         console.log(selectedTrips);
-    }, [isUnrelatedGroup, leader, selectedPeople]);
+    }, [isUnrelatedGroup, leader, selectedPeople, selectedTrips]);
     
     const handleSubmit = (e) => {
         e.preventDefault();

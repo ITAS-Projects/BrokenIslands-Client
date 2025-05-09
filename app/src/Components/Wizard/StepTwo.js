@@ -43,14 +43,14 @@ function StepTwo({ data, onNext, onBack, updateFormData }) {
             </label>
             {data.People.map((person, index) => (
               <div key={index} className="Person-Object">
-                {index != 0 && (
+                {index !== 0 && (
                   <>
                   {data.People.length > data.NumberOfPeople && (
                     <div className="error">
                     TOO MANY PEOPLE
                     </div>
                   )}
-                    <button className={data.People.length > data.NumberOfPeople && "Delete" || "next"} onClick={() => {
+                    <button className={((data.People.length > data.NumberOfPeople) && "Delete") || "next"} onClick={() => {
                       document.querySelectorAll("input").forEach(inputEl => {
                         inputEl.value = '';
                       });

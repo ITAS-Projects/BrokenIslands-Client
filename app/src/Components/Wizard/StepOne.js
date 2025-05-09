@@ -47,7 +47,7 @@ function StepOne({ data, onNext, updateFormData }) {
                     value={data.ArrivalDay}
                     onChange={handleChange}
                 />
-                {data.ArrivalSchedule.split(" ")[0] == "Custom" && (<input
+                {data.ArrivalSchedule.split(" ")[0] === "Custom" && (<input
                     type="time"
                     name="ArrivalTime"
                     value={data.ArrivalTime}
@@ -78,7 +78,7 @@ function StepOne({ data, onNext, updateFormData }) {
                     value={data.DepartureDay}
                     onChange={handleChange}
                 />
-                {data.DepartureSchedule.split(" ")[0] == "Custom" && (<input
+                {data.DepartureSchedule.split(" ")[0] === "Custom" && (<input
                     type="time"
                     name="DepartureTime"
                     value={data.DepartureTime}

@@ -4,7 +4,7 @@ import "../../assets/QuickTrip.css";
 
 function QuickTrip() {
     const [trips, setTrips] = useState([]);
-    const [selectedTripId, setSelectedTripId] = useState(null);
+    const [selectedTripIndex, setSelectedTripIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [selectedYear, setSelectedYear] = useState("all");
     const [selectedMonth, setSelectedMonth] = useState("all");
@@ -14,7 +14,6 @@ function QuickTrip() {
         axios.get("http://localhost:8081/trips")
             .then((response) => {
                 setTrips(response.data);
-                setSelectedTripId(response.data[0]?.id || null);
                 setLoading(false);
             })
             .catch(error => {
@@ -81,7 +80,40 @@ function QuickTrip() {
         );
     });
 
-    const selectedTrip = trips.find(trip => trip.id === selectedTripId);
+    const timeOrder = [
+        "Custom AM", "Lodge to Secret AM", "Secret to Lodge AM", "Custom", "Lodge to Secret PM", "Secret to Lodge PM", "Custom PM"
+    ]
+
+    filteredTrips.sort((a, b) => {
+        let dayData = a.day?.split('T')[0].split('-');
+        let dayData2 = b.day?.split('T')[0].split('-');
+    
+        if (!dayData || !dayData2) return 0;
+    
+        // Compare year
+        if (dayData[0] !== dayData2[0]) {
+            return Number(dayData[0]) - Number(dayData2[0]);
+        }
+    
+        // Compare month
+        if (dayData[1] !== dayData2[1]) {
+            return Number(dayData[1]) - Number(dayData2[1]);
+        }
+    
+        // Compare day
+        if (dayData[2] !== dayData2[2]) {
+            return Number(dayData[2]) - Number(dayData2[2]);
+        }
+        
+        
+        return timeOrder.findIndex(item => item === a.timeFrame) - timeOrder.findIndex(item => item === b.timeFrame);
+    })
+
+    const selectedTrip = filteredTrips[selectedTripIndex];
+
+    if (!selectedTrip && selectedTripIndex !== 0) {
+        setSelectedTripIndex(0);
+    }
 
     const peopleUsed = selectedTrip?.Reservations?.reduce((sum, res) => {
         return sum + (res.Group?.numberOfPeople || 0);
@@ -157,7 +189,7 @@ function QuickTrip() {
 
             {/* Trip List */}
             <div className="trip-list">
-                {filteredTrips.map((trip) => {
+                {filteredTrips.map((trip, idx) => {
                     let isOverCapacity = false;
 
                     let currentPeople = trip.Reservations?.reduce((sum, res) => {
@@ -178,8 +210,8 @@ function QuickTrip() {
                     return (
                         <div
                             key={trip.id}
-                            className={`trip-item ${trip.id === selectedTripId ? "active" : ""} ${isOverCapacity ? "over-capacity" : ""}`}
-                            onClick={() => setSelectedTripId(trip.id)}
+                            className={`trip-item ${idx === selectedTripIndex ? "active" : ""} ${isOverCapacity ? "over-capacity" : ""}`}
+                            onClick={() => setSelectedTripIndex(idx)}
                         >
                             {formatDate(trip.day)} – {trip.timeFrame}
                         </div>

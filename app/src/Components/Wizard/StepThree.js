@@ -1,10 +1,6 @@
 import React from "react";
 
 function StepThree({ data, onNext, onBack, updateFormData }) {
-    const handleChange = (e) => {
-        updateFormData({ [e.target.name]: e.target.value });
-    };
-
     const createBoat = () => {
         updateFormData({ Boats: [...(data?.Boats || []), {}] });
       }

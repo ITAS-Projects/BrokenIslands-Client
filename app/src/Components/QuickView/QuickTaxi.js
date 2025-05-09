@@ -9,10 +9,6 @@ function QuickTaxi() {
     const [loading, setLoading] = useState(true);
     const [tripsSorted, setTripsSorted] = useState([]);
 
-    const timeOrder = [
-        "Custom AM", "Lodge to Secret AM", "Secret to Lodge AM", "Custom", "Lodge to Secret PM", "Secret to Lodge PM", "Custom PM"
-    ]
-
     useEffect(() => {
         axios.get("http://localhost:8081/taxis")
             .then((response) => {
@@ -26,6 +22,10 @@ function QuickTaxi() {
     }, []);
 
     useEffect(() => {
+        const timeOrder = [
+            "Custom AM", "Lodge to Secret AM", "Secret to Lodge AM", "Custom", "Lodge to Secret PM", "Secret to Lodge PM", "Custom PM"
+        ]
+
         setTaxi(taxis[selectedTaxiIndex]);
         setTripsSorted(taxi?.Trips?.sort((a, b) => {
             let dayData = a.day?.split('T')[0].split('-');
@@ -49,9 +49,9 @@ function QuickTaxi() {
             }
             
             
-            return timeOrder.findIndex(item => item == a.timeFrame) - timeOrder.findIndex(item => item == b.timeFrame);
+            return timeOrder.findIndex(item => item === a.timeFrame) - timeOrder.findIndex(item => item === b.timeFrame);
         }) || []);        
-    }, [timeOrder])
+    }, [taxi, taxis, selectedTaxiIndex])
 
     if (loading) return <div>Loading taxis...</div>;
 

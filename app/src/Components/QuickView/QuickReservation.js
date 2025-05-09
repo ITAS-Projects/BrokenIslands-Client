@@ -101,7 +101,69 @@ function QuickReservation() {
     if (loading) return <div>Loading reservations...</div>;
     if (error) return <div>{error}</div>;
 
+    const timeOrder = [
+        "Custom AM", "Lodge to Secret AM", "Secret to Lodge AM", "Custom", "Lodge to Secret PM", "Secret to Lodge PM", "Custom PM"
+    ]
+
+    filteredReservations.map((self) => {
+        self.Trips?.sort((a, b) => {
+            let dayData = a.day?.split('T')[0].split('-');
+            let dayData2 = b.day?.split('T')[0].split('-');
+        
+            if (!dayData || !dayData2) return 0;
+        
+            // Compare year
+            if (dayData[0] !== dayData2[0]) {
+                return Number(dayData[0]) - Number(dayData2[0]);
+            }
+        
+            // Compare month
+            if (dayData[1] !== dayData2[1]) {
+                return Number(dayData[1]) - Number(dayData2[1]);
+            }
+        
+            // Compare day
+            if (dayData[2] !== dayData2[2]) {
+                return Number(dayData[2]) - Number(dayData2[2]);
+            }
+            
+            
+            return timeOrder.findIndex(item => item === a.timeFrame) - timeOrder.findIndex(item => item === b.timeFrame);
+        });
+
+        return self;
+    })
+
+    filteredReservations.sort((a, b) => {
+        let dayData = a.Trips?.[0]?.day?.split('T')[0].split('-');
+        let dayData2 = b.Trips?.[0]?.day?.split('T')[0].split('-');
+    
+        if (!dayData || !dayData2) return 0;
+    
+        // Compare year
+        if (dayData[0] !== dayData2[0]) {
+            return Number(dayData[0]) - Number(dayData2[0]);
+        }
+    
+        // Compare month
+        if (dayData[1] !== dayData2[1]) {
+            return Number(dayData[1]) - Number(dayData2[1]);
+        }
+    
+        // Compare day
+        if (dayData[2] !== dayData2[2]) {
+            return Number(dayData[2]) - Number(dayData2[2]);
+        }
+        
+        
+        return timeOrder.findIndex(item => item === a.timeFrame) - timeOrder.findIndex(item => item === b.timeFrame);
+    })
+
     const selectedReservation = filteredReservations[selectedIndex];
+
+    if (!selectedReservation && selectedIndex !== 0) {
+        setSelectedIndex(0);
+    }
 
     // Get unique years, months, and days from the reservation data
     const years = [...new Set(reservations.map(res => res.Trips[0]?.day.split('-')[0]))].sort();
