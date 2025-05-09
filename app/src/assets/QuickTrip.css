@@ -59,3 +59,15 @@
 option:disabled {
     background-color: #eee;
 }
+
+.No-Style-Link {
+    text-decoration: none;
+    color: inherit; 
+}
+
+.No-Style-Link > * {
+    background-color: #eee !important;
+    padding: 5px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
