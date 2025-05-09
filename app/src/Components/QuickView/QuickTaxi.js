@@ -7,7 +7,11 @@ function QuickTaxi() {
     const [selectedTaxiIndex, setSelectedTaxiIndex] = useState(0);
     const [taxi, setTaxi] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [tripsLoading, setTripsLoading] = useState(false);
+    const [tripsSorted, setTripsSorted] = useState([]);
+
+    const timeOrder = [
+        "Custom AM", "Lodge to Secret AM", "Secret to Lodge AM", "Custom", "Lodge to Secret PM", "Secret to Lodge PM", "Custom PM"
+    ]
 
     useEffect(() => {
         axios.get("http://localhost:8081/taxis")
@@ -23,7 +27,31 @@ function QuickTaxi() {
 
     useEffect(() => {
         setTaxi(taxis[selectedTaxiIndex]);
-    })
+        setTripsSorted(taxi?.Trips?.sort((a, b) => {
+            let dayData = a.day?.split('T')[0].split('-');
+            let dayData2 = b.day?.split('T')[0].split('-');
+        
+            if (!dayData || !dayData2) return 0;
+        
+            // Compare year
+            if (dayData[0] !== dayData2[0]) {
+                return Number(dayData[0]) - Number(dayData2[0]);
+            }
+        
+            // Compare month
+            if (dayData[1] !== dayData2[1]) {
+                return Number(dayData[1]) - Number(dayData2[1]);
+            }
+        
+            // Compare day
+            if (dayData[2] !== dayData2[2]) {
+                return Number(dayData[2]) - Number(dayData2[2]);
+            }
+            
+            
+            return timeOrder.findIndex(item => item == a.timeFrame) - timeOrder.findIndex(item => item == b.timeFrame);
+        }) || []);        
+    }, [timeOrder])
 
     if (loading) return <div>Loading taxis...</div>;
 
@@ -46,9 +74,7 @@ function QuickTaxi() {
 
             {/* Taxi Detail Panel */}
             <div className="taxi-details">
-                {tripsLoading ? (
-                    <p>Loading trips...</p>
-                ) : taxi ? (
+                {taxi ? (
                     <>
                         <h2>{taxi.name || `Taxi #${taxi.id}`}</h2>
                         <p>Capacity: {taxi.spaceForPeople} people & {taxi.spaceForKayaks} boats</p>
@@ -64,7 +90,8 @@ function QuickTaxi() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {taxi.Trips?.map((trip) => {
+                                {(() => {
+                                return (tripsSorted.map((trip) => {
                                     const date = trip.day?.split('T')[0] || 'N/A';
                                     const isCustom = trip.timeFrame.startsWith("Custom");
 
@@ -107,7 +134,7 @@ function QuickTaxi() {
                                             <td>{boatsUsed}/{taxi.spaceForKayaks}</td>
                                         </tr>
                                     );
-                                })}
+                                }))})()}
                             </tbody>
                         </table>
                     </>
