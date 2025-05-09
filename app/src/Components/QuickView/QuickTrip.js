@@ -6,8 +6,10 @@ function QuickTrip() {
     const [trips, setTrips] = useState([]);
     const [selectedTripId, setSelectedTripId] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [selectedYear, setSelectedYear] = useState("all");
+    const [selectedMonth, setSelectedMonth] = useState("all");
+    const [selectedDay, setSelectedDay] = useState("all");
 
-    // Fetch all trips
     useEffect(() => {
         axios.get("http://localhost:8081/trips")
             .then((response) => {
@@ -24,59 +26,168 @@ function QuickTrip() {
     if (loading) return <div>Loading trips...</div>;
     if (!trips.length) return <div>No trips found.</div>;
 
+    const formatDate = (iso) => new Date(iso).toISOString().split("T")[0];
+    const getYear = (dateStr) => new Date(dateStr).getFullYear();
+    const getMonth = (dateStr) => new Date(dateStr).getMonth() + 1;
+    const getDay = (dateStr) => new Date(dateStr).getDate();
+    const getMonthName = (monthNum) =>
+        new Date(2024, monthNum - 1).toLocaleString("default", { month: "long" });
+
+    const allYears = [...new Set(trips.map(trip => getYear(trip.day)))].sort((a, b) => a - b);
+    const allMonths = [...new Set(trips.map(trip => getMonth(trip.day)))].sort((a, b) => a - b);
+    const allDays = [...new Set(trips.map(trip => getDay(trip.day)))].sort((a, b) => a - b);
+
+    const monthsWithSelectedDayAndYear = selectedDay === "all" ? allMonths : [
+        ...new Set(trips
+            .filter(trip => {
+                const matchDay = getDay(trip.day) === parseInt(selectedDay);
+                const matchYear = selectedYear === "all" || getYear(trip.day) === parseInt(selectedYear);
+                return matchDay && matchYear;
+            })
+            .map(trip => getMonth(trip.day)))
+    ].sort((a, b) => a - b);
+
+    const daysInSelectedMonthAndYear = selectedMonth === "all" ? allDays : [
+        ...new Set(trips
+            .filter(trip => {
+                const matchMonth = getMonth(trip.day) === parseInt(selectedMonth);
+                const matchYear = selectedYear === "all" || getYear(trip.day) === parseInt(selectedYear);
+                return matchMonth && matchYear;
+            })
+            .map(trip => getDay(trip.day)))
+    ].sort((a, b) => a - b);
+
+    const yearsWithMonthAndDay = selectedMonth === "all" && selectedDay === "all"
+        ? allYears
+        : [
+            ...new Set(trips
+                .filter(trip => {
+                    const matchMonth = selectedMonth === "all" || getMonth(trip.day) === parseInt(selectedMonth);
+                    const matchDay = selectedDay === "all" || getDay(trip.day) === parseInt(selectedDay);
+                    return matchMonth && matchDay;
+                })
+                .map(trip => getYear(trip.day)))
+        ].sort((a, b) => a - b);
+
+    const filteredTrips = trips.filter(trip => {
+        const tripYear = getYear(trip.day);
+        const tripMonth = getMonth(trip.day);
+        const tripDay = getDay(trip.day);
+
+        return (
+            (selectedYear === "all" || tripYear === parseInt(selectedYear)) &&
+            (selectedMonth === "all" || tripMonth === parseInt(selectedMonth)) &&
+            (selectedDay === "all" || tripDay === parseInt(selectedDay))
+        );
+    });
+
     const selectedTrip = trips.find(trip => trip.id === selectedTripId);
 
-    // Helper function to format the date
-    const formatDate = (iso) => new Date(iso).toISOString().split("T")[0];
-
-    // Calculate the number of people used on the trip
-    const peopleUsed = selectedTrip.Reservations?.reduce((sum, res) => {
+    const peopleUsed = selectedTrip?.Reservations?.reduce((sum, res) => {
         return sum + (res.Group?.numberOfPeople || 0);
     }, 0) ?? 0;
 
-    // Calculate the number of boats used on the trip
-    const boatsUsed = selectedTrip.Reservations?.reduce((resTotal, res) => {
+    const boatsUsed = selectedTrip?.Reservations?.reduce((resTotal, res) => {
         return resTotal + (res.Boats?.reduce((bSum, boat) => bSum + (boat.numberOf || 0), 0) || 0);
     }, 0) ?? 0;
 
-    // Taxi capacity
-    const peopleCapacity = selectedTrip.Taxi?.spaceForPeople || 0;
-    const boatsCapacity = selectedTrip.Taxi?.spaceForKayaks || 0;
+    const peopleCapacity = selectedTrip?.Taxi?.spaceForPeople || 0;
+    const boatsCapacity = selectedTrip?.Taxi?.spaceForKayaks || 0;
 
     return (
         <div className="trip-container">
-            {/* Left Panel: List of trips */}
+            {/* Filter Controls */}
+            <div className="trip-filters">
+                <label>
+                    Year:
+                    <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
+                        <option value="all">All</option>
+                        {allYears.map(year => (
+                            <option
+                                key={year}
+                                value={year}
+                                disabled={(selectedMonth !== "all" || selectedDay !== "all") && !yearsWithMonthAndDay.includes(year)}
+                            >
+                                {year}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+
+                <label>
+                    Month:
+                    <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+                        <option value="all">All</option>
+                        {allMonths.map(month => (
+                            <option
+                                key={month}
+                                value={month}
+                                disabled={selectedDay !== "all" && !monthsWithSelectedDayAndYear.includes(month)}
+                            >
+                                {getMonthName(month)}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+
+                <label>
+                    Day:
+                    <select value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)}>
+                        <option value="all">All</option>
+                        {allDays.map(day => (
+                            <option
+                                key={day}
+                                value={day}
+                                disabled={selectedMonth !== "all" && !daysInSelectedMonthAndYear.includes(day)}
+                            >
+                                {day}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+
+                <button onClick={() => {
+                    setSelectedYear("all");
+                    setSelectedMonth("all");
+                    setSelectedDay("all");
+                }}>
+                    Clear Filters
+                </button>
+            </div>
+
+            {/* Trip List */}
             <div className="trip-list">
-                {trips.map((trip) => {
-                    let isOverCapacity = false
+                {filteredTrips.map((trip) => {
+                    let isOverCapacity = false;
 
                     let currentPeople = trip.Reservations?.reduce((sum, res) => {
                         return sum + (res.Group?.numberOfPeople || 0);
                     }, 0) ?? 0;
-                    let currentPeopleCapacity = trip.Taxi?.spaceForPeople || 0;
-
-                    if (currentPeople > currentPeopleCapacity) {isOverCapacity = true}
 
                     let currentBoats = trip.Reservations?.reduce((resTotal, res) => {
                         return resTotal + (res.Boats?.reduce((bSum, boat) => bSum + (boat.numberOf || 0), 0) || 0);
                     }, 0) ?? 0;
+
+                    let currentPeopleCapacity = trip.Taxi?.spaceForPeople || 0;
                     let currentBoatsCapacity = trip.Taxi?.spaceForKayaks || 0;
 
-                    if (currentBoats > currentBoatsCapacity) {isOverCapacity = true}
+                    if (currentPeople > currentPeopleCapacity || currentBoats > currentBoatsCapacity) {
+                        isOverCapacity = true;
+                    }
 
-                    
                     return (
-                    <div
-                        key={trip.id}
-                        className={`trip-item ${trip.id === selectedTripId ? "active" : ""} ${isOverCapacity ? "over-capacity": ""}`}
-                        onClick={() => setSelectedTripId(trip.id)}
-                    >
-                        {formatDate(trip.day)} – {trip.timeFrame}
-                    </div>
-                )})}
+                        <div
+                            key={trip.id}
+                            className={`trip-item ${trip.id === selectedTripId ? "active" : ""} ${isOverCapacity ? "over-capacity" : ""}`}
+                            onClick={() => setSelectedTripId(trip.id)}
+                        >
+                            {formatDate(trip.day)} – {trip.timeFrame}
+                        </div>
+                    );
+                })}
             </div>
 
-            {/* Right Panel: Selected Trip Details */}
+            {/* Trip Details */}
             <div className="trip-details">
                 {selectedTrip && (
                     <>
@@ -93,14 +204,14 @@ function QuickTrip() {
                                     Reserved by: {res.Group?.leader?.name}
                                     {res.Boats?.length > 0 && (
                                         <>
-                                        <span>Boats:</span>
-                                        <ul>
-                                            {res.Boats.map((boat, i) => (
-                                                <li key={i}>
-                                                    {boat.numberOf} × {boat.isRented ? "rented" : "personal"} {boat.type}
-                                                </li>
-                                            ))}
-                                        </ul>
+                                            <span>Boats:</span>
+                                            <ul>
+                                                {res.Boats.map((boat, i) => (
+                                                    <li key={i}>
+                                                        {boat.numberOf} × {boat.isRented ? "rented" : "personal"} {boat.type}
+                                                    </li>
+                                                ))}
+                                            </ul>
                                         </>
                                     )}
                                 </li>

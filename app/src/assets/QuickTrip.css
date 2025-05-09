@@ -39,3 +39,23 @@
 .trip-item.active.over-capacity {
     background-color: #ffc0c0;
 }
+
+.trip-filters {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.trip-filters label {
+    font-weight: bold;
+    flex-direction: column;
+}
+
+.trip-filters button {
+    margin-top: 1.5rem;
+}
+
+
+option:disabled {
+    background-color: #eee;
+}
