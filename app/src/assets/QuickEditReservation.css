@@ -1,0 +1,21 @@
+.not-error {
+    color: black;
+}
+
+.Trip-Object {
+    background-color: rgb(231, 231, 231);
+    padding: 10px 20px;
+    border-radius: 20px;
+    margin-top: 10px;
+}
+
+.changed {
+    background-color: rgb(168, 214, 240);
+}
+
+.new {
+    background-color: rgb(170, 240, 168);
+}
+button + button {
+    margin-left: 10px;
+}

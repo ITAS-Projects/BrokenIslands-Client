@@ -233,13 +233,29 @@ function QuickReservation() {
                 
                 <h4>Trips:</h4>
                 <ul>
-                    {selectedReservation.Trips?.map((trip, i) => (
+                    {selectedReservation.Trips?.map((trip, i) => {
+                        let showTime = false;
+                        let timeShown;
+                        if (trip.timeFrame.includes("Custom")) {
+                            let timeSections = trip.timeStart.split(":");
+                            let timeShownHr = (timeSections[0] + 11) % 12 + 1;
+                            let timeShownMin = timeSections[1];
+                            let timeText = "AM";
+                            showTime = true;
+                            if (timeSections[0] >= 12) {
+                                timeText = "PM";
+                            }
+                            timeShown = ` ${timeShownHr}:${timeShownMin} ${timeText}`;
+                        }
+
+
+                        return (
                         <li key={i}>
                             {i === 0 && <strong>[Arrival]</strong>}
                             {i === 1 && <strong>[Departure]</strong>}
-                            {trip.timeFrame}, {trip.day.split("T")[0]}
+                            {trip.timeFrame}{showTime && timeShown}, {trip.day.split("T")[0]}
                         </li>
-                    ))}
+                    )})}
                 </ul>
                 
                 {selectedReservation.Boats?.length > 0 && (

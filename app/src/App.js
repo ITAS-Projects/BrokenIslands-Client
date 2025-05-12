@@ -19,7 +19,7 @@ import EditPerson from "./Components/People/EditPerson.js";
 import GroupList from "./Components/Groups/GroupList.js";
 import NewGroup from "./Components/Groups/NewGroup.js";
 import Wizard from "./Components/Wizard/Wizard.js";
-import ReservationList from "./Components/Groups copy/ReservationList.js";
+import ReservationList from "./Components/Reservations/ReservationList.js";
 import QuickTaxi from "./Components/QuickView/QuickTaxi.js";
 import Quick from "./Components/QuickView/Quick.js";
 import QuickReservation from "./Components/QuickView/QuickReservation.js";

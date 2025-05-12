@@ -105,6 +105,13 @@ body {
     margin-bottom: 10px;
   }
 
+  .Boat-Object {
+    background-color: rgb(231, 231, 231);
+    padding: 10px 20px;
+    border-radius: 20px;
+    margin-top: 10px;
+  }
+
   .error {
     color: red;
     font-weight: 900;
