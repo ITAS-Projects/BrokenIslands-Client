@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import "../../assets/TripList.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function TripList() {
     const [trips, setTrips] = useState([]);
     const [loading, setLoading] = useState(true);
   
     useEffect(() => {
-        axios.get('http://localhost:8081/trips')
+        axios.get(`${backendURL}/trips`)
             .then((response) => {
                 let tempTrips = response.data;
                 tempTrips.map(trip => {
@@ -44,7 +46,7 @@ function TripList() {
     }, []);
   
     const handleDelete = (id) => {
-      axios.delete(`http://localhost:8081/trips/${id}`)
+      axios.delete(`${backendURL}/trips/${id}`)
         .then(response => {
           alert("Trip deleted successfully");
           setTrips(trips.filter(trip => trip.id !== id)); // Update state to remove deleted person

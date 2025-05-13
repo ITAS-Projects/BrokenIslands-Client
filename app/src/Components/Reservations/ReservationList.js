@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import "../../assets/ReservationList.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function ReservationList() {
     const [reservations, setReservations] = useState([]);
     const [loading, setLoading] = useState(true);
   
     useEffect(() => {
-        axios.get('http://localhost:8081/reservations')
+        axios.get(`${backendURL}/reservations`)
             .then((response) => {
                 setReservations(response.data);
                 setLoading(false);
@@ -19,7 +21,7 @@ function ReservationList() {
     }, []);
   
     const handleDelete = (id) => {
-      axios.delete(`http://localhost:8081/reservations/${id}`)
+      axios.delete(`${backendURL}/reservations/${id}`)
         .then(response => {
           alert("Reservation deleted successfully");
           setReservations(reservations.filter(reservation => reservation.id !== id)); // Update state to remove deleted person

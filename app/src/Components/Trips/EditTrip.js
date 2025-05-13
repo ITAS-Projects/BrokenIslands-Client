@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import axios from 'axios';
 import "../../assets/EditTrip.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function EditTrip() {
     const { id } = useParams();
     const [timeStart, setTimeStart] = useState('');
@@ -19,7 +21,7 @@ function EditTrip() {
     useEffect(() => {
 
         Promise.all([
-            axios.get(`http://localhost:8081/trips/${id}`)
+            axios.get(`${backendURL}/trips/${id}`)
             .then((response) => response.data)
             .then(data => {
                 setTimeStart(data.timeStart || '');
@@ -32,7 +34,7 @@ function EditTrip() {
                 return data.TaxiId;
             }),
 
-            axios.get(`http://localhost:8081/taxis`)
+            axios.get(`${backendURL}/taxis`)
             .then((response) => response.data)
             .then(data => {
                 data.map(taxi => taxi.id);
@@ -55,7 +57,7 @@ function EditTrip() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.put(`http://localhost:8081/trips/${id}`, {
+        axios.put(`${backendURL}/trips/${id}`, {
             timeStart: timeStart,
             timeEnd: timeEnd,
             day: day,

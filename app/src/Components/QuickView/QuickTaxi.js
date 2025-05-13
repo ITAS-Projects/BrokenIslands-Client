@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import "../../assets/QuickTaxi.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function QuickTaxi() {
     const [taxis, setTaxis] = useState([]);
     const [selectedTaxiIndex, setSelectedTaxiIndex] = useState(0);
@@ -10,7 +12,7 @@ function QuickTaxi() {
     const [tripsSorted, setTripsSorted] = useState([]);
 
     useEffect(() => {
-        axios.get("http://localhost:8081/taxis")
+        axios.get(`${backendURL}/taxis`)
             .then((response) => {
                 setTaxis(response.data);
                 setLoading(false);

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import "../../assets/NewBoat.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function NewBoat() {
     const [rented, setRented] = useState(false);
     const [numberOf, setNumberOf] = useState(0);
@@ -27,7 +29,7 @@ function NewBoat() {
     const [people, setPeople] = useState();
 
     useEffect(() => {
-        axios.get('http://localhost:8081/groups')
+        axios.get(`${backendURL}/groups`)
             .then((response) => {
                 let tempGroups = response.data;
                 let groupResult = tempGroups.filter(group => {
@@ -43,7 +45,7 @@ function NewBoat() {
                 console.error('Error fetching data:', error);
             });
 
-        axios.get('http://localhost:8081/reservations')
+        axios.get(`${backendURL}/reservations`)
             .then((response) => {
                 setReservations(response.data);
             })
@@ -63,7 +65,7 @@ function NewBoat() {
             groupId = sourceId;
         }
 
-        axios.post('http://localhost:8081/boats', {
+        axios.post(`${backendURL}/boats`, {
             isRented: rented,
             type: type,
             numberOf: numberOf,

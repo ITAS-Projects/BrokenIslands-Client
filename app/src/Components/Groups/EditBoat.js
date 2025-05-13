@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import axios from 'axios';
 import "../../assets/EditBoat.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function EditBoat() {
     const { id } = useParams();
     const [rented, setRented] = useState(false);
@@ -32,7 +34,7 @@ function EditBoat() {
     useEffect(() => {
 
         Promise.all([
-            axios.get(`http://localhost:8081/boats/${id}`)
+            axios.get(`${backendURL}/boats/${id}`)
             .then((response) => response.data)
             .then(data => {
                 setRented(data.isRented);
@@ -62,7 +64,7 @@ function EditBoat() {
                 return data.TaxiId;
             }),
 
-            axios.get(`http://localhost:8081/taxis`)
+            axios.get(`${backendURL}/taxis`)
             .then((response) => response.data)
             .then(data => {
                 data.map(taxi => taxi.id);
@@ -77,7 +79,7 @@ function EditBoat() {
             setLoading(false);
           });
 
-        axios.get('http://localhost:8081/groups')
+        axios.get(`${backendURL}/groups`)
             .then((response) => {
                 let tempGroups = response.data;
                 let groupResult = tempGroups.filter(group => {
@@ -93,7 +95,7 @@ function EditBoat() {
                 console.error('Error fetching data:', error);
             });
 
-        axios.get('http://localhost:8081/reservations')
+        axios.get(`${backendURL}/reservations`)
             .then((response) => {
                 setReservations(response.data);
             })
@@ -113,7 +115,7 @@ function EditBoat() {
             groupId = sourceId;
         }
 
-        axios.put(`http://localhost:8081/boats/${id}`, {
+        axios.put(`${backendURL}/boats/${id}`, {
             isRented: rented,
             type: type,
             numberOf: numberOf,

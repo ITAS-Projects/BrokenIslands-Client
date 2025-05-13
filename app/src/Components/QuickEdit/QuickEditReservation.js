@@ -3,6 +3,8 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import "../../assets/QuickEditReservation.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function QuickEditReservation() {
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
@@ -146,7 +148,7 @@ function QuickEditReservation() {
     }
 
     useEffect(() => {
-        axios.get(`http://localhost:8081/reservations/${id}`)
+        axios.get(`${backendURL}/reservations/${id}`)
             .then((response) => response.data)
             .then(data => {
                 setReservation(data);
@@ -162,7 +164,7 @@ function QuickEditReservation() {
                 setLoading(false);
             });
 
-        axios.get("http://localhost:8081/taxis")
+        axios.get(`${backendURL}/taxis`)
             .then((response) => response.data)
             .then(data => {
                 setTaxis(data || []);
@@ -245,12 +247,12 @@ function QuickEditReservation() {
         Promise.all(
             people.map(person => {
                 if (person.new === true) {
-                    return axios.post('http://localhost:8081/people', {
+                    return axios.post(`${backendURL}/people`, {
                         name: person.name,
                         allergies: person.allergies || ""
                     }).then(response => response.data);
                 } else {
-                    return axios.put(`http://localhost:8081/people/${person.id}`, {
+                    return axios.put(`${backendURL}/people/${person.id}`, {
                         name: person.name,
                         allergies: person.allergies || ""
                     }).then(response => response.data);
@@ -290,16 +292,16 @@ function QuickEditReservation() {
 
                 Promise.all([
                     trips[0].new === true
-                        ? axios.post('http://localhost:8081/trips', arrivalData)
-                        : axios.put(`http://localhost:8081/trips/${trips[0].id}`, arrivalData)
+                        ? axios.post(`${backendURL}/trips`, arrivalData)
+                        : axios.put(`${backendURL}/trips/${trips[0].id}`, arrivalData)
                             .then(response => response.data.id),
 
                     trips[1].new === true
-                        ? axios.post('http://localhost:8081/trips', departureData)
-                        : axios.put(`http://localhost:8081/trips/${trips[1].id}`, departureData)
+                        ? axios.post(`${backendURL}/trips`, departureData)
+                        : axios.put(`${backendURL}/trips/${trips[1].id}`, departureData)
                             .then(response => response.data.id),
 
-                    axios.put(`http://localhost:8081/groups/${reservation.GroupId}`, {
+                    axios.put(`${backendURL}/groups/${reservation.GroupId}`, {
                         seperatePeople: false,
                         numberOfPeople: numberOfPeople,
                         PersonIds: PeopleIds,
@@ -309,7 +311,7 @@ function QuickEditReservation() {
                     .then(([arrivalId, departureId, groupId]) => {
                         console.log("Created arrival, departure and group");
                         console.log(`Arrivel: ${arrivalId}, Departure: ${departureId}`);
-                        axios.put(`http://localhost:8081/reservations/${reservation.id}`, {
+                        axios.put(`${backendURL}/reservations/${reservation.id}`, {
                             TripIds: [arrivalId, departureId],
                             GroupId: groupId
                         })
@@ -319,14 +321,14 @@ function QuickEditReservation() {
                                 Promise.all(
                                     boats.map(boat => {
                                         if (boat.new === true) {
-                                            return axios.post('http://localhost:8081/boats', {
+                                            return axios.post(`${backendURL}/boats`, {
                                                 type: boat.type,
                                                 numberOf: boat.numberOf,
                                                 isRented: boat.isRented,
                                                 ReservationId: reservationId
                                             }).then(response => response.data.id)
                                         } else {
-                                            return axios.put(`http://localhost:8081/boats/${boat.id}`, {
+                                            return axios.put(`${backendURL}/boats/${boat.id}`, {
                                                 type: boat.type,
                                                 numberOf: boat.numberOf,
                                                 isRented: boat.isRented,

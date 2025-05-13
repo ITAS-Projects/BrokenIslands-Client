@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import "../../assets/PersonList.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function PersonList() {
     const [people, setPersons] = useState([]);
     const [loading, setLoading] = useState(true);
   
     useEffect(() => {
-        axios.get('http://localhost:8081/people')
+        axios.get(`${backendURL}/people`)
             .then((response) => {
                 setPersons(response.data)
                 setLoading(false);
@@ -19,7 +21,7 @@ function PersonList() {
     }, []);
   
     const handleDelete = (id) => {
-      axios.delete(`http://localhost:8081/people/${id}`)
+      axios.delete(`${backendURL}/people/${id}`)
         .then(response => {
           alert("Person deleted successfully");
           setPersons(people.filter(person => person.id !== id)); // Update state to remove deleted person

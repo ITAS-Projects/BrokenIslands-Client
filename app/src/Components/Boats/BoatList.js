@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import "../../assets/BoatList.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function BoatList() {
     const [boats, setBoats] = useState([]);
     const [loading, setLoading] = useState(true);
   
     useEffect(() => {
-        axios.get('http://localhost:8081/boats')
+        axios.get(`${backendURL}/boats`)
             .then((response) => {
                 let tempBoats = response.data;
                 let result = tempBoats.map(boat => {
@@ -38,7 +40,7 @@ function BoatList() {
     }, []);
   
     const handleDelete = (id) => {
-      axios.delete(`http://localhost:8081/boats/${id}`)
+      axios.delete(`${backendURL}/boats/${id}`)
         .then(response => {
           alert("Boat deleted successfully");
           setBoats(boats.filter(boat => boat.id !== id)); // Update state to remove deleted person

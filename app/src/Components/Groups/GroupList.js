@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import "../../assets/GroupList.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function GroupList() {
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
   
     useEffect(() => {
-        axios.get('http://localhost:8081/groups')
+        axios.get(`${backendURL}/groups`)
             .then((response) => {
                 setGroups(response.data);
                 setLoading(false);
@@ -19,7 +21,7 @@ function GroupList() {
     }, []);
   
     const handleDelete = (id) => {
-      axios.delete(`http://localhost:8081/groups/${id}`)
+      axios.delete(`${backendURL}/groups/${id}`)
         .then(response => {
           alert("Group deleted successfully");
           setGroups(groups.filter(group => group.id !== id)); // Update state to remove deleted person

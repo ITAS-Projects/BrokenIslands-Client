@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import "../../assets/NewTrip.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function NewTrip() {
     const [timeStart, setTimeStart] = useState('');
     const [timeEnd, setTimeEnd] = useState('');
@@ -14,7 +16,7 @@ function NewTrip() {
     const [taxis, setTaxis] = useState([]);
 
     useEffect(() => {
-        axios.get(`http://localhost:8081/taxis`)
+        axios.get(`${backendURL}/taxis`)
             .then((response) => response.data)
             .then(data => {
                 data.map(taxi => taxi.id);
@@ -29,7 +31,7 @@ function NewTrip() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.post('http://localhost:8081/trips', {
+        axios.post(`${backendURL}/trips`, {
             timeStart: timeStart,
             timeEnd: timeEnd,
             day: day,

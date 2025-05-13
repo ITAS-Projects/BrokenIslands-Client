@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import axios from 'axios';
 import "../../assets/EditTaxi.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function EditTaxi() {
     const { id } = useParams();
     const [spaceForKayaks, setSpaceForKayaks] = useState(0);
@@ -11,7 +13,7 @@ function EditTaxi() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get(`http://localhost:8081/taxis/${id}`)
+        axios.get(`${backendURL}/taxis/${id}`)
             .then((response) => response.data)
             .then(data => {
                 setSpaceForKayaks(data.spaceForKayaks);
@@ -38,7 +40,7 @@ function EditTaxi() {
             return;
         }
         
-        axios.put(`http://localhost:8081/taxis/${id}`, {
+        axios.put(`${backendURL}/taxis/${id}`, {
             spaceForKayaks: spaceForKayaks,
             spaceForPeople: spaceForPeople,
             running: running

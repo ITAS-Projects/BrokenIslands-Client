@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../../assets/QuickTrip.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function QuickTrip() {
     const [trips, setTrips] = useState([]);
     const [selectedTripIndex, setSelectedTripIndex] = useState(0);
@@ -11,7 +13,7 @@ function QuickTrip() {
     const [selectedDay, setSelectedDay] = useState("all");
 
     useEffect(() => {
-        axios.get("http://localhost:8081/trips")
+        axios.get(`${backendURL}/trips`)
             .then((response) => {
                 setTrips(response.data);
                 setLoading(false);

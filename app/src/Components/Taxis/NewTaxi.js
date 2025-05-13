@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from 'axios';
 import "../../assets/NewTaxi.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function NewTaxi() {
     const [spaceForKayaks, setSpaceForKayaks] = useState(0);
     const [spaceForPeople, setSpaceForPeople] = useState(0);
@@ -20,7 +22,7 @@ function NewTaxi() {
             return;
         }
 
-        axios.post('http://localhost:8081/taxis', {
+        axios.post(`${backendURL}/taxis`, {
             spaceForKayaks: spaceForKayaks,
             spaceForPeople: spaceForPeople,
             running: running

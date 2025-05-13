@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../../assets/QuickReservation.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function QuickReservation() {
     const [loading, setLoading] = useState(true);
     const [reservations, setReservations] = useState([]);
@@ -27,7 +29,7 @@ function QuickReservation() {
     const [selectedDay, setSelectedDay] = useState("all");
 
     useEffect(() => {
-        axios.get("http://localhost:8081/reservations")
+        axios.get(`${backendURL}/reservations`)
             .then((response) => {
                 setReservations(response.data);
                 setLoading(false);

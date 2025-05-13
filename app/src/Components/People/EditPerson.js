@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import axios from 'axios';
 import "../../assets/EditPerson.css";
 
+const backendURL = process.env.REACT_APP_API_BASE_URL;
+
 function EditPerson() {
     const { id } = useParams();
     const [name, setName] = useState('');
@@ -10,7 +12,7 @@ function EditPerson() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get(`http://localhost:8081/people/${id}`)
+        axios.get(`${backendURL}/people/${id}`)
             .then((response) => response.data)
             .then(data => {
                 setName(data.name);
@@ -26,7 +28,7 @@ function EditPerson() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.put(`http://localhost:8081/people/${id}`, {
+        axios.put(`${backendURL}/people/${id}`, {
             name: name,
             allergies: allergies
         })
