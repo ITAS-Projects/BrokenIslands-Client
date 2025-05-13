@@ -154,6 +154,7 @@ function QuickEditReservation() {
                 setupPeople(data.Group?.People, data.Group?.leader?.id);
                 setupBoats(data.Boats);
                 setupTrips(data.Trips);
+                console.log(data);
                 setLoading(false);
             })
             .catch(error => {
@@ -179,7 +180,9 @@ function QuickEditReservation() {
         return m1 - m2;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
         let arrivalCustom = false;
         let departureCustom = false;
 
@@ -245,12 +248,12 @@ function QuickEditReservation() {
                     return axios.post('http://localhost:8081/people', {
                         name: person.name,
                         allergies: person.allergies || ""
-                    });
+                    }).then(response => response.data);
                 } else {
                     return axios.put(`http://localhost:8081/people/${person.id}`, {
                         name: person.name,
                         allergies: person.allergies || ""
-                    });
+                    }).then(response => response.data);
                 }
             })
         )
@@ -296,7 +299,7 @@ function QuickEditReservation() {
                         : axios.put(`http://localhost:8081/trips/${trips[1].id}`, departureData)
                             .then(response => response.data.id),
 
-                    axios.post('http://localhost:8081/groups', {
+                    axios.put(`http://localhost:8081/groups/${reservation.GroupId}`, {
                         seperatePeople: false,
                         numberOfPeople: numberOfPeople,
                         PersonIds: PeopleIds,
@@ -316,14 +319,14 @@ function QuickEditReservation() {
                                 Promise.all(
                                     boats.map(boat => {
                                         if (boat.new === true) {
-                                            axios.post('http://localhost:8081/boats', {
+                                            return axios.post('http://localhost:8081/boats', {
                                                 type: boat.type,
                                                 numberOf: boat.numberOf,
                                                 isRented: boat.isRented,
                                                 ReservationId: reservationId
                                             }).then(response => response.data.id)
                                         } else {
-                                            axios.put(`http://localhost:8081/boats/${boat.id}`, {
+                                            return axios.put(`http://localhost:8081/boats/${boat.id}`, {
                                                 type: boat.type,
                                                 numberOf: boat.numberOf,
                                                 isRented: boat.isRented,
@@ -335,7 +338,7 @@ function QuickEditReservation() {
                                     console.log("Created Boats");
                                     console.log("All data created");
                                     alert("The full reservation was created sucessfully, redirecting...");
-                                    window.location.href = '/quick/trips';
+                                    window.location.href = '/quick/trip';
                                 })
                             })
                     });
@@ -361,7 +364,7 @@ function QuickEditReservation() {
                     className="quickPeopleInputText"
                     type="text"
                     id="reservationName"
-                    value={people[0].name}
+                    value={people[0]?.name}
                     onChange={e => editPersonAtIndex(0, { name: e.target.value })}
                     required
                 />
