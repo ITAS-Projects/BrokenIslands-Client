@@ -3,12 +3,12 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import "../../assets/QuickEditReservation.css";
 
-function QuickEditReservation() { 
+function QuickEditReservation() {
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
     const [reservation, setReservation] = useState(null);
     const [numberOfPeople, setNumOfPeople] = useState(0);
-    
+
     const [prevTrips, setPrevTrips] = useState(null);
     const [prevBoats, setPrevBoats] = useState(null);
     const [prevPeople, setPrevPeople] = useState(null);
@@ -29,25 +29,25 @@ function QuickEditReservation() {
         newTrips?.sort((a, b) => {
             let dayData = a.day?.split('T')[0].split('-');
             let dayData2 = b.day?.split('T')[0].split('-');
-        
+
             if (!dayData || !dayData2) return 0;
-        
+
             // Compare year
             if (dayData[0] !== dayData2[0]) {
                 return Number(dayData[0]) - Number(dayData2[0]);
             }
-        
+
             // Compare month
             if (dayData[1] !== dayData2[1]) {
                 return Number(dayData[1]) - Number(dayData2[1]);
             }
-        
+
             // Compare day
             if (dayData[2] !== dayData2[2]) {
                 return Number(dayData[2]) - Number(dayData2[2]);
             }
-            
-            
+
+
             return timeOrder.findIndex(item => item === a.timeFrame) - timeOrder.findIndex(item => item === b.timeFrame);
         });
         setPrevTrips(newTrips);
@@ -60,7 +60,7 @@ function QuickEditReservation() {
     };
     const deleteTrip = (index) => {
         setTrips(deletingTrips =>
-            deletingTrips.map((trip, i) => (i === index ? {new: true, timeFrame: "", TaxiId: ""} : trip))
+            deletingTrips.map((trip, i) => (i === index ? { new: true, timeFrame: "", TaxiId: "" } : trip))
         );
     };
     const resetTrip = (index) => {
@@ -88,7 +88,7 @@ function QuickEditReservation() {
         setPeople(prevPeople => prevPeople.filter((_, i) => i !== index));
     };
     const createPerson = () => {
-        const newPersonList = [...people, {new: true}]; // create a new array with an empty object added
+        const newPersonList = [...people, { new: true }]; // create a new array with an empty object added
         setPeople(newPersonList);
     };
     const resetPerson = (index) => {
@@ -117,10 +117,10 @@ function QuickEditReservation() {
         setBoats(prevBoats);
     };
     const createBoat = () => {
-        const newBoatList = [...boats, {new: true, numberOf: "1"}]; // create a new array with an empty object added
+        const newBoatList = [...boats, { new: true, numberOf: "1" }]; // create a new array with an empty object added
         setBoats(newBoatList);
     };
-    
+
     const [peopleShown, setPeopleShown] = useState(false);
     const togglePersonDropdown = () => {
         setPeopleShown(!peopleShown);
@@ -171,21 +171,182 @@ function QuickEditReservation() {
             });
     }, [id]);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const compareTimes = (t1, t2) => {
+        const [h1, m1] = t1.split(':').slice(0, 2).map(Number);
+        const [h2, m2] = t2.split(':').slice(0, 2).map(Number);
 
-        axios.put(`http://localhost:8081/reservations/${id}`, {
-        })
-        .then(() => {
-            alert('Reservation edited successfully!');
-            window.location.href = '/quick/reservation';
-        })
-        .catch(error => {
-            console.error('Error editing reservation:', error);
-            alert('There was an error while editing the reservation. Please try again.');
-        });
+        if (h1 !== h2) return h1 - h2;
+        return m1 - m2;
     };
-  
+
+    const handleSubmit = () => {
+        let arrivalCustom = false;
+        let departureCustom = false;
+
+        let scheduleToTime = {
+            "Lodge to Secret AM": "9:15",
+            "Secret to Lodge AM": "10:15",
+            "Lodge to Secret PM": "15:15",
+            "Secret to Lodge PM": "16:00"
+        }
+
+        if (trips[0].timeFrame === "") { alert('The Arrival Time Frame doesnt exist'); return null }
+        if (trips[1].timeFrame === "") { alert('The Departure Time Frame doesnt exist'); return null }
+
+        if (trips[0].day === "") { alert('The Arrival Day doesnt exist'); return null }
+        if (trips[1].day === "") { alert('The Departure Day doesnt exist'); return null }
+
+        if (trips[0].timeFrame.split(" ")[0] === "Custom") { arrivalCustom = true }
+        if (trips[1].timeFrame.split(" ")[0] === "Custom") { departureCustom = true }
+        if (arrivalCustom && trips[0].timeStart === "") { alert('The Arrival time doesnt exist'); return null }
+        if (departureCustom && trips[1].timeStart === "") { alert('The Departure time doesnt exist'); return null }
+
+        if (numberOfPeople < 1) { alert('The Number of people needs a number greater than 1'); return null }
+        if (!/[a-zA-Z]/.test(people?.[0]?.name || '')) { alert('The Reservation name doesnt exist'); return null }
+        for (let person of people) {
+            if (!person.name) {
+                alert('There is a person without a name');
+                return null;
+            }
+        }
+        if (numberOfPeople < people.length) { alert('There are too many people with data'); return null }
+
+        let arrivalDay = new Date(trips[0].day.split('T')[0]);
+        let departureDay = new Date(trips[1].day.split('T')[0]);
+
+        if (arrivalDay > departureDay) {
+            alert('The Departure is before the Arrival');
+            return null;
+        } else if (trips[0].day.split('T')[0] === trips[1].day.split('T')[0]) {
+            if (arrivalCustom) {
+                if (departureCustom) {
+                    if (compareTimes(trips[0].timeStart, trips[1].timeStart) >= 0) { alert('The time leaving is the same or before time ariving'); return null }
+                } else {
+                    if (compareTimes(trips[0].timeStart, scheduleToTime[trips[1].timeFrame]) >= 0) { alert('The schedule for leaving is the same or before time ariving'); return null }
+                }
+            } else if (departureCustom) {
+                if (compareTimes(scheduleToTime[trips[0].timeFrame], trips[1].timeStart) >= 0) { alert('The time leaving is the same or before schedule for ariving'); return null }
+            } else {
+                if (compareTimes(scheduleToTime[trips[0].timeFrame], scheduleToTime[trips[1].timeFrame]) >= 0) { alert('The schedule for leaving is the same or before schedule for ariving'); return null }
+            }
+        }
+
+        let numOfBoats = 0;
+        for (let boat of boats) {
+            numOfBoats += Number(boat.numberOf);
+            if (boat.type === "") { alert('There is a group of boats without a type'); return null }
+            if ((boat.numberOf || 0) <= 0) { alert('There is a group of boats with less than one boat in it'); return null }
+        }
+
+
+        Promise.all(
+            people.map(person => {
+                if (person.new === true) {
+                    return axios.post('http://localhost:8081/people', {
+                        name: person.name,
+                        allergies: person.allergies || ""
+                    });
+                } else {
+                    return axios.put(`http://localhost:8081/people/${person.id}`, {
+                        name: person.name,
+                        allergies: person.allergies || ""
+                    });
+                }
+            })
+        )
+            .then((PeopleData) => {
+                console.log("Created and edited people");
+
+                let leaderId = people?.[0]?.id;
+                let PeopleIds = PeopleData.map(personData => personData.id);
+                if (leaderId === null) { alert("Leader doesnt exist?"); return null }
+
+                let arrivalData = {
+                    day: trips[0].day,
+                    timeFrame: trips[0].timeFrame,
+                    TaxiId: trips[0].TaxiId,
+                }
+
+                if (arrivalCustom) {
+                    arrivalData.timeStart = trips[0].timeStart;
+                } else {
+                    arrivalData.timeStart = null;
+                }
+
+                let departureData = {
+                    day: trips[1].day,
+                    timeFrame: trips[1].timeFrame,
+                    TaxiId: trips[1].TaxiId,
+                }
+
+                if (departureCustom) {
+                    departureData.timeStart = trips[1].timeStart;
+                } else {
+                    departureData.timeStart = null;
+                }
+
+                Promise.all([
+                    trips[0].new === true
+                        ? axios.post('http://localhost:8081/trips', arrivalData)
+                        : axios.put(`http://localhost:8081/trips/${trips[0].id}`, arrivalData)
+                            .then(response => response.data.id),
+
+                    trips[1].new === true
+                        ? axios.post('http://localhost:8081/trips', departureData)
+                        : axios.put(`http://localhost:8081/trips/${trips[1].id}`, departureData)
+                            .then(response => response.data.id),
+
+                    axios.post('http://localhost:8081/groups', {
+                        seperatePeople: false,
+                        numberOfPeople: numberOfPeople,
+                        PersonIds: PeopleIds,
+                        GroupLeader: leaderId
+                    }).then(response => response.data.id)
+                ])
+                    .then(([arrivalId, departureId, groupId]) => {
+                        console.log("Created arrival, departure and group");
+                        console.log(`Arrivel: ${arrivalId}, Departure: ${departureId}`);
+                        axios.put(`http://localhost:8081/reservations/${reservation.id}`, {
+                            TripIds: [arrivalId, departureId],
+                            GroupId: groupId
+                        })
+                            .then(response => response.data.id)
+                            .then(reservationId => {
+                                console.log("Created Reservation");
+                                Promise.all(
+                                    boats.map(boat => {
+                                        if (boat.new === true) {
+                                            axios.post('http://localhost:8081/boats', {
+                                                type: boat.type,
+                                                numberOf: boat.numberOf,
+                                                isRented: boat.isRented,
+                                                ReservationId: reservationId
+                                            }).then(response => response.data.id)
+                                        } else {
+                                            axios.put(`http://localhost:8081/boats/${boat.id}`, {
+                                                type: boat.type,
+                                                numberOf: boat.numberOf,
+                                                isRented: boat.isRented,
+                                                ReservationId: reservationId
+                                            }).then(response => response.data.id)
+                                        }
+                                    })
+                                ).then(response => {
+                                    console.log("Created Boats");
+                                    console.log("All data created");
+                                    alert("The full reservation was created sucessfully, redirecting...");
+                                    window.location.href = '/quick/trips';
+                                })
+                            })
+                    });
+
+            })
+            .catch(error => {
+                console.error('Error adding people:', error);
+                alert('There was an error while adding data. Please try again.');
+            });
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -197,87 +358,86 @@ function QuickEditReservation() {
             <form className="quickReservationForm" onSubmit={handleSubmit}>
                 <label>Reservation Name:</label>
                 <input
-                        className="quickPeopleInputText"
-                        type="text"
-                        id="reservationName"
-                        value={people[0].name}
-                        onChange={e => editPersonAtIndex(0, {name: e.target.value})}
-                        required
-                    />
+                    className="quickPeopleInputText"
+                    type="text"
+                    id="reservationName"
+                    value={people[0].name}
+                    onChange={e => editPersonAtIndex(0, { name: e.target.value })}
+                    required
+                />
 
                 <label>Number of People:</label>
                 <input
-                        className="quickPeopleInputNumber"
-                        type="number"
-                        id="numberOfPeople"
-                        value={numberOfPeople}
-                        onChange={e => setNumOfPeople(Number(e.target.value))}
-                        min="1"
-                        required
-                    />
+                    className="quickPeopleInputNumber"
+                    type="number"
+                    id="numberOfPeople"
+                    value={numberOfPeople}
+                    onChange={e => setNumOfPeople(Number(e.target.value))}
+                    min="1"
+                    required
+                />
 
                 <div>
                     <button type="button" onClick={togglePersonDropdown}>
                         {peopleShown ? 'Hide People ▲' : 'Show People ▼'}
                     </button>
                     {people != prevPeople && (
-                    <button
-                        type="button"
-                        className="next"
-                        onClick={() => {
-                        clearInputs();
-                        resetPeople();
-                        }}
-                    >
-                        Reset all People to previous names
-                    </button>
+                        <button
+                            type="button"
+                            className="next"
+                            onClick={() => {
+                                clearInputs();
+                                resetPeople();
+                            }}
+                        >
+                            Reset all People to previous names
+                        </button>
                     )}
                     {peopleShown && (
                         <div className="dropdown-content" style={{ marginTop: '10px' }}>
                             {people.map((person, index) => (
-                                    <div key={index} className={`Person-Object ${
-                                    person !== prevPeople[index]
+                                <div key={index} className={`Person-Object ${person !== prevPeople[index]
                                         ? person.new
-                                        ? "new"
-                                        : "changed"
+                                            ? "new"
+                                            : "changed"
                                         : ""
                                     }`}>
-                                        {index !== 0 && (
-                                            <>
+                                    {index !== 0 && (
+                                        <>
                                             {people.length > numberOfPeople && (
                                                 <div className="error">
-                                                TOO MANY PEOPLE
+                                                    TOO MANY PEOPLE
                                                 </div>
                                             )}
                                             <button type="button" className={((people.length > numberOfPeople) && "Delete") || "next"} onClick={() => {
-                                            clearInputs();
-                                            deletePerson(index);
+                                                clearInputs();
+                                                deletePerson(index);
                                             }}>Delete</button>
-                                            </>
-                                        )}
-                                        {person !== prevPeople[index] && !person.new && (
+                                        </>
+                                    )}
+                                    {person !== prevPeople[index] && !person.new && (
                                         <button
                                             type="button"
                                             className="next"
                                             onClick={() => {
-                                            clearInputs();
-                                            resetPerson(index);
+                                                clearInputs();
+                                                resetPerson(index);
                                             }}
                                         >
                                             Reset to previous boat
                                         </button>
-                                        )}
-                                        <label>
+                                    )}
+                                    <label>
                                         Name:
                                         <input
                                             type="text"
                                             value={person.name}
                                             onChange={(e) =>
-                                            editPersonAtIndex(index, { name: e.target.value })
+                                                editPersonAtIndex(index, { name: e.target.value })
                                             }
                                         />
-                                        </label>
-                                        {/* <label>
+                                    </label>
+                                    {/* <label>
                                         Allergies:
                                         <input
                                             type="text"
@@ -287,8 +447,8 @@ function QuickEditReservation() {
                                             }
                                         />
                                         </label> */}
-                                    </div>
-                                    ))}
+                                </div>
+                            ))}
                             {numberOfPeople > people.length && (<button type="button" onClick={createPerson} className="next">+</button>)}
 
                         </div>
@@ -301,104 +461,103 @@ function QuickEditReservation() {
                         {boatsShown ? 'Hide Boats ▲' : 'Show Boats ▼'}
                     </button>
                     {boats != prevBoats && (
-                    <button
-                        type="button"
-                        className="next"
-                        onClick={() => {
-                        clearInputs();
-                        resetBoats();
-                        }}
-                    >
-                        Reset all boats
-                    </button>
-                    )}
-                    {boatsShown && (
-                    <>
-                        {boats?.map((boat, index) => (
-                        <div
-                            key={boat.id || index}
-                            className={`Boat-Object ${
-                            boat !== prevBoats[index]
-                                ? boat.new
-                                ? "new"
-                                : "changed"
-                                : ""
-                            }`}
-                        >
-                            <button
+                        <button
                             type="button"
                             className="next"
                             onClick={() => {
                                 clearInputs();
-                                deleteBoat(index);
+                                resetBoats();
                             }}
-                            >
-                            Delete
-                            </button>
-                            {boat !== prevBoats[index] && !boat.new && (
-                            <button
-                                type="button"
-                                className="next"
-                                onClick={() => {
-                                clearInputs();
-                                resetBoat(index);
-                                }}
-                            >
-                                Reset to previous boat
-                            </button>
-                            )}
-                            <label>
-                            Type:
-                            <select
-                                value={boat.type || ""}
-                                onChange={(e) =>
-                                editBoatAtIndex(index, { type: e.target.value })
-                                }
-                                required
-                            >
-                                <option value="" disabled>
-                                -- Select Type --
-                                </option>
-                                <option value="Single Kayaks">Single Kayaks</option>
-                                <option value="XL Single Kayaks">XL Single Kayaks</option>
-                                <option value="Double Kayaks">Double Kayaks</option>
-                                <option value="XL Double Kayaks">XL Double Kayaks</option>
-                                <option value="Canoes">Canoes</option>
-                            </select>
-                            </label>
-                            <label>
-                            Boats are rented:
-                            <input
-                                type="checkbox"
-                                className="inline"
-                                checked={boat.isRented}
-                                onChange={(e) =>
-                                editBoatAtIndex(index, { isRented: e.target.checked })
-                                }
-                            />
-                            </label>
-                            <label>
-                            Number of Boats of this type:
-                            <input
-                                type="number"
-                                className="inline"
-                                value={boat.numberOf}
-                                onChange={(e) =>
-                                editBoatAtIndex(index, {
-                                    numberOf: parseInt(e.target.value, 10),
-                                })
-                                }
-                                min="1"
-                                required
-                            />
-                            </label>
-                        </div>
-                        ))}
-                        <br />
-                        <button type="button" onClick={createBoat} className="next">
-                        +
+                        >
+                            Reset all boats
                         </button>
-                    </>
+                    )}
+                    {boatsShown && (
+                        <>
+                            {boats?.map((boat, index) => (
+                                <div
+                                    key={boat.id || index}
+                                    className={`Boat-Object ${boat !== prevBoats[index]
+                                            ? boat.new
+                                                ? "new"
+                                                : "changed"
+                                            : ""
+                                        }`}
+                                >
+                                    <button
+                                        type="button"
+                                        className="next"
+                                        onClick={() => {
+                                            clearInputs();
+                                            deleteBoat(index);
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
+                                    {boat !== prevBoats[index] && !boat.new && (
+                                        <button
+                                            type="button"
+                                            className="next"
+                                            onClick={() => {
+                                                clearInputs();
+                                                resetBoat(index);
+                                            }}
+                                        >
+                                            Reset to previous boat
+                                        </button>
+                                    )}
+                                    <label>
+                                        Type:
+                                        <select
+                                            value={boat.type || ""}
+                                            onChange={(e) =>
+                                                editBoatAtIndex(index, { type: e.target.value })
+                                            }
+                                            required
+                                        >
+                                            <option value="" disabled>
+                                                -- Select Type --
+                                            </option>
+                                            <option value="Single Kayaks">Single Kayaks</option>
+                                            <option value="XL Single Kayaks">XL Single Kayaks</option>
+                                            <option value="Double Kayaks">Double Kayaks</option>
+                                            <option value="XL Double Kayaks">XL Double Kayaks</option>
+                                            <option value="Canoes">Canoes</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        Boats are rented:
+                                        <input
+                                            type="checkbox"
+                                            className="inline"
+                                            checked={boat.isRented}
+                                            onChange={(e) =>
+                                                editBoatAtIndex(index, { isRented: e.target.checked })
+                                            }
+                                        />
+                                    </label>
+                                    <label>
+                                        Number of Boats of this type:
+                                        <input
+                                            type="number"
+                                            className="inline"
+                                            value={boat.numberOf}
+                                            onChange={(e) =>
+                                                editBoatAtIndex(index, {
+                                                    numberOf: parseInt(e.target.value, 10),
+                                                })
+                                            }
+                                            min="1"
+                                            required
+                                        />
+                                    </label>
+                                </div>
+                            ))}
+                            <br />
+                            <button type="button" onClick={createBoat} className="next">
+                                +
+                            </button>
+                        </>
                     )}
                 </div>
 
@@ -418,72 +577,73 @@ function QuickEditReservation() {
                                     <div key={index} className={`Trip-Object ${trip !== prevTrips[index] ? (trip.new ? "new" : "changed") : ""}`}>
                                         <label>{index == 0 && "Arival" || "Departure"} {trip !== prevTrips[index] ? (trip.new ? "(new)" : "(changed)") : ""}:</label>
                                         {trip !== prevTrips[index] ? (
-                                        <button type="button" className="next" onClick={() => {
-                                            clearInputs();
-                                            resetTrip(index);
-                                        }}>Reset to previous trip</button>) : (
-                                        <button type="button" className="next" onClick={() => {
-                                            clearInputs();
-                                            deleteTrip(index);
-                                        }}>Move to new trip</button>
+                                            <button type="button" className="next" onClick={() => {
+                                                clearInputs();
+                                                resetTrip(index);
+                                            }}>Reset to previous trip</button>) : (
+                                            <button type="button" className="next" onClick={() => {
+                                                clearInputs();
+                                                deleteTrip(index);
+                                            }}>Move to new trip</button>
                                         )}
                                         <label>
-                                        day:
-                                        <input
-                                            type="date"
-                                            value={trip.day?.split('T')[0]}
-                                            onChange={(e) => editTripAtIndex(index, {day: e.target.value})}
-                                            required
-                                        />
+                                            day:
+                                            <input
+                                                type="date"
+                                                value={trip.day?.split('T')[0]}
+                                                onChange={(e) => editTripAtIndex(index, { day: e.target.value })}
+                                                required
+                                            />
                                         </label>
 
                                         <label>Time Frame:
-                                        <select
-                                            className="editTripInputSelect"
-                                            id="timeFrame"
-                                            value={trip.timeFrame}
-                                            onChange={e => editTripAtIndex(index, {timeFrame: e.target.value})}
-                                            required
-                                        >
-                                            <option value="" disabled>-- select a timeframe --</option>
-                                            <option value="Custom AM">Custom AM</option>
-                                            <option value={index == 0 && "Secret to Lodge AM" || "Lodge to Secret AM"}>{index == 0 && "Secret to Lodge AM" || "Lodge to Secret AM"}</option>
-                                            <option value="Custom">Custom</option>
-                                            <option value={index == 0 && "Secret to Lodge PM" || "Lodge to Secret PM"}>{index == 0 && "Secret to Lodge PM" || "Lodge to Secret PM"}</option>
-                                            <option value="Custom PM">Custom PM</option>
-                                        </select>
+                                            <select
+                                                className="editTripInputSelect"
+                                                id="timeFrame"
+                                                value={trip.timeFrame}
+                                                onChange={e => editTripAtIndex(index, { timeFrame: e.target.value })}
+                                                required
+                                            >
+                                                <option value="" disabled>-- select a timeframe --</option>
+                                                <option value="Custom AM">Custom AM</option>
+                                                <option value={index == 0 && "Secret to Lodge AM" || "Lodge to Secret AM"}>{index == 0 && "Secret to Lodge AM" || "Lodge to Secret AM"}</option>
+                                                <option value="Custom">Custom</option>
+                                                <option value={index == 0 && "Secret to Lodge PM" || "Lodge to Secret PM"}>{index == 0 && "Secret to Lodge PM" || "Lodge to Secret PM"}</option>
+                                                <option value="Custom PM">Custom PM</option>
+                                            </select>
                                         </label>
 
-                                        {trip.timeFrame?.includes("Custom") &&(<label>Time:
-                                        <input
-                                            className="editTripInputTime"
-                                            type="time"
-                                            id="timeStart"
-                                            value={trip.timeStart}
-                                            onChange={e => editTripAtIndex(index, {timeStart: e.target.value})}
-                                            required
-                                        />
+                                        {trip.timeFrame?.includes("Custom") && (<label>Time:
+                                            <input
+                                                className="editTripInputTime"
+                                                type="time"
+                                                id="timeStart"
+                                                value={trip.timeStart}
+                                                onChange={e => editTripAtIndex(index, { timeStart: e.target.value })}
+                                                required
+                                            />
                                         </label>)}
 
                                         <label>Taxi:
-                                        <select
-                                            className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople <= peopleOnTrip ? "error" : ""}`}
-                                            id="taxi"
-                                            value={trip.TaxiId}
-                                            onChange={e => editTripAtIndex(index, {TaxiId: Number(e.target.value)})}
-                                            required
-                                        >
-                                            <option value="" disabled selected>-- select a taxi --</option>
+                                            <select
+                                                className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople <= peopleOnTrip ? "error" : ""}`}
+                                                id="taxi"
+                                                value={trip.TaxiId || ""}
+                                                onChange={e => editTripAtIndex(index, { TaxiId: Number(e.target.value) })}
+                                                required
+                                            >
+                                                <option value="" disabled>-- select a taxi --</option>
 
-                                            {taxis?.map(taxi => {
-                                                return (
-                                                    <option className={taxi.spaceForPeople <= peopleOnTrip ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {peopleOnTrip}/{taxi.spaceForPeople}, boats: {boatsOnTrip}/{taxi.spaceForKayaks}</option>
-                                                )
-                                            })}
-                                        </select>
+                                                {taxis?.map((taxi, index) => {
+                                                    return (
+                                                        <option key={index} className={taxi.spaceForPeople <= peopleOnTrip ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {peopleOnTrip}/{taxi.spaceForPeople}, boats: {boatsOnTrip}/{taxi.spaceForKayaks}</option>
+                                                    )
+                                                })}
+                                            </select>
                                         </label>
                                     </div>
-                                    )})}
+                                )
+                            })}
                         </div>
                     )}
                 </div>

@@ -7,11 +7,12 @@ const Layout = () => {
     <>
       <header className="layout-header">
         <nav className="layout-nav">
+          <Link to="/">
           <img
             src="/logo192.png"
             alt="Logo"
             className="layout-logo"
-          />
+          /></Link>
 
           <ul className="layout-nav-list">
             <li><Link to="/">Home</Link></li>

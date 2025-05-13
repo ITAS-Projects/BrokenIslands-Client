@@ -34,7 +34,7 @@ function Review({ data, onBack }) {
     if (arrivalCustom && data.ArrivalTime === "") {alert('The Arrival time doesnt exist');return null}
     if (departureCustom && data.DepartureTime === "") {alert('The Departure time doesnt exist');return null}
 
-    if (data.NumberOfPeople < 1) {return null}
+    if (data.NumberOfPeople < 1) {alert('The Number of people needs a number greater than 1');return null}
     if (!/[a-zA-Z]/.test(data.People?.[0]?.name || '')) {alert('The Reservation name doesnt exist');return null}
     for (let person of data.People) {
       if (!person.name) {
@@ -138,7 +138,7 @@ function Review({ data, onBack }) {
         }
         return personData.id;
       })
-      if (leaderId === null) {alert("Creaded person wasnt created?"); return null}
+      if (leaderId === null) {alert("Created person wasnt created?"); return null}
       let TaxiIdForTrips;
       if (leastSpace === 0) {
         TaxiIdForTrips = BackupTaxiId;
