@@ -29,7 +29,7 @@ function QuickTrip() {
 
     const formatDate = (iso) => new Date(iso).toISOString().split("T")[0];
     const getYear = (dateStr) => new Date(dateStr).getFullYear();
-    const getMonth = (dateStr) => new Date(dateStr).getMonth() + 1;
+    const getMonth = (dateStr) => Number(dateStr.split('T')[0].split('-')[1]);
     const getDay = (dateStr) => Number(dateStr.split('T')[0].split('-')[2]);
     const getMonthName = (monthNum) =>
         new Date(2024, monthNum - 1).toLocaleString("default", { month: "long" });
@@ -235,6 +235,8 @@ function QuickTrip() {
                         <ol>
                             {selectedTrip.Reservations.map((res) => (
                                 <a className="No-Style-Link" href={`/quick/edit/reservation/${res.id}`}><li key={res.id}>
+                                    <div className="svg-container">
+
                                     Reserved by: {res.Group?.leader?.name}
                                     {res.Group?.numberOfPeople > 1 && (
                                         <>
@@ -242,8 +244,8 @@ function QuickTrip() {
                                         </>
                                     )}
 
-
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="270 200 210 210"><path d="M276.3 255L416.3 395M323.3 206.7L463.3 346.7M276 267L335 207M461.7 340.9V400.9M409.7 392.9H469.7" stroke="#000" stroke-width="17" fill="none"/></svg>
+                                    </div>
                                     {res.Boats?.length > 0 && (
                                         <>
                                             <span>Boats:</span>

@@ -654,7 +654,7 @@ function QuickEditReservation() {
                 </div>
 
 
-                <button type="submit">Save Changes</button>
+                <button type="submit" className="next">Save Changes</button>
             </form>
         </div>
     );
