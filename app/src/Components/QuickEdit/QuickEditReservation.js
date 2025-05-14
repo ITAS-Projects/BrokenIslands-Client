@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axiosAuth from "../../modules/authRequest";
+import axiosAuth from "../authRequest";
 import { useParams } from "react-router-dom";
 import "../../assets/QuickEditReservation.css";
 

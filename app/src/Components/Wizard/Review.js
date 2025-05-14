@@ -1,5 +1,5 @@
 import React from "react";
-import axiosAuth from "../../modules/authRequest";
+import axiosAuth from "../authRequest";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
 

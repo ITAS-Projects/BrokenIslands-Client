@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axiosAuth from "../../modules/authRequest";
+import axiosAuth from "../authRequest";
 import "../../assets/EditTaxi.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;

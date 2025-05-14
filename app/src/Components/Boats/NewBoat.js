@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axiosAuth from "../../modules/authRequest";
+import axiosAuth from "../authRequest";
 import "../../assets/NewBoat.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
