@@ -1,33 +1,27 @@
 import { useEffect, useState } from "react";
 import "../assets/Layout.css";
 import { Outlet, Link, useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
+import { useSession, useUser } from "@descope/react-sdk";
 
 const Layout = () => {
   const navigate = useNavigate();
-  const [userDetails, setUserDetails] = useState({});
-
-  const getUserDetails = async (accessToken) => {
-    const response = await fetch(
-      `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${accessToken}`
-    );
-    const data = await response.json();
-    setUserDetails(data);
-  };
+  const [userDetails, setUserDetails] = useState(null);
+  const { isAuthenticated } = useSession();
+  const { user } = useUser();
 
   useEffect(() => {
-    const accessToken = Cookies.get("access_token");
-
-    if (!accessToken) {
+    if (!isAuthenticated) {
       navigate("/login");
     }
 
-    getUserDetails(accessToken);
+    if (user) {
+      setUserDetails(user);
+    }
   }, [navigate]);
 
   return (
     <>
-      {userDetails?.email ? (
+      {userDetails ? (
       <>
       <header className="layout-header">
         <nav className="layout-nav">

@@ -3,11 +3,14 @@ import ReactDOM from 'react-dom/client';
 import './assets/index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { AuthProvider } from "@descope/react-sdk";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <AuthProvider projectId="P2x5jlbe2kXVJEtmtpKXqm39tiS5">
+      <App />
+    </AuthProvider>
   </React.StrictMode>
 );
 
