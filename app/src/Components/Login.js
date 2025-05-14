@@ -1,24 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import { Descope } from "@descope/react-sdk";
+import "../assets/Login.css";
 
 export default function Login() {
   const navigate = useNavigate();
 
   return (
     <div className="root">
-      <div>
-        <h1>Log in With Descope</h1>
+      <div className="login-container">
         <div className="btn-container">
           <Descope
-            flowId="sign-up-or-in"
+            flowId="sign-in"
             theme="light"
-            onSuccess={(e) => {
-              console.log(e.detail.user.name);
-              console.log(e.detail.user.email);
+            onSuccess={() => {
               navigate("/");
             }}
             onError={(err) => {
-              console.log("Error!", err);
               alert("Error: " + err.detail.message);
             }}
           />

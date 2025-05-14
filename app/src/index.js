@@ -5,10 +5,13 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from "@descope/react-sdk";
 
+const DescopeID = process.env.DESCOPE_PROJECT_ID;
+
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <AuthProvider projectId="P2x5jlbe2kXVJEtmtpKXqm39tiS5">
+    <AuthProvider projectId={DescopeID}>
       <App />
     </AuthProvider>
   </React.StrictMode>
