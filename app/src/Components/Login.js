@@ -1,9 +1,18 @@
 import { useNavigate } from "react-router-dom";
-import { Descope } from "@descope/react-sdk";
+import { Descope, useSession } from "@descope/react-sdk";
+import { useEffect } from "react";
 import "../assets/Login.css";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useSession();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+      return;
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="root">

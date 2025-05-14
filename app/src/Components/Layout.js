@@ -5,7 +5,7 @@ import { useSession, useUser, useDescope } from "@descope/react-sdk";
 
 const Layout = () => {
   const navigate = useNavigate();
-  const [userDetails, setUserDetails] = useState(null);
+  const [ userDetails, setUserDetails ] = useState(null);
   const { isAuthenticated, isSessionLoading } = useSession();
   const { user, isUserLoading } = useUser();
   const { logout } = useDescope();
