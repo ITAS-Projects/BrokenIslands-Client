@@ -1,5 +1,5 @@
 import React from "react";
-import axios from 'axios';
+import axiosAuth from "../../modules/authRequest";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
 
@@ -77,17 +77,17 @@ function Review({ data, onBack }) {
     Promise.all([
       Promise.all(
         data.People.map(person =>
-          axios.post(`${backendURL}/people`, {
+          axiosAuth.post(`${backendURL}/people`, {
             name: person.name,
             allergies: person.allergies
           }).then(response => response.data)
         )
       ),
       
-      axios.get(`${backendURL}/taxis`)
+      axiosAuth.get(`${backendURL}/taxis`)
       .then((response) => response.data),
 
-      axios.get(`${backendURL}/trips`)
+      axiosAuth.get(`${backendURL}/trips`)
         .then((response) => response.data)
     ])
     .then(([PeopleData, Taxis, Trips]) => {
@@ -171,15 +171,15 @@ function Review({ data, onBack }) {
       Promise.all([
         arrivalTrip !== null 
           ? Promise.resolve(arrivalTrip) 
-          : axios.post(`${backendURL}/trips`, arrivalData)
+          : axiosAuth.post(`${backendURL}/trips`, arrivalData)
           .then(response => response.data.id),
 
         departureTrip !== null 
           ? Promise.resolve(departureTrip) 
-          : axios.post(`${backendURL}/trips`, departureData)
+          : axiosAuth.post(`${backendURL}/trips`, departureData)
           .then(response => response.data.id),
 
-        axios.post(`${backendURL}/groups`, {
+        axiosAuth.post(`${backendURL}/groups`, {
             seperatePeople: false,
             numberOfPeople: data.NumberOfPeople,
             PersonIds: PeopleIds,
@@ -189,7 +189,7 @@ function Review({ data, onBack }) {
       .then(([arrivalId, departureId, groupId]) => {
         console.log("Created arrival, departure and group");
         console.log(`Arrivel: ${arrivalId}, Departure: ${departureId}`);
-        axios.post(`${backendURL}/reservations`, {
+        axiosAuth.post(`${backendURL}/reservations`, {
           TripIds: [arrivalId, departureId],
           GroupId: groupId
         })
@@ -198,7 +198,7 @@ function Review({ data, onBack }) {
           console.log("Created Reservation");
           Promise.all(
             data.Boats.map(boat =>
-              axios.post(`${backendURL}/boats`, {
+              axiosAuth.post(`${backendURL}/boats`, {
                 type: boat.type,
                 numberOf: boat.numberOf,
                 isRented: boat.rented,

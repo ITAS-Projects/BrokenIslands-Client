@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axios from 'axios';
+import axiosAuth from "../../modules/authRequest";
 import "../../assets/EditTaxi.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -13,7 +13,7 @@ function EditTaxi() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get(`${backendURL}/taxis/${id}`)
+        axiosAuth.get(`${backendURL}/taxis/${id}`)
             .then((response) => response.data)
             .then(data => {
                 setSpaceForKayaks(data.spaceForKayaks);
@@ -40,7 +40,7 @@ function EditTaxi() {
             return;
         }
         
-        axios.put(`${backendURL}/taxis/${id}`, {
+        axiosAuth.put(`${backendURL}/taxis/${id}`, {
             spaceForKayaks: spaceForKayaks,
             spaceForPeople: spaceForPeople,
             running: running

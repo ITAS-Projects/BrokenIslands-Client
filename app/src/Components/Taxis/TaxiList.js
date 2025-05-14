@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from 'axios';
+import axiosAuth from "../../modules/authRequest";
 import "../../assets/TaxiList.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -9,7 +9,7 @@ function TaxiList() {
     const [loading, setLoading] = useState(true);
   
     useEffect(() => {
-        axios.get(`${backendURL}/taxis`)
+        axiosAuth.get(`${backendURL}/taxis`)
             .then((response) => {
                 setTaxis(response.data)
                 setLoading(false);
@@ -21,7 +21,7 @@ function TaxiList() {
     }, []);
   
     const handleDelete = (id) => {
-      axios.delete(`${backendURL}/taxis/${id}`)
+      axiosAuth.delete(`${backendURL}/taxis/${id}`)
         .then(response => {
           alert("Taxi deleted successfully");
           setTaxis(taxis.filter(taxi => taxi.id !== id)); // Update state to remove deleted person

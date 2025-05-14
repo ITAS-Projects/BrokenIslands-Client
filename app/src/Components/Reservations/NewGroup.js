@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from 'axios';
+import axiosAuth from "../../modules/authRequest";
 import "../../assets/NewGroup.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -26,7 +26,7 @@ function NewGroup() {
     const [people, setPeople] = useState([]);
 
     useEffect(() => {
-        axios.get(`${backendURL}/trips`)
+        axiosAuth.get(`${backendURL}/trips`)
             .then((response) => {
                 setTrips(response.data);
             })
@@ -34,7 +34,7 @@ function NewGroup() {
                 console.error('Error fetching data:', error);
             });
 
-        axios.get(`${backendURL}/people`)
+        axiosAuth.get(`${backendURL}/people`)
             .then((response) => {
                 setPeople(response.data);
             })
@@ -58,7 +58,7 @@ function NewGroup() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.post(`${backendURL}/groups`, {
+        axiosAuth.post(`${backendURL}/groups`, {
             numberOfPeople: numberOfPeople,
             seperatePeople: isUnrelatedGroup,
 

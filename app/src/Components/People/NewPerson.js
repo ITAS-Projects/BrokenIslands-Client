@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from 'axios';
+import axiosAuth from "../../modules/authRequest";
 import "../../assets/NewPerson.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -11,7 +11,7 @@ function NewPerson() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.post(`${backendURL}/people`, {
+        axiosAuth.post(`${backendURL}/people`, {
             name: name,
             allergies: allergies
         })

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axios from 'axios';
+import axiosAuth from "../../modules/authRequest";
 import "../../assets/EditPerson.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -12,7 +12,7 @@ function EditPerson() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get(`${backendURL}/people/${id}`)
+        axiosAuth.get(`${backendURL}/people/${id}`)
             .then((response) => response.data)
             .then(data => {
                 setName(data.name);
@@ -28,7 +28,7 @@ function EditPerson() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.put(`${backendURL}/people/${id}`, {
+        axiosAuth.put(`${backendURL}/people/${id}`, {
             name: name,
             allergies: allergies
         })

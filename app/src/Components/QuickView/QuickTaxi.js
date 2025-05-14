@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from 'axios';
+import axiosAuth from "../../modules/authRequest";
 import "../../assets/QuickTaxi.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -12,7 +12,7 @@ function QuickTaxi() {
     const [tripsSorted, setTripsSorted] = useState([]);
 
     useEffect(() => {
-        axios.get(`${backendURL}/taxis`)
+        axiosAuth.get(`${backendURL}/taxis`)
             .then((response) => {
                 setTaxis(response.data);
                 setLoading(false);

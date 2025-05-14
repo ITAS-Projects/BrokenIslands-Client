@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from 'axios';
+import axiosAuth from "../../modules/authRequest";
 import "../../assets/NewTaxi.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -22,7 +22,7 @@ function NewTaxi() {
             return;
         }
 
-        axios.post(`${backendURL}/taxis`, {
+        axiosAuth.post(`${backendURL}/taxis`, {
             spaceForKayaks: spaceForKayaks,
             spaceForPeople: spaceForPeople,
             running: running

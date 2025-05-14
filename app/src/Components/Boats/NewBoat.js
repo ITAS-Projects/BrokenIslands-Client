@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from 'axios';
+import axiosAuth from "../../modules/authRequest";
 import "../../assets/NewBoat.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -29,7 +29,7 @@ function NewBoat() {
     const [people, setPeople] = useState();
 
     useEffect(() => {
-        axios.get(`${backendURL}/groups`)
+        axiosAuth.get(`${backendURL}/groups`)
             .then((response) => {
                 let tempGroups = response.data;
                 let groupResult = tempGroups.filter(group => {
@@ -45,7 +45,7 @@ function NewBoat() {
                 console.error('Error fetching data:', error);
             });
 
-        axios.get(`${backendURL}/reservations`)
+        axiosAuth.get(`${backendURL}/reservations`)
             .then((response) => {
                 setReservations(response.data);
             })
@@ -65,7 +65,7 @@ function NewBoat() {
             groupId = sourceId;
         }
 
-        axios.post(`${backendURL}/boats`, {
+        axiosAuth.post(`${backendURL}/boats`, {
             isRented: rented,
             type: type,
             numberOf: numberOf,

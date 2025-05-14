@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from 'axios';
+import axiosAuth from "../../modules/authRequest";
 import "../../assets/NewTrip.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -16,7 +16,7 @@ function NewTrip() {
     const [taxis, setTaxis] = useState([]);
 
     useEffect(() => {
-        axios.get(`${backendURL}/taxis`)
+        axiosAuth.get(`${backendURL}/taxis`)
             .then((response) => response.data)
             .then(data => {
                 data.map(taxi => taxi.id);
@@ -31,7 +31,7 @@ function NewTrip() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        axios.post(`${backendURL}/trips`, {
+        axiosAuth.post(`${backendURL}/trips`, {
             timeStart: timeStart,
             timeEnd: timeEnd,
             day: day,
