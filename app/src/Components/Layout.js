@@ -1,23 +1,30 @@
 import { useEffect, useState } from "react";
 import "../assets/Layout.css";
 import { Outlet, Link, useNavigate } from "react-router-dom";
-import { useSession, useUser } from "@descope/react-sdk";
+import { useSession, useUser, useDescope } from "@descope/react-sdk";
 
 const Layout = () => {
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
-  const { isAuthenticated } = useSession();
-  const { user } = useUser();
+  const { isAuthenticated, isSessionLoading } = useSession();
+  const { user, isUserLoading } = useUser();
+  const { logout } = useDescope();
 
   useEffect(() => {
+    if (isSessionLoading || isUserLoading) {
+      return; // Wait until both loading flags are false
+    }
+
     if (!isAuthenticated) {
       navigate("/login");
+      return;
     }
 
     if (user) {
       setUserDetails(user);
     }
-  }, [navigate]);
+  }, [isSessionLoading, isUserLoading, isAuthenticated, user, navigate]);
+
 
   return (
     <>
@@ -47,7 +54,7 @@ const Layout = () => {
 
           </ul>
         </nav>
-            <Link to="/logout">Logout</Link>
+            <button onClick={() => {logout(); navigate("/login");}}>Logout</button>
       </header>
 
       <main className="layout-main">
