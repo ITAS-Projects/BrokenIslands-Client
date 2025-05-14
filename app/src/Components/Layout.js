@@ -49,8 +49,11 @@ const Layout = () => {
             <li><Link to="/people">People</Link></li>
             <li><Link to="/groups">Groups</Link></li>
             <li><Link to="/reservations">Reservations</Link></li>
+
+
           </ul>
         </nav>
+            <Link to="/logout">Logout</Link>
       </header>
 
       <main className="layout-main">

@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
+import '../assets/Login.css';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ export default function Login() {
 
   return (
     <div className="root">
-      <div>
+      <div className="login-container">
         <h1>Log in with Google</h1>
         <div className="btn-container">
           <button className="btn btn-primary" onClick={handleClick}>

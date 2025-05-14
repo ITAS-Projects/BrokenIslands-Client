@@ -2,7 +2,7 @@ import React from "react";
 import "./assets/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./Components/Login.js";
-import Secure from "./Components/Secure.js";
+import Logout from "./Components/Logout.js";
 
 import Layout from "./Components/Layout.js"
 import NoPage from "./Components/NoPage.js"
@@ -34,8 +34,8 @@ function App() {
     <BrowserRouter>
       <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/logout" element={<Logout />} />
         <Route path="/" element={<Layout />}>
-          <Route path="/secure" element={<Secure />} />
           <Route index element={<Home />} />
           <Route path="/wizard" element={<Wizard />} />
           <Route path="/taxis" element={<TaxiList />} />
