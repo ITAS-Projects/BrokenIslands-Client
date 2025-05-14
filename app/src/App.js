@@ -1,6 +1,9 @@
 import React from "react";
 import "./assets/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./Components/Login.js";
+import Secure from "./Components/Secure.js";
+
 import Layout from "./Components/Layout.js"
 import NoPage from "./Components/NoPage.js"
 import Home from "./Components/Home.js";
@@ -30,7 +33,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+          <Route path="/login" element={<Login />} />
         <Route path="/" element={<Layout />}>
+          <Route path="/secure" element={<Secure />} />
           <Route index element={<Home />} />
           <Route path="/wizard" element={<Wizard />} />
           <Route path="/taxis" element={<TaxiList />} />

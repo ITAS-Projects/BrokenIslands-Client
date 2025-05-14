@@ -1,10 +1,34 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import "../assets/Layout.css";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 const Layout = () => {
+  const navigate = useNavigate();
+  const [userDetails, setUserDetails] = useState({});
+
+  const getUserDetails = async (accessToken) => {
+    const response = await fetch(
+      `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${accessToken}`
+    );
+    const data = await response.json();
+    setUserDetails(data);
+  };
+
+  useEffect(() => {
+    const accessToken = Cookies.get("access_token");
+
+    if (!accessToken) {
+      navigate("/login");
+    }
+
+    getUserDetails(accessToken);
+  }, [navigate]);
+
   return (
     <>
+      {userDetails?.email ? (
+      <>
       <header className="layout-header">
         <nav className="layout-nav">
           <Link to="/">
@@ -32,6 +56,12 @@ const Layout = () => {
       <main className="layout-main">
         <Outlet />
       </main>
+      </>
+      ) : (
+      <div>
+        <h1>Loading...</h1>
+      </div>
+      )}
     </>
   );
 };
