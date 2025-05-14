@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axiosAuth from "../../modules/authRequest";
 import "../../assets/QuickTrip.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -13,7 +13,7 @@ function QuickTrip() {
     const [selectedDay, setSelectedDay] = useState("all");
 
     useEffect(() => {
-        axios.get(`${backendURL}/trips`)
+        axiosAuth.get(`${backendURL}/trips`)
             .then((response) => {
                 setTrips(response.data);
                 setLoading(false);

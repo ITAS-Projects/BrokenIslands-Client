@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axiosAuth from "../../modules/authRequest";
 import "../../assets/QuickReservation.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -29,7 +29,7 @@ function QuickReservation() {
     const [selectedDay, setSelectedDay] = useState("all");
 
     useEffect(() => {
-        axios.get(`${backendURL}/reservations`)
+        axiosAuth.get(`${backendURL}/reservations`)
             .then((response) => {
                 setReservations(response.data);
                 setLoading(false);
