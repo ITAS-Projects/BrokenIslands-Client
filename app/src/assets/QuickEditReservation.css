@@ -16,6 +16,6 @@
 .new {
     background-color: rgb(170, 240, 168);
 }
-button + button {
-    margin-left: 10px;
+button:has( + button) {
+    margin-right: 10px;
 }
