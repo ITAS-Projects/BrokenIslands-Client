@@ -182,174 +182,25 @@ function QuickEditReservation() {
         return m1 - m2;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        let arrivalCustom = false;
-        let departureCustom = false;
+        const updatedData = {
+        trips: trips,
+        numberOfPeople,
+        people,
+        boats
+        };
 
-        let scheduleToTime = {
-            "Lodge to Secret AM": "9:15",
-            "Secret to Lodge AM": "10:15",
-            "Lodge to Secret PM": "15:15",
-            "Secret to Lodge PM": "16:00"
+        try {
+        // Send the updated data to the backend to update the reservation
+        const response = await axiosAuth.put(`${backendURL}/quick/${id}`, updatedData);
+        alert("Reservation updated successfully, redirecting...");
+        window.location.href = '/quick/trip';  // Redirect to reservations list or confirmation page
+        } catch (error) {
+        console.error("Error updating reservation:", error);
+        alert(error.response?.data?.error || "There was an error while updating the reservation. Please try again.");
         }
-
-        if (trips[0].timeFrame === "") { alert('The Arrival Time Frame doesnt exist'); return null }
-        if (trips[1].timeFrame === "") { alert('The Departure Time Frame doesnt exist'); return null }
-
-        if (trips[0].day === "") { alert('The Arrival Day doesnt exist'); return null }
-        if (trips[1].day === "") { alert('The Departure Day doesnt exist'); return null }
-
-        if (trips[0].timeFrame.split(" ")[0] === "Custom") { arrivalCustom = true }
-        if (trips[1].timeFrame.split(" ")[0] === "Custom") { departureCustom = true }
-        if (arrivalCustom && trips[0].timeStart === "") { alert('The Arrival time doesnt exist'); return null }
-        if (departureCustom && trips[1].timeStart === "") { alert('The Departure time doesnt exist'); return null }
-
-        if (numberOfPeople < 1) { alert('The Number of people needs a number greater than 1'); return null }
-        if (!/[a-zA-Z]/.test(people?.[0]?.name || '')) { alert('The Reservation name doesnt exist'); return null }
-        for (let person of people) {
-            if (!person.name) {
-                alert('There is a person without a name');
-                return null;
-            }
-        }
-        if (numberOfPeople < people.length) { alert('There are too many people with data'); return null }
-
-        let arrivalDay = new Date(trips[0].day.split('T')[0]);
-        let departureDay = new Date(trips[1].day.split('T')[0]);
-
-        if (arrivalDay > departureDay) {
-            alert('The Departure is before the Arrival');
-            return null;
-        } else if (trips[0].day.split('T')[0] === trips[1].day.split('T')[0]) {
-            if (arrivalCustom) {
-                if (departureCustom) {
-                    if (compareTimes(trips[0].timeStart, trips[1].timeStart) >= 0) { alert('The time leaving is the same or before time ariving'); return null }
-                } else {
-                    if (compareTimes(trips[0].timeStart, scheduleToTime[trips[1].timeFrame]) >= 0) { alert('The schedule for leaving is the same or before time ariving'); return null }
-                }
-            } else if (departureCustom) {
-                if (compareTimes(scheduleToTime[trips[0].timeFrame], trips[1].timeStart) >= 0) { alert('The time leaving is the same or before schedule for ariving'); return null }
-            } else {
-                if (compareTimes(scheduleToTime[trips[0].timeFrame], scheduleToTime[trips[1].timeFrame]) >= 0) { alert('The schedule for leaving is the same or before schedule for ariving'); return null }
-            }
-        }
-
-        let numOfBoats = 0;
-        for (let boat of boats) {
-            numOfBoats += Number(boat.numberOf);
-            if (boat.type === "") { alert('There is a group of boats without a type'); return null }
-            if ((boat.numberOf || 0) <= 0) { alert('There is a group of boats with less than one boat in it'); return null }
-        }
-
-
-        Promise.all(
-            people.map(person => {
-                if (person.new === true) {
-                    return axiosAuth.post(`${backendURL}/people`, {
-                        name: person.name,
-                        allergies: person.allergies || ""
-                    }).then(response => response.data);
-                } else {
-                    return axiosAuth.put(`${backendURL}/people/${person.id}`, {
-                        name: person.name,
-                        allergies: person.allergies || ""
-                    }).then(response => response.data);
-                }
-            })
-        )
-            .then((PeopleData) => {
-                console.log("Created and edited people");
-
-                let leaderId = people?.[0]?.id;
-                let PeopleIds = PeopleData.map(personData => personData.id);
-                if (leaderId === null) { alert("Leader doesnt exist?"); return null }
-
-                let arrivalData = {
-                    day: trips[0].day,
-                    timeFrame: trips[0].timeFrame,
-                    TaxiId: trips[0].TaxiId,
-                }
-
-                if (arrivalCustom) {
-                    arrivalData.timeStart = trips[0].timeStart;
-                } else {
-                    arrivalData.timeStart = null;
-                }
-
-                let departureData = {
-                    day: trips[1].day,
-                    timeFrame: trips[1].timeFrame,
-                    TaxiId: trips[1].TaxiId,
-                }
-
-                if (departureCustom) {
-                    departureData.timeStart = trips[1].timeStart;
-                } else {
-                    departureData.timeStart = null;
-                }
-
-                Promise.all([
-                    trips[0].new === true
-                        ? axiosAuth.post(`${backendURL}/trips`, arrivalData)
-                        : axiosAuth.put(`${backendURL}/trips/${trips[0].id}`, arrivalData)
-                            .then(response => response.data.id),
-
-                    trips[1].new === true
-                        ? axiosAuth.post(`${backendURL}/trips`, departureData)
-                        : axiosAuth.put(`${backendURL}/trips/${trips[1].id}`, departureData)
-                            .then(response => response.data.id),
-
-                    axiosAuth.put(`${backendURL}/groups/${reservation.GroupId}`, {
-                        seperatePeople: false,
-                        numberOfPeople: numberOfPeople,
-                        PersonIds: PeopleIds,
-                        GroupLeader: leaderId
-                    }).then(response => response.data.id)
-                ])
-                    .then(([arrivalId, departureId, groupId]) => {
-                        console.log("Created arrival, departure and group");
-                        console.log(`Arrivel: ${arrivalId}, Departure: ${departureId}`);
-                        axiosAuth.put(`${backendURL}/reservations/${reservation.id}`, {
-                            TripIds: [arrivalId, departureId],
-                            GroupId: groupId
-                        })
-                            .then(response => response.data.id)
-                            .then(reservationId => {
-                                console.log("Created Reservation");
-                                Promise.all(
-                                    boats.map(boat => {
-                                        if (boat.new === true) {
-                                            return axiosAuth.post(`${backendURL}/boats`, {
-                                                type: boat.type,
-                                                numberOf: boat.numberOf,
-                                                isRented: boat.isRented,
-                                                ReservationId: reservationId
-                                            }).then(response => response.data.id)
-                                        } else {
-                                            return axiosAuth.put(`${backendURL}/boats/${boat.id}`, {
-                                                type: boat.type,
-                                                numberOf: boat.numberOf,
-                                                isRented: boat.isRented,
-                                                ReservationId: reservationId
-                                            }).then(response => response.data.id)
-                                        }
-                                    })
-                                ).then(response => {
-                                    console.log("Created Boats");
-                                    console.log("All data created");
-                                    alert("The full reservation was created sucessfully, redirecting...");
-                                    window.location.href = '/quick/trip';
-                                })
-                            })
-                    });
-
-            })
-            .catch(error => {
-                console.error('Error adding people:', error);
-                alert('There was an error while adding data. Please try again.');
-            });
     };
 
     if (loading) {

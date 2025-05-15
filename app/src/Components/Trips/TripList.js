@@ -17,19 +17,19 @@ function TripList() {
                   let numOfPeople = 0;
                   trip.Groups?.forEach(group => {
                     group.Boats?.forEach(boat => {
-                      numOfBoats += boat.numberOf;
+                      numOfBoats += boat.numberOf || 0;
                     });
-                    numOfPeople += group.numberOfPeople;
+                    numOfPeople += group.numberOfPeople || 0;
                   });
                   trip.People?.Boats?.forEach(boat => {
-                    numOfBoats += boat.numberOf;
+                    numOfBoats += boat.numberOf || 0;
                   })
-                  numOfPeople += trip.People?.numberOfPeople;
+                  numOfPeople += trip.People?.numberOfPeople || 0;
                   trip.Reservations?.forEach(reservation => {
                     reservation.Boats?.forEach(boat => {
-                      numOfBoats += boat.numberOf;
+                      numOfBoats += boat.numberOf || 0;
                     })
-                    numOfPeople += reservation.Group?.numberOfPeople;
+                    numOfPeople += reservation.Group?.numberOfPeople || 0;
                   })
                   trip.numOfBoats = numOfBoats;
                   trip.numOfPeople = numOfPeople;
