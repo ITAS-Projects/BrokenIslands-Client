@@ -121,6 +121,7 @@ function QuickTaxi() {
                     <button onClick={handle.active ? handle.exit : handle.enter}>
                         {handle.active ? "Exit Full Screen" : "Go Full Screen"}
                     </button>
+                    <br />
 
                     <FormControl fullWidth>
                         <InputLabel>Taxi</InputLabel>
