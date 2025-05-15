@@ -212,6 +212,10 @@ function Review({ data, onBack }) {
             window.location.href = '/quick';
           })
         })
+        .catch(error => {
+          console.error('Error adding reservation:', error);
+          alert(`There was an error while adding reservation`);
+        })
       });
 
     })    
