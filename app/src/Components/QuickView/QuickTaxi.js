@@ -22,6 +22,12 @@ function QuickTaxi() {
         axiosAuth
             .get(`${backendURL}/taxis`)
             .then((response) => {
+                response.data?.forEach(taxi => {
+                    taxi?.Trips?.forEach(trip => {
+                        const [year, month, day] = trip.day?.split('T')[0].split('-');
+                        trip.day = new Date(year, month - 1, day);
+                    });
+                });
                 setTaxis(response.data);
                 setLoading(false);
             })
@@ -59,7 +65,6 @@ function QuickTaxi() {
     const tripsForTheWeek = (taxi?.Trips || [])
         .filter((trip) => {
             const tripDate = normalizeToLocalMidnight(trip.day);
-            tripDate.setDate(tripDate.getDate() +1);
             return tripDate >= startOfWeek && tripDate <= endOfWeek;
         })
         .sort((a, b) => new Date(a.day) - new Date(b.day));
@@ -67,9 +72,7 @@ function QuickTaxi() {
     const dayTrips =
         taxi?.Trips?.filter(
             (trip) =>{
-                const tripDate = normalizeToLocalMidnight(trip.day);
-                tripDate.setDate(tripDate.getDate() + 1);
-                return tripDate.getTime() === normalizeToLocalMidnight(currentDate).getTime();
+                return normalizeToLocalMidnight(trip.day).getTime() === normalizeToLocalMidnight(currentDate).getTime();
             }
         ).sort((a, b) => {
             const order = [
@@ -197,9 +200,7 @@ function QuickTaxi() {
 
                                             const tripsForDay = tripsForTheWeek.filter(
                                                 (trip) => {
-                                                    const tripDate = normalizeToLocalMidnight(trip.day);
-                                                    tripDate.setDate(tripDate.getDate() + 1);
-                                                    return tripDate.getTime() === normalizeToLocalMidnight(day).getTime();
+                                                    return normalizeToLocalMidnight(trip.day).getTime() === normalizeToLocalMidnight(day).getTime();
                                                 }
                                             );
 
