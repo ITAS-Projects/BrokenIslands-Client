@@ -84,18 +84,20 @@ function QuickTaxi() {
             return order.indexOf(a.timeFrame) - order.indexOf(b.timeFrame);
         }) || [];
 
+    let eairliestTrip = null;
     let upcomingTrips = (taxi?.Trips || [])
         .sort((a, b) => new Date(a.day) - new Date(b.day))
-        .filter((trip) => new Date(trip.day) > currentDate);
-
-    upcomingTrips = upcomingTrips.filter(
-        (trip) => new Date(trip.day) <= new Date(upcomingTrips?.[0]?.day)
-    );
+        .filter((trip) => new Date(trip.day) > currentDate)
+        .filter((trip) => {
+            if (new Date(trip.day) <= eairliestTrip || eairliestTrip == null) {
+                eairliestTrip = new Date(trip.day);
+                return 1
+            }
+            return 0;
+        });
 
     const handleTripClick = (trip) => {
-        let trip_fix = new Date(trip.day);
-        trip_fix.setDate(trip_fix.getDate() + 1);
-        setCurrentDate(trip_fix);
+        setCurrentDate(new Date(trip.day));
         setSelectedTrip(trip);
         setViewMode("day");
     };
