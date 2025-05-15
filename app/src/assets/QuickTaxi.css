@@ -1,45 +1,139 @@
 .taxi-container {
+    background-color: white;
+}
+
+.view-toggle {
+  margin: 10px 0;
+}
+
+.view-toggle button {
+  margin-right: 10px;
+  padding: 6px 12px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.view-toggle button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.taxi-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 250px;
+  padding: 20px;
+  border-right: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.upcoming-trips {
+  width: 250px;
+  padding: 20px;
+  border-left: 1px solid #ccc;
+  background-color: #f9f9f9;
+  overflow-y: auto;
+}
+
+.week-view {
+  display: flex;
+  gap: 10px;
+}
+
+.day-cell {
+  flex: 1;
+  border: 1px solid #ddd;
+  padding: 10px;
+  background: #fff;
+}
+
+.day-cell ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.day-cell li {
+  padding: 4px;
+  cursor: pointer;
+  background: #eef;
+  margin-top: 4px;
+  border-radius: 3px;
+}
+
+.day-view table {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: collapse;
+}
+
+.trips-table th,
+.trips-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+.day-navigation {
     display: flex;
-    gap: 20px;
-    padding: 20px;
+    justify-content: space-between;
+}
+.day-navigation:not( + .week-navigation) {
+  margin-top: 10px;
 }
 
-.taxi-list {
-    width: 250px;
-    border-right: 1px solid #ccc;
+.week-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
 }
 
-.taxi-item {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
+.day-navigation button {
+  padding: 5px 10px;
+  cursor: pointer;
 }
 
-.taxi-item:hover {
-    background-color: #f9f9f9;
+.week-navigation button {
+  padding: 5px 10px;
+  cursor: pointer;
 }
 
-.taxi-item.active {
-    background-color: #d0f0fd;
-    font-weight: bold;
+.view-toggle button {
+  margin-top: 10px;
 }
 
-.taxi-details {
-    flex-grow: 1;
+.date-picker {
+  margin-top: 15px;
 }
 
-.trips-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
+.upcoming-trips {
+  margin-top: 20px;
 }
 
-.trips-table th, .trips-table td {
-    padding: 8px;
-    border: 1px solid #ddd;
-    text-align: center;
+.upcoming-trips ul {
+  list-style: none;
+  padding: 0;
 }
 
-tr.over-capacity {
-    background-color: #ffdddd;
+.upcoming-trips li {
+  cursor: pointer;
+}
+
+.upcoming-trips li:hover {
+  background-color: #f0f0f0;
+}
+
+.SelectedDay {
+    background-color: #b1d7ff;
 }
