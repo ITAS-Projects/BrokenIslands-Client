@@ -122,6 +122,7 @@ function QuickTaxi() {
                         {handle.active ? "Exit Full Screen" : "Go Full Screen"}
                     </button>
                     <br />
+                    <br />
 
                     <FormControl fullWidth>
                         <InputLabel>Taxi</InputLabel>
@@ -138,29 +139,31 @@ function QuickTaxi() {
                         </Select>
                     </FormControl>
 
-                    <DatePicker
-                        selected={currentDate}
-                        onChange={handleDateChange}
-                        dateFormat="yyyy-MM-dd"
-                        showYearDropdown
-                        scrollableYearDropdown
-                        showPopperArrow={false}
-                        className="date-picker"
-                    />
+                    <div className="Setting-Wrapper">
+                        <DatePicker
+                            selected={currentDate}
+                            onChange={handleDateChange}
+                            dateFormat="yyyy-MM-dd"
+                            showYearDropdown
+                            scrollableYearDropdown
+                            showPopperArrow={false}
+                            className="date-picker"
+                        />
 
-                    <div className="view-toggle">
-                        <button
-                            className={viewMode === "day" ? "active" : ""}
-                            onClick={() => setViewMode("day")}
-                        >
-                            Day View
-                        </button>
-                        <button
-                            className={viewMode === "week" ? "active" : ""}
-                            onClick={() => setViewMode("week")}
-                        >
-                            Week View
-                        </button>
+                        <div className="view-toggle">
+                            <button
+                                className={viewMode === "day" ? "active" : ""}
+                                onClick={() => setViewMode("day")}
+                            >
+                                Day View
+                            </button>
+                            <button
+                                className={viewMode === "week" ? "active" : ""}
+                                onClick={() => setViewMode("week")}
+                            >
+                                Week View
+                            </button>
+                        </div>
                     </div>
                 </div>
 

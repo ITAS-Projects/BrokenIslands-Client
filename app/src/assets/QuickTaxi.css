@@ -137,3 +137,29 @@
 .SelectedDay {
     background-color: #b1d7ff;
 }
+
+@media (max-width: 1550px) {
+    .week-view {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 900px) {
+    .taxi-container {
+        flex-direction: column;
+    }
+    
+    .taxi-container > * {
+        width: 90%;
+        height: min-content;
+    }
+
+    .Setting-Wrapper {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .upcoming-trips {
+        height: 20%;
+    }
+}
