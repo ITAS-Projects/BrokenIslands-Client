@@ -54,7 +54,14 @@ const Layout = () => {
 
           </ul>
         </nav>
+        <span className="User-Manage">
+          <img
+          src={userDetails.picture}
+          alt={`${userDetails.given_name}'s profile`}
+          className="profile-pic"
+          ></img>
             <button onClick={() => {logout(); navigate("/login");}}>Logout</button>
+            </span>
       </header>
 
       <main className="layout-main">

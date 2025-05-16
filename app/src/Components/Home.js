@@ -9,7 +9,7 @@ function Home() {
   return (
     <div className="Home">
       <header className="Home-header">
-        <h1>Hello {user.name}!</h1>
+        <h1>Hello {user && user.name}!</h1>
         <p>Welcome! Would you like to make a reservation?</p>
         <button onClick={() => window.location.href = `/wizard`}>
           Start Reservation Wizard

@@ -60,3 +60,19 @@
   .nav-list-2 * {
     color: white !important;
   }
+
+  .profile-pic {
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  .User-Manage {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .User-Manage button{
+    background-color: #ddd;
+  }
