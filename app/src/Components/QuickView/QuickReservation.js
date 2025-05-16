@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axiosAuth from "../authRequest";
+import Confirmation from "../Confirmation";
 import "../../assets/QuickReservation.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -10,6 +11,10 @@ function QuickReservation() {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [error, setError] = useState(false);
     const [days, setDays] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [currentId, setCurrentId] = useState(null);
+    const [message, setMessage] = useState("");
+
 
     // Filters for Year, Month, Day
     const [selectedYear, setSelectedYearHidden] = useState("all");
@@ -175,19 +180,30 @@ function QuickReservation() {
     ];
 
     const handleDelete = (id) => {
-    axiosAuth.delete(`${backendURL}/quick/${id}`)
-        .then(response => {
-            alert("Reservation Successfully deleted");
+        setCurrentId(id);
+        setMessage("Are you sure you want to remove this reservation?");
+        setShowModal(true);
+    };
 
-            // Use setReservations to ensure re-render
-            setReservations(prevReservations => 
-                prevReservations.filter(reservation => reservation.id !== id)
-            );
-        })
-        .catch(error => 
-            alert(error.response?.data?.error || "There was an error while deleting the reservation. Please try again.")
-        );
-    }
+    const confirmDeletion = () => {
+        axiosAuth
+            .delete(`${backendURL}/quick/${currentId}`)
+            .then((response) => {
+                alert("Reservation successfully deleted.");
+                setReservations((prevReservations) =>
+                    prevReservations.filter((reservation) => reservation.id !== currentId)
+                );
+                setShowModal(false);
+            })
+            .catch((error) => {
+                alert(error.response?.data?.error || "There was an error while deleting the reservation. Please try again.");
+                setShowModal(false);
+            });
+    };
+
+    const cancelDeletion = () => {
+        setShowModal(false); // Close modal without deleting
+    };
 
     return (
         <div className="reservation-container">
@@ -248,11 +264,11 @@ function QuickReservation() {
 
                 <div className="align-right">
                     <button onClick={() =>{window.location.href = `/quick/edit/reservation/${selectedReservation.id}`}}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="270 200 210 210"><path d="M276.3 255L416.3 395M323.3 206.7L463.3 346.7M276 267L335 207M461.7 340.9V400.9M409.7 392.9H469.7" stroke="#000" stroke-width="17" fill="none" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="270 200 210 210"><path d="M276.3 255L416.3 395M323.3 206.7L463.3 346.7M276 267L335 207M461.7 340.9V400.9M409.7 392.9H469.7" stroke="#000" strokeWidth="17" fill="none" /></svg>
                     </button>
                     <button onClick={() => handleDelete(selectedReservation.id)}>
                     <svg viewBox="0 0 190 240" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M40 227 L140 227 M165 20 L145 230 M15 20 L35 230 M0 20 L180 20 M75 5 L105 5 M105 0 L105 23 M75 0 L75 23" stroke="#000" stroke-width="15" fill="none" />
+                        <path d="M40 227 L140 227 M165 20 L145 230 M15 20 L35 230 M0 20 L180 20 M75 5 L105 5 M105 0 L105 23 M75 0 L75 23" stroke="#000" strokeWidth="15" fill="none" />
                     </svg>
                     </button>
                 </div>
@@ -301,6 +317,14 @@ function QuickReservation() {
                     </>
                 )}
             </div>)}
+
+            {/* Confirmation Modal */}
+            <Confirmation
+                show={showModal}
+                onConfirm={confirmDeletion}
+                onCancel={cancelDeletion}
+                message={message}
+            />
         </div>
     );
 }

@@ -32,7 +32,7 @@ function Review({ data, onBack }) {
 
       // Handle success - inform the user and redirect
       alert("Reservation created successfully. Redirecting...");
-      window.location.href = '/quick';
+      window.location.href = '/quick/reservation';
     } catch (error) {
       // Handle error - show the error message from the backend
       console.error("Error creating reservation:", error);

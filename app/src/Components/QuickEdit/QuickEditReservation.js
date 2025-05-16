@@ -196,7 +196,7 @@ function QuickEditReservation() {
         // Send the updated data to the backend to update the reservation
         const response = await axiosAuth.put(`${backendURL}/quick/${id}`, updatedData);
         alert("Reservation updated successfully, redirecting...");
-        window.location.href = '/quick/trip';  // Redirect to reservations list or confirmation page
+        window.location.href = '/quick/reservation';  // Redirect to reservations list or confirmation page
         } catch (error) {
         console.error("Error updating reservation:", error);
         alert(error.response?.data?.error || "There was an error while updating the reservation. Please try again.");
