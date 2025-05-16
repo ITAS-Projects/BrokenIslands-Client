@@ -40,3 +40,15 @@
 h4 {
     margin-top: 1rem;
 }
+
+.align-right {
+    display: flex;
+    right: 0px;
+    justify-content: end;
+    top: 0px;
+}
+
+.align-right button{
+    width: max-content;
+    padding: 6px;
+}

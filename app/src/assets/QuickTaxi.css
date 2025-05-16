@@ -1,137 +1,129 @@
+/* Global box-sizing fix to prevent overflow issues */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 .taxi-container {
     background-color: white;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .view-toggle {
-  margin: 10px 0;
+    margin: 10px 0;
 }
 
 .view-toggle button {
-  margin-right: 10px;
-  padding: 6px 12px;
-  background-color: #eee;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
+    margin-right: 10px;
+    padding: 6px 12px;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
 }
 
 .view-toggle button.active {
-  background-color: #007bff;
-  color: white;
-}
-
-.taxi-container {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
+    background-color: #007bff;
+    color: white;
 }
 
 .sidebar {
-  width: 250px;
-  padding: 20px;
-  border-right: 1px solid #ccc;
-  background-color: #f9f9f9;
+    width: 250px;
+    padding: 20px;
+    border-right: 1px solid #ccc;
+    background-color: #f9f9f9;
 }
 
 .main-content {
-  flex-grow: 1;
-  padding: 20px;
-  overflow-y: auto;
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
 }
 
 .upcoming-trips {
-  width: 250px;
-  padding: 20px;
-  border-left: 1px solid #ccc;
-  background-color: #f9f9f9;
-  overflow-y: auto;
+    width: 250px;
+    padding: 20px;
+    border-left: 1px solid #ccc;
+    background-color: #f9f9f9;
+    overflow-y: auto;
+    margin-top: 20px;
 }
 
 .week-view {
-  display: flex;
-  gap: 10px;
+    display: flex;
+    gap: 10px;
 }
 
 .day-cell {
-  flex: 1;
-  border: 1px solid #ddd;
-  padding: 10px;
-  background: #fff;
+    flex: 1;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #fff;
 }
 
 .day-cell ul {
-  list-style: none;
-  padding-left: 0;
+    list-style: none;
+    padding-left: 0;
 }
 
 .day-cell li {
-  padding: 4px;
-  cursor: pointer;
-  background: #eef;
-  margin-top: 4px;
-  border-radius: 3px;
+    padding: 4px;
+    cursor: pointer;
+    background: #eef;
+    margin-top: 4px;
+    border-radius: 3px;
 }
 
 .day-view table {
-  width: 100%;
-  margin-top: 10px;
-  border-collapse: collapse;
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
 }
 
 .trips-table th,
 .trips-table td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: center;
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
 }
 
 .day-navigation {
     display: flex;
     justify-content: space-between;
-}
-.day-navigation:not( + .week-navigation) {
-  margin-top: 10px;
+    margin-top: 10px;
 }
 
 .week-navigation {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
 }
 
-.day-navigation button {
-  padding: 5px 10px;
-  cursor: pointer;
-}
-
+.day-navigation button,
 .week-navigation button {
-  padding: 5px 10px;
-  cursor: pointer;
-}
-
-.view-toggle button {
-  margin-top: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
 }
 
 .date-picker {
-  margin-top: 15px;
-}
-
-.upcoming-trips {
-  margin-top: 20px;
+    margin-top: 15px;
 }
 
 .upcoming-trips ul {
-  list-style: none;
-  padding: 0;
+    list-style: none;
+    padding: 0;
 }
 
 .upcoming-trips li {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .upcoming-trips li:hover {
-  background-color: #f0f0f0;
+    background-color: #f0f0f0;
 }
 
 .SelectedDay {
@@ -148,9 +140,9 @@
     .taxi-container {
         flex-direction: column;
     }
-    
+
     .taxi-container > * {
-        width: 90%;
+        width: 100%; /* Now safe due to global box-sizing rule */
         height: min-content;
     }
 
