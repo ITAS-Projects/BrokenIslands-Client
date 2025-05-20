@@ -15,18 +15,21 @@ import Quick from "./Components/QuickView/Quick.js";
 import QuickReservation from "./Components/QuickView/QuickReservation.js";
 import QuickTrip from "./Components/QuickView/QuickTrip.js";
 import QuickEditReservation from "./Components/QuickEdit/QuickEditReservation.js";
+import UserManager from "./Components/ManageUsers/UserManager.js";
+import { UserManagement } from "@descope/react-sdk";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-          <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={<Navbar />}>
           <Route index element={<Home />} />
           <Route path="/wizard" element={<Wizard />} />
           <Route path="/taxis" element={<TaxiList />} />
           <Route path="/taxis/new" element={<NewTaxi />} />
           <Route path="/taxis/edit/:id" element={<EditTaxi />} />
+          <Route path="/users" element={<UserManager />} />
           <Route path="/quick" element={<Quick />} />
           <Route path="/quick/taxi" element={<QuickTaxi />} />
           <Route path="/quick/reservation" element={<QuickReservation />} />
