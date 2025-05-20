@@ -25,7 +25,6 @@ const Layout = () => {
     }
   }, [isSessionLoading, isUserLoading, isAuthenticated, user, navigate]);
 
-
   return (
     <>
       {userDetails ? (
@@ -55,13 +54,16 @@ const Layout = () => {
           </ul>
         </nav>
         <span className="User-Manage">
+          
           <img
+          id="avatar-image"
+          onError={(e) => {e.target.onError=null; e.target.src='225-default-avatar.png';}}
           src={userDetails.picture}
-          alt={`${userDetails.given_name}'s profile`}
+          alt={`${userDetails.givenName}'s profile`}
           className="profile-pic"
           ></img>
-            <button onClick={() => {logout(); navigate("/login");}}>Logout</button>
-            </span>
+          <button onClick={() => {logout(); navigate("/login");}}>Logout</button>
+        </span>
       </header>
 
       <main className="layout-main">
