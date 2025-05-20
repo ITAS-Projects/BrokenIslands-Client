@@ -1,0 +1,127 @@
+.navbar-header {
+  padding: 1rem 2rem;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.navbar-logo {
+  max-height: 50px;
+  margin-right: 1rem;
+}
+
+.navbar-nav-list {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-nav-list li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.navbar-nav-list li a:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.navbar-main {
+  padding: 2rem;
+  max-width: 90%;
+  margin: 2rem auto;
+  color: #333;
+  line-height: 1.7;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-profile-pic {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+}
+
+.navbar-user-manage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.navbar-user-manage button {
+  background-color: #ddd;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.navbar-dropdown {
+  position: relative;
+}
+
+.navbar-dropdown-toggle {
+  background-color: gray;
+  color: white;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.navbar-dropdown-toggle:hover {
+  background-color: #555;
+}
+
+.navbar-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: gray;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  z-index: 1000;
+  min-width: 180px;
+  padding: 0;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.navbar-dropdown-menu.open {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.navbar-dropdown-menu li a {
+  display: block;
+  padding: 10px 15px;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.navbar-dropdown-menu li a:hover {
+  background-color: #007bff;
+  color: white;
+}

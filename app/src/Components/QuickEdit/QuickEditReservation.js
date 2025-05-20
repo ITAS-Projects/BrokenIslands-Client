@@ -246,7 +246,7 @@ function QuickEditReservation() {
                                 resetPeople();
                             }}
                         >
-                            Reset all People to previous names
+                            Reset all People to previous names and allergies
                         </button>
                     )}
                     {peopleShown && (
@@ -280,7 +280,7 @@ function QuickEditReservation() {
                                                 resetPerson(index);
                                             }}
                                         >
-                                            Reset to previous boat
+                                            Reset to previous name and allergies
                                         </button>
                                     )}
                                     <label>
@@ -293,7 +293,7 @@ function QuickEditReservation() {
                                             }
                                         />
                                     </label>
-                                    {/* <label>
+                                    <label>
                                         Allergies:
                                         <input
                                             type="text"
@@ -302,7 +302,7 @@ function QuickEditReservation() {
                                             editPersonAtIndex(index, { allergies: e.target.value })
                                             }
                                         />
-                                        </label> */}
+                                        </label>
                                 </div>
                             ))}
                             {numberOfPeople > people.length && (<button type="button" onClick={createPerson} className="next">+</button>)}
