@@ -16,7 +16,8 @@ import QuickReservation from "./Components/QuickView/QuickReservation.js";
 import QuickTrip from "./Components/QuickView/QuickTrip.js";
 import QuickEditReservation from "./Components/QuickEdit/QuickEditReservation.js";
 import UserManager from "./Components/ManageUsers/UserManager.js";
-import { UserManagement } from "@descope/react-sdk";
+// import { UserManagement, UserProfile } from "@descope/react-sdk";
+import UserProfiles from "./Components/ManageUsers/UserProfile.js";
 
 function App() {
   return (
@@ -30,6 +31,8 @@ function App() {
           <Route path="/taxis/new" element={<NewTaxi />} />
           <Route path="/taxis/edit/:id" element={<EditTaxi />} />
           <Route path="/users" element={<UserManager />} />
+          <Route path="/user-profile/:userId" element={<UserProfiles />} />
+          
           <Route path="/quick" element={<Quick />} />
           <Route path="/quick/taxi" element={<QuickTaxi />} />
           <Route path="/quick/reservation" element={<QuickReservation />} />

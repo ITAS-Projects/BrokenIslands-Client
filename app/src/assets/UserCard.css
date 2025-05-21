@@ -1,0 +1,40 @@
+/* Card container styling */
+.user-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0.5rem;
+    max-width: 400px;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
+    flex: 1 1 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* Profile image styling */
+.user-card img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-bottom: 0.5rem;
+}
+
+/* Button styling */
+.user-card .view-profile-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background-color 0.3s;
+    font-size: 0.9rem;
+}
+
+.user-card .view-profile-button:hover {
+    background-color: #0056b3;
+}
