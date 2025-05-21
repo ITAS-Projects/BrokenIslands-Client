@@ -1,135 +1,191 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { DataGrid } from 'react-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import axiosAuth from '../authRequest';
-import 'react-data-grid/lib/styles.css';
 import '../../assets/UserManager.css';
+import { IconButton } from '@mui/material';
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
 
 const UserManager = () => {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectAll, setSelectAll] = useState(false); // State for "Select All" checkbox
-  const [sortInfo, setSortInfo] = useState({ column: '', direction: 'ASC' }); // Sort state
+    const [rows, setRows] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedRowIds, setSelectedRowIds] = useState({});
+    const [newUser, setNewUser] = useState({ name: '', email: '', loginIds: '', roles: '' });
 
-  // Function to handle checkbox changes
-  const handleCheckboxChange = (e, row, rowIdx) => {
-    const updatedRows = [...rows];
-    updatedRows[rowIdx] = { ...row, selected: e.target.checked };
-    setRows(updatedRows);
-  };
+    const columns = [
+        { field: 'status', headerName: 'Status', width: 100 },
+        { field: 'name', headerName: 'Name', width: 110 },
+        { field: 'email', headerName: 'Email', width: 200 },
+        { field: 'roleList', headerName: 'Roles', width: 120 },
+        { field: 'loginIdList', headerName: 'Login ID', width: 300 },
+        {
+            field: 'actions',
+            headerName: 'Actions',
+            width: 120,
+            renderCell: (params) => (
+                <>
+                    {/* Edit Button */}
+                    <IconButton onClick={() => handleEdit(params.row)} size="small">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="270 200 210 210">
+                            <path d="M276.3 255L416.3 395M323.3 206.7L463.3 346.7M276 267L335 207M461.7 340.9V400.9M409.7 392.9H469.7" stroke="#000" strokeWidth="17" fill="none" />
+                        </svg>
+                    </IconButton>
 
-  // Function to handle "Select All" checkbox change
-  const handleSelectAllChange = (e) => {
-    const isChecked = e.target.checked;
-    setSelectAll(isChecked);
-    const updatedRows = rows.map(row => ({ ...row, selected: isChecked }));
-    setRows(updatedRows);
-  };
+                    {/* Delete Button */}
+                    <IconButton onClick={() => handleDelete(params.row)} size="small">
+                        <svg viewBox="0 0 190 240" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M40 227 L140 227 M165 20 L145 230 M15 20 L35 230 M0 20 L180 20 M75 5 L105 5 M105 0 L105 23 M75 0 L75 23" stroke="#000" strokeWidth="15" fill="none" />
+                        </svg>
+                    </IconButton>
+                </>
+            ),
+        },
+    ];
 
-  // Columns with sortable property
-  const columns = [
-    {
-      key: 'selected',
-      width: 50,
-      frozen: true,
-      name: (
-        <input
-          type="checkbox"
-          checked={selectAll}
-          className="userSelectedCheckbox"
-          onChange={handleSelectAllChange}
-          id="selectAllCheckbox"
-        />
-      ),
-      renderCell: ({ row, rowIdx }) => (
-        <input
-          type="checkbox"
-          className="userSelectedCheckbox"
-          checked={row.selected}
-          onChange={(e) => handleCheckboxChange(e, row, rowIdx)} // Handling checkbox change
-        />
-      ),
-    },
-    { key: 'loginIdList', name: 'Login ID', width: 300, resizable: true, sortable: true },
-    { key: 'status', name: 'Status', width: 100, resizable: true },
-    { key: 'name', name: 'Name', width: 110, resizable: true },
-    { key: 'email', name: 'Email', width: 150, resizable: true },
-    { key: 'mainRole', name: 'Role', width: 100, resizable: true },
-  ];
+    const fetchUsers = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await axiosAuth.get(`${backendURL}/users`);
+            const formattedData = response.data.map(user => {
+                const loginIdList = user?.loginIds?.join(', ') || 'unknown';
+                const roleList = user?.roleNames?.join(', ') || 'Missing';
+                return {
+                    ...user,
+                    id: user.userId, // Required by DataGrid
+                    loginIdList,
+                    roleList
+                };
+            });
+            setRows(formattedData);
+        } catch (error) {
+            console.error('Failed to load users:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-  // Fetch users and add 'selected' field
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await axiosAuth.get(`${backendURL}/users`);
-      const formattedData = response.data.map(user => ({
-        ...user,
-        loginIdList: user?.loginIds?.join(', ') || '',
-        mainRole: user.roleNames?.[0] || 'Missing',
-        selected: false, // Initialize the `selected` field for checkbox
-      }));
-      setRows(formattedData);
-    } catch (error) {
-      console.error('Failed to load users:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    useEffect(() => {
+        console.log(selectedRowIds?.ids?.size);
+    }, [selectedRowIds]);
 
-  // Dynamically update the "Select All" checkbox state based on individual row selections
-  useEffect(() => {
-    const allSelected = rows.every(row => row.selected);
-    setSelectAll(allSelected); // Check "Select All" if all are selected
-  }, [rows]);
+    const handleDelete = async (user) => {
+        if (!window.confirm(`Delete user: ${user.name}?`)) return;
 
-  // Handle sorting
-  const handleSort = (columnKey, direction) => {
-    console.log("sorting", columnKey, direction);
-    const sortedRows = [...rows].sort((a, b) => {
-      if (a[columnKey] < b[columnKey]) return direction === 'ASC' ? -1 : 1;
-      if (a[columnKey] > b[columnKey]) return direction === 'ASC' ? 1 : -1;
-      return 0;
-    });
-    setRows(sortedRows);
-    setSortInfo({ column: columnKey, direction });
-  };
+        try {
+            await axiosAuth.delete(`${backendURL}/users/${user.id}`);
+            fetchUsers();
+        } catch (error) {
+            console.error('Failed to delete user:', error);
+        }
+    };
 
-  // Toggle sort direction
-  const getNextSortDirection = (currentDirection) => {
-    return currentDirection === 'ASC' ? 'DESC' : 'ASC';
-  };
+    const handleEdit = (user) => {
+        // For now just alert — later we’ll use a modal/form
+        alert(`Edit user: ${user.name}`);
+    };
 
-  return (
-    <div>
-      <div style={{ marginBottom: '10px' }}>
-        <button onClick={fetchUsers} disabled={loading}>
-          {loading ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </div>
+    // Handle Bulk Delete
+    const handleBulkDelete = async () => {
+        if (selectedRowIds?.ids?.size === 0) return;
 
-      <div style={{ height: 500 }}>
-        <DataGrid
-          columns={columns.map(column => ({
-            ...column,
-            sortDirection: sortInfo.column === column.key ? sortInfo.direction : undefined,
-            onSort: () => {
-              const newDirection = getNextSortDirection(sortInfo.direction);
-              handleSort(column.key, newDirection);
-            },
-          }))}
-          rows={rows}
-          onRowsChange={setRows} // Ensure the grid rows are updated correctly
-          rowKeyGetter={(row) => row.id}
-          defaultColumnOptions={{ resizable: false, sortable: false }}
-        />
-      </div>
-    </div>
-  );
+        if (!window.confirm(`Delete ${selectedRowIds?.ids?.size} users?`)) return;
+
+        try {
+            console.log(Array.from(selectedRowIds?.ids));
+            await Promise.all(
+                Array.from(selectedRowIds?.ids).map((id) =>
+                    axiosAuth.delete(`${backendURL}/users/${id}`)
+                )
+            );
+            setSelectedRowIds({});
+            fetchUsers();
+        } catch (error) {
+            console.error('Bulk delete failed:', error);
+        }
+    };
+
+    // Handle New User Add
+    const handleAddUser = async () => {
+        const payload = {
+            name: newUser.name,
+            email: newUser.email,
+            loginIds: newUser.loginIds.split(',').map(s => s.trim()),
+            roleNames: newUser.roles.split(',').map(s => s.trim()),
+        };
+
+        try {
+            await axiosAuth.post(`${backendURL}/users`, payload);
+            setNewUser({ name: '', email: '', loginIds: '', roles: '' });
+            fetchUsers();
+        } catch (error) {
+            console.error('Failed to add user:', error);
+        }
+    };
+
+    return (
+        <div>
+            {/* Add User Form */}
+            <div style={{ marginBottom: '10px' }}>
+                <input
+                    placeholder="Name"
+                    value={newUser.name}
+                    onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                />
+                <input
+                    placeholder="Email"
+                    value={newUser.email}
+                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                />
+                <input
+                    placeholder="Login IDs (comma separated)"
+                    value={newUser.loginIds}
+                    onChange={(e) => setNewUser({ ...newUser, loginIds: e.target.value })}
+                />
+                <input
+                    placeholder="Roles (comma separated)"
+                    value={newUser.roles}
+                    onChange={(e) => setNewUser({ ...newUser, roles: e.target.value })}
+                />
+                <button onClick={handleAddUser}>Add User</button>
+            </div>
+
+            {/* Bulk Delete Button */}
+            {selectedRowIds?.ids?.size > 0 && (
+                <button onClick={handleBulkDelete} disabled={loading}>
+                    Delete Selected ({selectedRowIds?.ids?.size})
+                </button>
+            )}
+
+            {/* Refresh Button */}
+            <div style={{ marginBottom: '10px' }}>
+                <button onClick={fetchUsers} disabled={loading}>
+                    {loading ? 'Refreshing...' : 'Refresh'}
+                </button>
+            </div>
+
+            {/* Data Grid */}
+            <div style={{ height: 500 }}>
+                <DataGrid
+                    columns={columns}
+                    rows={rows}
+                    pageSize={10}
+                    rowsPerPageOptions={[10, 25, 50]}
+                    loading={loading}
+                    checkboxSelection
+                    disableSelectionOnClick
+                    onRowSelectionModelChange={(newSelection, details) => {
+                        // console.log(newSelection);
+                        // console.log(details);
+                        setSelectedRowIds(newSelection);
+                    }}
+                />
+            </div>
+        </div>
+    );
 };
 
 export default UserManager;
