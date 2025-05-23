@@ -3,17 +3,17 @@ import "./assets/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./Components/Login.js";
 
-import NoPage from "./Components/NoPage.js"
+import NoPage from "./Components/NoPage.js";
 import Navbar from "./Components/Navbar.js";
 import Home from "./Components/Home.js";
 import TaxiList from "./Components/Taxis/TaxiList.js";
 import NewTaxi from "./Components/Taxis/NewTaxi.js";
 import EditTaxi from "./Components/Taxis/EditTaxi.js";
-import Wizard from "./Components/Wizard/Wizard.js";
-import QuickTaxi from "./Components/QuickView/QuickTaxi.js";
 import Quick from "./Components/QuickView/Quick.js";
-import QuickReservation from "./Components/QuickView/QuickReservation.js";
+import QuickTaxi from "./Components/QuickView/QuickTaxi.js";
 import QuickTrip from "./Components/QuickView/QuickTrip.js";
+import QuickReservation from "./Components/QuickView/QuickReservation.js";
+import QuickCreateReservation from "./Components/QuickCreate/QuickCreateReservation.js";
 import QuickEditReservation from "./Components/QuickEdit/QuickEditReservation.js";
 import UserManager from "./Components/ManageUsers/UserManager.js";
 import CreateUser from "./Components/ManageUsers/CreateUser.js";
@@ -26,7 +26,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Navbar />}>
           <Route index element={<Home />} />
-          <Route path="/wizard" element={<Wizard />} />
+          <Route path="/wizard" element={<QuickCreateReservation />} />
           <Route path="/taxis" element={<TaxiList />} />
           <Route path="/taxis/new" element={<NewTaxi />} />
           <Route path="/taxis/edit/:id" element={<EditTaxi />} />

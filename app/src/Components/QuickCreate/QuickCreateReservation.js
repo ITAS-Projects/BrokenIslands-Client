@@ -1,87 +1,26 @@
 import React, { useEffect, useState } from "react";
 import axiosAuth from "../authRequest";
 import { useNavigate, useParams } from "react-router-dom";
-import "../../assets/QuickEditReservation.css";
+import "../../assets/QuickCreateReservation.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
 
-function QuickEditReservation() {
-    const { id } = useParams();
+function QuickCreateReservation() {
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
     const [reservation, setReservation] = useState(null);
-    const [numberOfPeople, setNumOfPeople] = useState(0);
+    const [numberOfPeople, setNumOfPeople] = useState(1);
 
-    const [prevTrips, setPrevTrips] = useState(null);
-    const [prevBoats, setPrevBoats] = useState(null);
-    const [prevPeople, setPrevPeople] = useState(null);
-    const [trips, setTrips] = useState(null);
-    const [people, setPeople] = useState([]);
+    const [trips, setTrips] = useState([{timeFrame: ""},{timeFrame: ""}]);
+    const [people, setPeople] = useState([{}]);
     const [boats, setBoats] = useState([]);
-    const setupBoats = (value) => {
-        setPrevBoats(value);
-        setBoats(value);
-    }
     const [taxis, setTaxis] = useState([]);
 
-    const setupTrips = (newTrips) => {
-        const timeOrder = [
-            "Custom AM", "Lodge to Secret AM", "Secret to Lodge AM", "Custom", "Lodge to Secret PM", "Secret to Lodge PM", "Custom PM"
-        ]
-
-        newTrips?.sort((a, b) => {
-            let dayData = a.day?.split('T')[0].split('-');
-            let dayData2 = b.day?.split('T')[0].split('-');
-
-            if (!dayData || !dayData2) return 0;
-
-            // Compare year
-            if (dayData[0] !== dayData2[0]) {
-                return Number(dayData[0]) - Number(dayData2[0]);
-            }
-
-            // Compare month
-            if (dayData[1] !== dayData2[1]) {
-                return Number(dayData[1]) - Number(dayData2[1]);
-            }
-
-            // Compare day
-            if (dayData[2] !== dayData2[2]) {
-                return Number(dayData[2]) - Number(dayData2[2]);
-            }
-
-
-            return timeOrder.findIndex(item => item === a.timeFrame) - timeOrder.findIndex(item => item === b.timeFrame);
-        });
-        setPrevTrips(newTrips);
-        setTrips(newTrips);
-    }
     const editTripAtIndex = (index, newData) => {
         const updatedTrips = [...trips];
         updatedTrips[index] = { ...updatedTrips[index], ...newData };
         setTrips(updatedTrips);
     };
-    const deleteTrip = (index) => {
-        setTrips(deletingTrips =>
-            deletingTrips.map((trip, i) => (i === index ? { new: true, timeFrame: "", TaxiId: "" } : trip))
-        );
-    };
-    const resetTrip = (index) => {
-        setTrips(resettingTrips =>
-            resettingTrips.map((trip, i) => (i === index ? prevTrips[i] : trip))
-        );
-    };
 
-
-    const setupPeople = (newPeople, leaderId) => {
-        const index = newPeople.findIndex(person => person.id === leaderId);
-        if (index > 0) {
-            const [leader] = newPeople.splice(index, 1); // Remove the leader
-            newPeople.unshift(leader); // Add to the beginning
-        }
-        setPrevPeople(newPeople);
-        setPeople(newPeople);
-    }
     const editPersonAtIndex = (index, newData) => {
         const updatedPeople = [...people];
         updatedPeople[index] = { ...updatedPeople[index], ...newData };
@@ -91,17 +30,9 @@ function QuickEditReservation() {
         setPeople(prevPeople => prevPeople.filter((_, i) => i !== index));
     };
     const createPerson = () => {
-        const newPersonList = [...people, { new: true }]; // create a new array with an empty object added
+        const newPersonList = [...people, {}]; // create a new array with an empty object added
         setPeople(newPersonList);
     };
-    const resetPerson = (index) => {
-        setPeople(resettingPeople =>
-            resettingPeople.map((person, i) => (i === index ? prevPeople[i] : person))
-        );
-    }
-    const resetPeople = () => {
-        setPeople(prevPeople);
-    }
 
     const deleteBoat = (index) => {
         setBoats(prevBoats => prevBoats.filter((_, i) => i !== index));
@@ -111,16 +42,8 @@ function QuickEditReservation() {
         updatedBoats[index] = { ...updatedBoats[index], ...newData };
         setBoats(updatedBoats);
     };
-    const resetBoat = (index) => {
-        setBoats(resettingBoats =>
-            resettingBoats.map((boat, i) => (i === index ? prevBoats[i] : boat))
-        );
-    };
-    const resetBoats = () => {
-        setBoats(prevBoats);
-    };
     const createBoat = () => {
-        const newBoatList = [...boats, { new: true, numberOf: "1" }]; // create a new array with an empty object added
+        const newBoatList = [...boats, { numberOf: "1" }]; // create a new array with an empty object added
         setBoats(newBoatList);
     };
 
@@ -149,22 +72,6 @@ function QuickEditReservation() {
     }
 
     useEffect(() => {
-        axiosAuth.get(`${backendURL}/reservations/${id}`)
-            .then((response) => response.data)
-            .then(data => {
-                setReservation(data);
-                setNumOfPeople(data.Group?.numberOfPeople || 0)
-                setupPeople(data.Group?.People, data.Group?.leader?.id);
-                setupBoats(data.Boats);
-                setupTrips(data.Trips);
-                console.log(data);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-                setLoading(false);
-            });
-
         axiosAuth.get(`${backendURL}/taxis`)
             .then((response) => response.data)
             .then(data => {
@@ -173,44 +80,49 @@ function QuickEditReservation() {
             .catch(error => {
                 console.error('Error fetching taxis:', error);
             });
-    }, [id]);
-
-    const compareTimes = (t1, t2) => {
-        const [h1, m1] = t1.split(':').slice(0, 2).map(Number);
-        const [h2, m2] = t2.split(':').slice(0, 2).map(Number);
-
-        if (h1 !== h2) return h1 - h2;
-        return m1 - m2;
-    };
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const updatedData = {
-        trips: trips,
-        numberOfPeople,
-        people,
-        boats
+        // Prepare payload to send to the backend
+        const payload = {
+            arrivalDay: trips?.[0]?.day,
+            departureDay: trips?.[1]?.day,
+            arrivalSchedule: trips?.[0]?.timeFrame,
+            departureSchedule: trips?.[1]?.timeFrame,
+            arrivalTime: trips?.[0]?.timeFrame?.startsWith("Custom") ? trips?.[0]?.timeStart : undefined,
+            departureTime: trips?.[1]?.timeFrame.startsWith("Custom") ? trips?.[1]?.timeStart : undefined,
+            numberOfPeople: numberOfPeople,
+            people: people.map(p => ({
+                name: p.name,
+                allergies: p.allergies || ""
+            })),
+            boats: boats.map(b => ({
+                type: b.type,
+                numberOf: Number(b.numberOf),
+                rented: b.isRented
+            }))
         };
 
         try {
-        // Send the updated data to the backend to update the reservation
-        const response = await axiosAuth.put(`${backendURL}/quick/${id}`, updatedData);
-        alert("Reservation updated successfully, redirecting...");
-        navigate('/quick/reservation');  // Redirect to reservations list or confirmation page
+            // Send the data to the backend for validation and creation
+            const response = await axiosAuth.post(`${backendURL}/quick`, payload);
+            console.log(response);
+            // Handle success - inform the user and redirect
+            alert("Reservation created successfully. Redirecting...");
+            navigate('/quick/reservation');
         } catch (error) {
-        console.error("Error updating reservation:", error);
-        alert(error.response?.data?.error || "There was an error while updating the reservation. Please try again.");
+            // Handle error - show the error message from the backend
+            console.error("Error creating reservation:", error);
+            // show error message, or default error if missing
+            alert(error.response?.data?.error || "An error occurred while creating the reservation. Please try again.");
         }
     };
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
     return (
         <div>
-            <h1>Edit Reservation</h1>
+            <h1>New Reservation</h1>
 
             <form className="quickReservationForm" onSubmit={handleSubmit}>
                 <label>Reservation Name:</label>
@@ -238,27 +150,10 @@ function QuickEditReservation() {
                     <button type="button" onClick={togglePersonDropdown}>
                         {peopleShown ? 'Hide People ▲' : 'Show People ▼'}
                     </button>
-                    {people != prevPeople && (
-                        <button
-                            type="button"
-                            className="next"
-                            onClick={() => {
-                                clearInputs();
-                                resetPeople();
-                            }}
-                        >
-                            Reset all People to previous names and allergies
-                        </button>
-                    )}
                     {peopleShown && (
                         <div className="dropdown-content" style={{ marginTop: '10px' }}>
                             {people.map((person, index) => (
-                                <div key={index} className={`Person-Object ${person !== prevPeople[index]
-                                        ? person.new
-                                            ? "new"
-                                            : "changed"
-                                        : ""
-                                    }`}>
+                                <div key={index} className={`Person-Object`}>
                                     {index !== 0 && (
                                         <>
                                             {people.length > numberOfPeople && (
@@ -271,18 +166,6 @@ function QuickEditReservation() {
                                                 deletePerson(index);
                                             }}>Delete</button>
                                         </>
-                                    )}
-                                    {person !== prevPeople[index] && !person.new && (
-                                        <button
-                                            type="button"
-                                            className="next"
-                                            onClick={() => {
-                                                clearInputs();
-                                                resetPerson(index);
-                                            }}
-                                        >
-                                            Reset to previous name and allergies
-                                        </button>
                                     )}
                                     <label>
                                         Name:
@@ -317,29 +200,12 @@ function QuickEditReservation() {
                     <button type="button" onClick={toggleBoatDropdown}>
                         {boatsShown ? 'Hide Boats ▲' : 'Show Boats ▼'}
                     </button>
-                    {boats != prevBoats && (
-                        <button
-                            type="button"
-                            className="next"
-                            onClick={() => {
-                                clearInputs();
-                                resetBoats();
-                            }}
-                        >
-                            Reset all boats
-                        </button>
-                    )}
                     {boatsShown && (
                         <>
                             {boats?.map((boat, index) => (
                                 <div
                                     key={boat.id || index}
-                                    className={`Boat-Object ${boat !== prevBoats[index]
-                                            ? boat.new
-                                                ? "new"
-                                                : "changed"
-                                            : ""
-                                        }`}
+                                    className={`Boat-Object`}
                                 >
                                     <button
                                         type="button"
@@ -351,18 +217,6 @@ function QuickEditReservation() {
                                     >
                                         Delete
                                     </button>
-                                    {boat !== prevBoats[index] && !boat.new && (
-                                        <button
-                                            type="button"
-                                            className="next"
-                                            onClick={() => {
-                                                clearInputs();
-                                                resetBoat(index);
-                                            }}
-                                        >
-                                            Reset to previous boat
-                                        </button>
-                                    )}
                                     <label>
                                         Type:
                                         <select
@@ -426,23 +280,9 @@ function QuickEditReservation() {
                     {tripsShown && (
                         <div className="dropdown-content" style={{ marginTop: '10px' }}>
                             {trips.map((trip, index) => {
-                                let peopleOnTrip = taxis.find(taxifind => taxifind.id === prevTrips[index].TaxiId).Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => res?.Group?.numberOfPeople).reduce((sum, current) => sum + current, 0);;
-                                const boatsOnTrip = taxis.find(taxifind => taxifind.id === prevTrips[index].TaxiId).Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => {
-                                    return res.Boats?.map((boat) => Number(boat.numberOf)).reduce((sum, current) => sum + current, 0)
-                                }).reduce((sum, current) => sum + current, 0);
                                 return (
-                                    <div key={index} className={`Trip-Object ${trip !== prevTrips[index] ? (trip.new ? "new" : "changed") : ""}`}>
-                                        <label>{index == 0 && "Arival" || "Departure"} {trip !== prevTrips[index] ? (trip.new ? "(new)" : "(changed)") : ""}:</label>
-                                        {trip !== prevTrips[index] ? (
-                                            <button type="button" className="next" onClick={() => {
-                                                clearInputs();
-                                                resetTrip(index);
-                                            }}>Reset to previous trip</button>) : (
-                                            <button type="button" className="next" onClick={() => {
-                                                clearInputs();
-                                                deleteTrip(index);
-                                            }}>Move to new trip</button>
-                                        )}
+                                    <div key={index} className={`Trip-Object`}>
+                                        <label>{index == 0 && "Arival" || "Departure"}:</label>
                                         <label>
                                             day:
                                             <input
@@ -480,24 +320,6 @@ function QuickEditReservation() {
                                                 required
                                             />
                                         </label>)}
-
-                                        <label>Taxi:
-                                            <select
-                                                className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople <= peopleOnTrip ? "error" : ""}`}
-                                                id="taxi"
-                                                value={trip.TaxiId || ""}
-                                                onChange={e => editTripAtIndex(index, { TaxiId: Number(e.target.value) })}
-                                                required
-                                            >
-                                                <option value="" disabled>-- select a taxi --</option>
-
-                                                {taxis?.map((taxi, index) => {
-                                                    return (
-                                                        <option key={index} className={taxi.spaceForPeople <= peopleOnTrip ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {peopleOnTrip}/{taxi.spaceForPeople}, boats: {boatsOnTrip}/{taxi.spaceForKayaks}</option>
-                                                    )
-                                                })}
-                                            </select>
-                                        </label>
                                     </div>
                                 )
                             })}
@@ -512,4 +334,4 @@ function QuickEditReservation() {
     );
 }
 
-export default QuickEditReservation;
+export default QuickCreateReservation;
