@@ -26,7 +26,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Navbar />}>
           <Route index element={<Home />} />
-          <Route path="/wizard" element={<QuickCreateReservation />} />
           <Route path="/taxis" element={<TaxiList />} />
           <Route path="/taxis/new" element={<NewTaxi />} />
           <Route path="/taxis/edit/:id" element={<EditTaxi />} />
@@ -38,7 +37,8 @@ function App() {
           <Route path="/quick/taxi" element={<QuickTaxi />} />
           <Route path="/quick/reservation" element={<QuickReservation />} />
           <Route path="/quick/trip" element={<QuickTrip />} />
-          <Route path="/quick/edit/reservation/:id" element={<QuickEditReservation />} />
+          <Route path="/quick/reservation/edit/:id" element={<QuickEditReservation />} />
+          <Route path="/quick/reservation/new" element={<QuickCreateReservation />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>

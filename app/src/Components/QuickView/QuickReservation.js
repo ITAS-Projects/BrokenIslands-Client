@@ -263,7 +263,7 @@ function QuickReservation() {
 
 
                 <div className="align-right">
-                    <button onClick={() =>{window.location.href = `/quick/edit/reservation/${selectedReservation.id}`}}>
+                    <button onClick={() =>{window.location.href = `/quick/reservation/edit/${selectedReservation.id}`}}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="270 200 210 210"><path d="M276.3 255L416.3 395M323.3 206.7L463.3 346.7M276 267L335 207M461.7 340.9V400.9M409.7 392.9H469.7" stroke="#000" strokeWidth="17" fill="none" /></svg>
                     </button>
                     <button onClick={() => handleDelete(selectedReservation.id)}>

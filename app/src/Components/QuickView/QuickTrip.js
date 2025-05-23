@@ -234,7 +234,7 @@ function QuickTrip() {
                         <h3>Reservations:</h3>
                         <ol>
                             {selectedTrip.Reservations.map((res) => (
-                                <a className="No-Style-Link" href={`/quick/edit/reservation/${res.id}`}><li key={res.id}>
+                                <a className="No-Style-Link" href={`/quick/reservation/edit/${res.id}`}><li key={res.id}>
                                     <div className="svg-container">
 
                                     Reserved by: {res.Group?.leader?.name}
