@@ -3,3 +3,18 @@
     height: 80%;
     margin: 10%;
 }
+
+.MuiDataGrid-cell {
+    border-right: 1px solid black;
+}
+
+.MuiDataGrid-columnSeparator::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    border-right: 1px solid black;
+    transform: translateX(-50%);
+}

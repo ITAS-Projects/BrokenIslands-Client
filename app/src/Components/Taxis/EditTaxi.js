@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axiosAuth from "../authRequest";
 import "../../assets/EditTaxi.css";
 
@@ -7,6 +7,7 @@ const backendURL = process.env.REACT_APP_API_BASE_URL;
 
 function EditTaxi() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [spaceForKayaks, setSpaceForKayaks] = useState(0);
     const [spaceForPeople, setSpaceForPeople] = useState(0);
     const [running, setRunning] = useState(true);
@@ -60,6 +61,10 @@ function EditTaxi() {
     }
 
     return (
+        <>
+        <button onClick={() => navigate("/taxis")} style={{ padding: '10px 20px' }}>
+                Back
+            </button>
         <div>
             <h1>Edit Taxi</h1>
             <form className="editTaxiForm" onSubmit={handleSubmit}>
@@ -103,6 +108,7 @@ function EditTaxi() {
                 <button className="editTaxiButton" type="submit">Edit Taxi</button>
             </form>
         </div>
+        </>
     );
 }
 

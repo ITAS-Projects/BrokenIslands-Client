@@ -75,6 +75,7 @@ const Navbar = () => {
             </button>
             <ul className={`navbar-dropdown-menu ${dropdownOpen ? "open" : ""}`}>
               <li><Link to="/taxis" onClick={() => setDropdownOpen(false)}>Taxis</Link></li>
+              <li><Link to="/users" onClick={() => setDropdownOpen(false)}>Users</Link></li>
             </ul>
           </div>
         </nav>

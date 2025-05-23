@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axiosAuth from "../authRequest";
+import { useNavigate } from "react-router-dom";
 import "../../assets/TaxiList.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
 
 function TaxiList() {
+    const navigate = useNavigate();
     const [taxis, setTaxis] = useState([]);
     const [loading, setLoading] = useState(true);
   
@@ -36,7 +38,7 @@ function TaxiList() {
     return (
       <div>
         <h1>Taxi List</h1>
-        <button onClick={() => window.location.href = `/taxis/new`}>Add New Taxi</button>
+        <button onClick={() => navigate(`/taxis/new`)}>Add New Taxi</button>
         <table>
           <thead>
             <tr>
@@ -55,7 +57,7 @@ function TaxiList() {
                 <td>{taxi.spaceForPeople}</td>
                 <td>{taxi.running ? "yes" : "no"}</td>
                 <td>
-                  <button onClick={() => window.location.href = `/taxis/edit/${taxi.id}`}>Edit</button>
+                  <button onClick={() => navigate(`/taxis/edit/${taxi.id}`)}>Edit</button>
                   <button onClick={() => handleDelete(taxi.id)}>Delete</button>
                 </td>
               </tr>

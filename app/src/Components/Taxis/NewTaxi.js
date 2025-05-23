@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axiosAuth from "../authRequest";
 import "../../assets/NewTaxi.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
 
 function NewTaxi() {
+    const navigate = useNavigate();
     const [spaceForKayaks, setSpaceForKayaks] = useState(0);
     const [spaceForPeople, setSpaceForPeople] = useState(0);
     const [running, setRunning] = useState(true);
@@ -38,6 +40,10 @@ function NewTaxi() {
     };
 
     return (
+        <>
+        <button onClick={() => navigate("/taxis")} style={{ padding: '10px 20px' }}>
+                Back
+            </button>
         <div>
             <h1>New Taxi</h1>
             <form className="newTaxiForm" onSubmit={handleSubmit}>
@@ -81,6 +87,7 @@ function NewTaxi() {
                 <button className="newTaxiButton" type="submit">Add Taxi</button>
             </form>
         </div>
+        </>
     );
 }
 
