@@ -12,7 +12,7 @@ function Home() {
         <h1>Hello{user?.name && ` ${user.name}`}!</h1>
         <p>Welcome! Would you like to make a reservation?</p>
         <button onClick={() => window.location.href = `/wizard`}>
-          Start Reservation Wizard
+          New Reservation
         </button>
       </header>
     </div>
