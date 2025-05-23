@@ -122,7 +122,13 @@ function QuickTrip() {
     }, 0) ?? 0;
 
     const boatsUsed = selectedTrip?.Reservations?.reduce((resTotal, res) => {
-        return resTotal + (res.Boats?.reduce((bSum, boat) => bSum + (boat.numberOf || 0), 0) || 0);
+        return resTotal + (res.Boats?.reduce((bSum, boat) => {
+            if (boat.isRented) {
+                return bSum;
+            } else {
+                return bSum + (boat.numberOf || 0);
+            } 
+        }, 0) || 0);
     }, 0) ?? 0;
 
     const peopleCapacity = selectedTrip?.Taxi?.spaceForPeople || 0;

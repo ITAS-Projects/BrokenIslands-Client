@@ -37,8 +37,28 @@ function QuickTaxi() {
             });
     }, []);
 
+    const combineTripData = (data) => {
+        const defaultValues = {
+            running: true,
+            spaceForKayaks: 0,
+            spaceForPeople: 0,
+            Trips: []
+        };
+
+        return data.reduce((acc, item) => {
+            acc.spaceForKayaks += item.spaceForKayaks || 0;
+            acc.spaceForPeople += item.spaceForPeople || 0;
+            acc.Trips = acc.Trips.concat(item.Trips || []);
+            return acc;
+        }, { ...defaultValues });
+    }
+
     useEffect(() => {
-        setTaxi(taxis[selectedTaxiIndex]);
+        if (selectedTaxiIndex == 0) {
+            setTaxi(combineTripData(taxis));
+        } else {
+            setTaxi(taxis[selectedTaxiIndex - 1]);
+        }
     }, [taxis, selectedTaxiIndex]);
 
     const formatDate = (date) => date.toISOString().split("T")[0];
@@ -136,8 +156,11 @@ function QuickTaxi() {
                             onChange={(e) => setSelectedTaxiIndex(e.target.value)}
                             label="Taxi"
                         >
+                            <MenuItem value={0}>
+                                {`All Taxis`}
+                            </MenuItem>
                             {taxis.map((t, idx) => (
-                                <MenuItem key={t.id} value={idx}>
+                                <MenuItem key={t.id} value={idx + 1}>
                                     {t.name || `Taxi #${t.id}`}
                                 </MenuItem>
                             ))}
@@ -176,9 +199,9 @@ function QuickTaxi() {
                 <div className="main-content">
                     {taxi && (
                         <>
-                            <h2>{taxi.name || `Taxi #${taxi.id}`}</h2>
+                            <h2>{taxi.name || (taxi.id ? `Taxi #${taxi.id}` : "All Taxis")}</h2>
                             <p>
-                                Capacity: {taxi.spaceForPeople} people & {taxi.spaceForKayaks} boats
+                                {selectedTaxiIndex == 0 && "Total "}Capacity: {taxi.spaceForPeople} people & {taxi.spaceForKayaks} boats
                             </p>
 
                             {viewMode === "week" && (
@@ -253,6 +276,7 @@ function QuickTaxi() {
                                                     <th>Time</th>
                                                     <th>People</th>
                                                     <th>Boats</th>
+                                                    {selectedTaxiIndex == 0 && (<th>Taxi Id</th>)}
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -284,7 +308,13 @@ function QuickTaxi() {
                                                         (sum, res) =>
                                                             sum +
                                                             (res.Boats?.reduce(
-                                                                (bSum, b) => bSum + (b.numberOf || 0),
+                                                                (bSum, b) => {
+                                                                    if (b.isRented) {
+                                                                        return bSum;
+                                                                    } else {
+                                                                        return bSum + (b.numberOf || 0);
+                                                                    }
+                                                                },
                                                                 0
                                                             ) || 0),
                                                         0
@@ -298,6 +328,7 @@ function QuickTaxi() {
                                                             </td>
                                                             <td>{people}</td>
                                                             <td>{boats}</td>
+                                                            {selectedTaxiIndex == 0 && (<td>{trip.TaxiId}</td>)}
                                                         </tr>
                                                     );
                                                 })}

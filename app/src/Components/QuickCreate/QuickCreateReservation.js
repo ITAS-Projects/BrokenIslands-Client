@@ -15,6 +15,8 @@ function QuickCreateReservation() {
     const [boats, setBoats] = useState([]);
     const [taxis, setTaxis] = useState([]);
 
+    const [loading, setLoading] = useState(false);
+
     const editTripAtIndex = (index, newData) => {
         const updatedTrips = [...trips];
         updatedTrips[index] = { ...updatedTrips[index], ...newData };
@@ -84,6 +86,7 @@ function QuickCreateReservation() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         // Prepare payload to send to the backend
         const payload = {
@@ -108,7 +111,6 @@ function QuickCreateReservation() {
         try {
             // Send the data to the backend for validation and creation
             const response = await axiosAuth.post(`${backendURL}/quick`, payload);
-            console.log(response);
             // Handle success - inform the user and redirect
             alert("Reservation created successfully. Redirecting...");
             navigate('/quick/reservation');
@@ -118,6 +120,7 @@ function QuickCreateReservation() {
             // show error message, or default error if missing
             alert(error.response?.data?.error || "An error occurred while creating the reservation. Please try again.");
         }
+        setLoading(false);
     };
 
     return (
@@ -328,7 +331,7 @@ function QuickCreateReservation() {
                 </div>
 
 
-                <button type="submit" className="next">Save Changes</button>
+                <button type="submit" className={!loading && "next"} disabled={loading}>{loading ? "Loading..." : "Create New Reservation"}</button>
             </form>
         </div>
     );

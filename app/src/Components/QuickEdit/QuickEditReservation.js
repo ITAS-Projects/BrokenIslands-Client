@@ -157,7 +157,6 @@ function QuickEditReservation() {
                 setupPeople(data.Group?.People, data.Group?.leader?.id);
                 setupBoats(data.Boats);
                 setupTrips(data.Trips);
-                console.log(data);
                 setLoading(false);
             })
             .catch(error => {
