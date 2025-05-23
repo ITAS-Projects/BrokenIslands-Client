@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 function Home() {
   const navigate = useNavigate();
-  const { user } = useUser();quick/edit/reservation
+  const { user } = useUser();
 
   return (
     <div className="Home">

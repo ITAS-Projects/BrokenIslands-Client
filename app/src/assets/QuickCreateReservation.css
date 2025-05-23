@@ -1,21 +1,21 @@
-.not-error {
+.quick-create-not-error {
     color: black;
 }
 
-.Trip-Object {
+.quick-create-Trip-Object {
     background-color: rgb(231, 231, 231);
     padding: 10px 20px;
     border-radius: 20px;
     margin-top: 10px;
 }
 
-.changed {
+.quick-create-changed {
     background-color: rgb(168, 214, 240);
 }
 
-.new {
+.quick-create-new {
     background-color: rgb(170, 240, 168);
 }
-button:has( + button) {
+button.quick-create:has( + button) {
     margin-right: 10px;
 }

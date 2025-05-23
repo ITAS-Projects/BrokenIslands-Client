@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import axiosAuth from "../authRequest";
 import Confirmation from "../Confirmation";
 import "../../assets/QuickReservation.css";
+import { useNavigate } from "react-router-dom";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
 
 function QuickReservation() {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [reservations, setReservations] = useState([]);
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -263,7 +265,7 @@ function QuickReservation() {
 
 
                 <div className="align-right">
-                    <button onClick={() =>{window.location.href = `/quick/reservation/edit/${selectedReservation.id}`}}>
+                    <button onClick={() =>{navigate(`/quick/reservation/edit/${selectedReservation.id}`)}}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="270 200 210 210"><path d="M276.3 255L416.3 395M323.3 206.7L463.3 346.7M276 267L335 207M461.7 340.9V400.9M409.7 392.9H469.7" stroke="#000" strokeWidth="17" fill="none" /></svg>
                     </button>
                     <button onClick={() => handleDelete(selectedReservation.id)}>

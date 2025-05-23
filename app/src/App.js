@@ -1,6 +1,9 @@
 import React from "react";
 import "./assets/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import "./assets/Wizard.css"
+
 import Login from "./Components/Login.js";
 
 import NoPage from "./Components/NoPage.js";
