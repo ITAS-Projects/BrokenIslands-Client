@@ -277,6 +277,9 @@ function QuickReservation() {
 
                 <p><strong>Leader:</strong> {selectedReservation.Group?.leader?.name}</p>
                 <p><strong>People:</strong> {selectedReservation.Group?.numberOfPeople}</p>
+                {selectedReservation.Group?.notes && (
+                    <p><strong>Notes:</strong> {selectedReservation.Group?.notes}</p>
+                )}
 
                 <h4>Trips:</h4>
                 <ul>

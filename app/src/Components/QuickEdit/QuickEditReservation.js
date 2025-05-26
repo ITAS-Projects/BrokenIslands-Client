@@ -11,6 +11,7 @@ function QuickEditReservation() {
     const [loading, setLoading] = useState(true);
     const [reservation, setReservation] = useState(null);
     const [numberOfPeople, setNumOfPeople] = useState(0);
+    const [notes, setNotes] = useState("");
 
     const [prevTrips, setPrevTrips] = useState(null);
     const [prevBoats, setPrevBoats] = useState(null);
@@ -155,6 +156,7 @@ function QuickEditReservation() {
                 setReservation(data);
                 setNumOfPeople(data.Group?.numberOfPeople || 0)
                 setupPeople(data.Group?.People, data.Group?.leader?.id);
+                setNotes(data.Group?.notes);
                 setupBoats(data.Boats);
                 setupTrips(data.Trips);
                 setLoading(false);
@@ -188,6 +190,7 @@ function QuickEditReservation() {
         const updatedData = {
         trips: trips,
         numberOfPeople,
+        notes,
         people,
         boats
         };
@@ -231,6 +234,15 @@ function QuickEditReservation() {
                     onChange={e => setNumOfPeople(Number(e.target.value))}
                     min="1"
                     required
+                />
+
+                <label>Notes for trips:</label>
+                <input
+                    className="quickPeopleInputNumber"
+                    type="text"
+                    id="notes"
+                    value={notes}
+                    onChange={e => setNotes(e.target.value)}
                 />
 
                 <div>
@@ -469,16 +481,42 @@ function QuickEditReservation() {
                                             </select>
                                         </label>
 
-                                        {trip.timeFrame?.includes("Custom") && (<label>Time:
-                                            <input
-                                                className="editTripInputTime"
-                                                type="time"
-                                                id="timeStart"
-                                                value={trip.timeStart}
-                                                onChange={e => editTripAtIndex(index, { timeStart: e.target.value })}
-                                                required
-                                            />
-                                        </label>)}
+                                        {trip.timeFrame?.includes("Custom") && (
+                                            <>
+                                                <label>Time:
+                                                <input
+                                                    className="editTripInputTime"
+                                                    type="time"
+                                                    id="timeStart"
+                                                    value={trip.timeStart}
+                                                    onChange={e => editTripAtIndex(index, { timeStart: e.target.value })}
+                                                    required
+                                                />
+                                                </label>
+
+                                                <label>From Place:
+                                                <input
+                                                    className="editTripInputText"
+                                                    type="text"
+                                                    id="fromPlace"
+                                                    value={trip.fromPlace}
+                                                    onChange={e => editTripAtIndex(index, { fromPlace: e.target.value })}
+                                                    required
+                                                />
+                                                </label>
+
+                                                <label>To Place:
+                                                <input
+                                                    className="editTripInputText"
+                                                    type="text"
+                                                    id="toPlace"
+                                                    value={trip.toPlace}
+                                                    onChange={e => editTripAtIndex(index, { toPlace: e.target.value })}
+                                                    required
+                                                />
+                                                </label>
+                                            </>
+                                        )}
 
                                         <label>Taxi:
                                             <select
