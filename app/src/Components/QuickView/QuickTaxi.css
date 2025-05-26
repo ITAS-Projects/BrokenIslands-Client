@@ -1,0 +1,48 @@
+/* Weekday row above the calendar */
+.weekday-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #f9f9f9;
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
+}
+
+.weekday-cell {
+  flex: 1;
+  text-align: center;
+}
+
+/* Scroll container setup */
+.calendar-scroll-container {
+  overflow-y: scroll;
+  position: relative;
+  height: 560px; /* or your `monthHeight` */
+  overflow-anchor: none; /* This is the magic */
+
+  
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.calendar-scroll-container::-webkit-scrollbar {
+  display: none;            /* Chrome, Safari, Edge */
+}
+
+/* Each calendar block */
+.calendar-container {
+  margin: 0;
+  padding: 0;
+}
+
+.calendar-container .rbc-date-cell{
+  color: black;
+}
+
+.calendar-container .rbc-month-view {
+  border: 0 !important;
+}
+
+.monthContainer {
+    height: 1680px;
+}
