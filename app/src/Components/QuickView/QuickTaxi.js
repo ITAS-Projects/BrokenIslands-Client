@@ -70,8 +70,19 @@ function QuickTaxi() {
     const existingClassName = children.props.className || "";
 
     // For cells not in the main month, add class for grayed-out background
+    let newClassName = existingClassName;
+    if (existingClassName.includes("rbc-off-range-bg")) {
+        if (1 !== monthIndex) {
+            newClassName = existingClassName.replace("rbc-off-range-bg", "");
+        }
+        newClassName = mergeClassNames(newClassName, "remove-row");
+        return React.cloneElement(children, {
+            className: newClassName,
+        });
+    }
+
     if (1 !== monthIndex) {
-      const newClassName = mergeClassNames(existingClassName, "rbc-off-range-bg");
+        newClassName = mergeClassNames(newClassName, "rbc-off-range-bg");
       return React.cloneElement(children, {
         className: newClassName,
       });
@@ -98,7 +109,7 @@ function QuickTaxi() {
       <div ref={containerRef} className="calendar-scroll-container" onScroll={onScroll} style={{ height: `${monthHeight}px`, overflowY: "auto" }}>
         <div className="monthContainer" style={{ margin: `${redundantScroll}px 0px` }}>
             {months.map((month, idx) => (
-            <div key={idx} className="calendar-container" style={{ height: `${monthHeight}px` }}>
+            <div key={idx} className={`calendar-container${idx == 0 ? " shift" : ""}`} style={{ height: `${monthHeight}px`}}>
                 <Calendar
                 localizer={localizer}
                 events={[]}

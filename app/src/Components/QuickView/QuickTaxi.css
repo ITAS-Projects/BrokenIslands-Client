@@ -17,7 +17,6 @@
 .calendar-scroll-container {
   overflow-y: scroll;
   position: relative;
-  height: 560px; /* or your `monthHeight` */
   overflow-anchor: none; /* This is the magic */
 
   
@@ -40,9 +39,17 @@
 }
 
 .calendar-container .rbc-month-view {
-  border: 0 !important;
+  border: 0;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
 }
 
 .monthContainer {
     height: 1680px;
+}
+
+.rbc-month-row:has(
+  .rbc-row-bg > :nth-child(7).remove-row
+) {
+    display: none;
 }
