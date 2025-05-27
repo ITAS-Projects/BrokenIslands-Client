@@ -2,7 +2,7 @@
 .weekday-header {
   display: flex;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: 8px 0px;
   background: #f9f9f9;
   font-weight: bold;
   border-bottom: 1px solid #ccc;
@@ -52,4 +52,11 @@
   .rbc-row-bg > :nth-child(7).remove-row
 ) {
     display: none;
+}
+
+
+.DateNavigation {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
 }

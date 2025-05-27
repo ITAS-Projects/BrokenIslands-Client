@@ -1,134 +1,109 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+
 import format from "date-fns/format";
-import parse from "date-fns/parse";
-import startOfWeek from "date-fns/startOfWeek";
-import getDay from "date-fns/getDay";
-import addMonths from "date-fns/addMonths";
-import subMonths from "date-fns/subMonths";
-import isSameMonth from "date-fns/isSameMonth";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import "./QuickTaxi.css";
+import CustomCalendar from "./CustomCalendar";
+import axiosAuth from "../authRequest";
 
-const locales = {
-  "en-US": require("date-fns/locale/en-US"),
-};
+const backendURL = process.env.REACT_APP_API_BASE_URL;
 
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-});
-
-const redundantScroll = 10000;
-const monthHeight = 600 - 40;
+const monthHeight = 560;
 
 function QuickTaxi() {
-  const [mainMonthDate, setMainMonthDate] = useState(new Date());
-  const containerRef = useRef(null);
-
-  // Use date-fns to get months: previous, current, next
-  const months = [subMonths(mainMonthDate, 1), mainMonthDate, addMonths(mainMonthDate, 1)];
-
-  // Scroll detection to find the main (centered) month
-  const onScroll = useCallback(async () => {
-    if (!containerRef.current) return;
-
-    const scrollTop = containerRef.current.scrollTop;
-
-    if (scrollTop < 0.5 * monthHeight + redundantScroll) {
-        setMainMonthDate(months[0]);
-        setTimeout(() => {
-            containerRef.current.scrollTop = scrollTop + monthHeight;
-        });
-
-    } else if (scrollTop > 1.5 * monthHeight + redundantScroll) {
-        setMainMonthDate(months[2]);
-        // removes the flicker during main month change
-        setTimeout(() => {
-            containerRef.current.scrollTop = scrollTop - monthHeight;
-        });
-    }
-
-  }, [mainMonthDate, months]);
+  const [taxis, setTaxis] = useState([]);
+  const [selectedTaxiIndex, setSelectedTaxiIndex] = useState(-1); // -1 = All
+  const [taxi, setTaxi] = useState(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [loading, setLoading] = useState(true);
+  const [selectedTrip, setSelectedTrip] = useState(null);
 
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = monthHeight + redundantScroll;
-    }
+    axiosAuth
+      .get(`${backendURL}/taxis`)
+      .then((response) => {
+        response.data?.forEach((taxi) => {
+          taxi?.Trips?.forEach((trip) => {
+            const [year, month, day] = trip.day?.split("T")[0].split("-");
+            trip.day = new Date(year, month - 1, day);
+          });
+        });
+        setTaxis(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching taxis:", error);
+        setLoading(false);
+      });
   }, []);
 
-  const mergeClassNames = (existing = "", added = "") => {
-    const set = new Set([...existing.split(" "), ...added.split(" ")]);
-    return Array.from(set).filter(Boolean).join(" ");
+  useEffect(() => {
+    if (selectedTaxiIndex === -1) {
+      setTaxi({ Trips: taxis.flatMap((t) => t.Trips || []) });
+    } else {
+      setTaxi(taxis[selectedTaxiIndex]);
+    }
+  }, [taxis, selectedTaxiIndex]);
+
+  const events = (taxi?.Trips || []).map((trip, index) => ({
+    id: trip.id || index,
+    title: selectedTaxiIndex === -1 ? `${trip.Taxi?.name || `Taxi #${trip.TaxiId}`}: ${trip.timeFrame || "Trip"}` : trip.description || "Trip",
+    start: trip.day,
+    end: trip.day,
+    originalTrip: trip,
+  }));
+
+  const handleTripClick = (event) => {
+    setSelectedTrip(event.originalTrip);
   };
 
-  // Custom wrapper to apply grayed-out background using rbc-off-range-bg
-  const DateCellWrapper = ({ children, monthIndex }) => {
-    const existingClassName = children.props.className || "";
-
-    // For cells not in the main month, add class for grayed-out background
-    let newClassName = existingClassName;
-    if (existingClassName.includes("rbc-off-range-bg")) {
-        if (1 !== monthIndex) {
-            newClassName = existingClassName.replace("rbc-off-range-bg", "");
-        }
-        newClassName = mergeClassNames(newClassName, "remove-row");
-        return React.cloneElement(children, {
-            className: newClassName,
-        });
-    }
-
-    if (1 !== monthIndex) {
-        newClassName = mergeClassNames(newClassName, "rbc-off-range-bg");
-      return React.cloneElement(children, {
-        className: newClassName,
-      });
-    }
-
-    // For main month, just render normally
-    return children;
-  };
+  const sortedTaxis = [...taxis].sort((a, b) => {
+    const nameA = a.name || `Taxi #${a.id}`;
+    const nameB = b.name || `Taxi #${b.id}`;
+    return nameA.localeCompare(nameB);
+  });
 
   return (
     <div>
-      <h2 style={{ textAlign: "center" }}>{format(months[1], "MMMM yyyy")}</h2>
+      <h2 style={{ textAlign: "center" }}>{format(currentMonth, "MMMM yyyy")}</h2>
 
-      {/* Custom day-of-week header */}
-      <div className="weekday-header">
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, idx) => (
-          <div key={idx} className="weekday-cell">
-            {day}
-          </div>
-        ))}
+      {/* Taxi selector */}
+      <div style={{ marginBottom: "1rem", textAlign: "center" }}>
+        <label style={{ marginRight: "0.5rem" }}>Select Taxi:</label>
+        <select value={selectedTaxiIndex} onChange={(e) => setSelectedTaxiIndex(Number(e.target.value))}>
+          <option value={-1}>All Taxis ({taxis.reduce((sum, t) => sum + (t.Trips?.length || 0), 0)} trips)</option>
+          {sortedTaxis.map((taxi, index) => {
+            const name = taxi.name || `Taxi #${taxi.id}`;
+            return (
+              <option key={taxi.id || index} value={taxis.indexOf(taxi)}>
+                {name} ({taxi.Trips?.length || 0} trips)
+              </option>
+            );
+          })}
+        </select>
       </div>
-
-      {/* Scrollable calendar container */}
-      <div ref={containerRef} className="calendar-scroll-container" onScroll={onScroll} style={{ height: `${monthHeight}px`, overflowY: "auto" }}>
-        <div className="monthContainer" style={{ margin: `${redundantScroll}px 0px` }}>
-            {months.map((month, idx) => (
-            <div key={idx} className={`calendar-container${idx == 0 ? " shift" : ""}`} style={{ height: `${monthHeight}px`}}>
-                <Calendar
-                localizer={localizer}
-                events={[]}
-                startAccessor="start"
-                endAccessor="end"
-                style={{ height: monthHeight }}
-                views={["month"]}
-                defaultView="month"
-                toolbar={false}
-                date={month}
-                components={{
-                    header: () => null,
-                    dateCellWrapper: (props) => <DateCellWrapper {...props} monthIndex={idx} />,
-                }}
-                />
-            </div>
-            ))}
+      
+      {selectedTrip ? (
+        <div className="day-view">
+          <h3>Trip Details</h3>
+          <p>
+            <strong>Date:</strong> {selectedTrip.day.toDateString()}
+          </p>
+          <p>
+            <strong>Description:</strong> {selectedTrip.description}
+          </p>
+          <p>
+            <strong>Trip ID:</strong> {selectedTrip.id}
+          </p>
+          {selectedTrip.Taxi && (
+            <p>
+              <strong>Taxi:</strong> {selectedTrip.Taxi.name || selectedTrip.Taxi.id}
+            </p>
+          )}
+          <button onClick={() => setSelectedTrip(null)}>Close</button>
         </div>
-      </div>
+      ) : (
+        <CustomCalendar events={events} monthHeight={monthHeight} onEventClick={handleTripClick} dateDisplay={setCurrentMonth} currentDate={currentMonth} />
+      )}
+      {loading && (<p>loading taxis...</p>)}
     </div>
   );
 }
