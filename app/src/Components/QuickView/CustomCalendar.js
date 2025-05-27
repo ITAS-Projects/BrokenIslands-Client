@@ -4,8 +4,14 @@ import addMonths from "date-fns/addMonths";
 import subMonths from "date-fns/subMonths";
 import format from "date-fns/format";
 import parse from "date-fns/parse";
-import startOfWeek from "date-fns/startOfWeek";
 import getDay from "date-fns/getDay";
+import {
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  differenceInCalendarWeeks
+} from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
 import '../../assets/CustomCalender.css'
@@ -24,7 +30,7 @@ const localizer = dateFnsLocalizer({
 
 const redundantScroll = 10000;
 
-const CustomCalendar = ({ events, monthHeight, onEventClick, dateDisplay = null, currentDate = new Date() }) => {
+const CustomCalendar = ({ events, monthHeight, onDateClick, dateDisplay = null, currentDate = new Date() }) => {
     const [mainMonthDate, setMainMonthDateHidden] = useState(currentDate);
   const setMainMonthDate = (date) => {
     setMainMonthDateHidden(date);
@@ -37,7 +43,6 @@ const CustomCalendar = ({ events, monthHeight, onEventClick, dateDisplay = null,
   const months = [subMonths(mainMonthDate, 1), mainMonthDate, addMonths(mainMonthDate, 1)];
 
   const boundMonthHeight = Math.min(window.innerHeight * 0.5, monthHeight);
-  console.log(window.innerHeight);
 
   const onScroll = useCallback(() => {
     if (!containerRef.current) return;
@@ -58,7 +63,7 @@ const CustomCalendar = ({ events, monthHeight, onEventClick, dateDisplay = null,
 
   useEffect(() => {
     if (containerRef.current) {
-      containerRef.current.scrollTop = boundMonthHeight + redundantScroll;
+      containerRef.current.scrollTop = boundMonthHeight + redundantScroll + (boundMonthHeight * getWeekFractionInMonth(currentDate));
     }
   }, []);
 
@@ -87,31 +92,52 @@ const CustomCalendar = ({ events, monthHeight, onEventClick, dateDisplay = null,
     return children;
   };
 
+
+  const getWeekFractionInMonth = (date) => {
+    const startOfMonthDate = startOfMonth(date);
+    const endOfMonthDate = endOfMonth(date);
+
+    const monthStartWeek = startOfWeek(startOfMonthDate, { weekStartsOn: 0 });
+    const monthEndWeek = endOfWeek(endOfMonthDate, { weekStartsOn: 0 });
+
+    const currentWeekStart = startOfWeek(date, { weekStartsOn: 0 });
+
+    let currentWeek = differenceInCalendarWeeks(currentWeekStart, monthStartWeek, { weekStartsOn: 0 });
+    let totalWeeks = differenceInCalendarWeeks(monthEndWeek, monthStartWeek, { weekStartsOn: 0 }) + 1;
+
+    currentWeek = currentWeek - 1.1;
+    if (getDay(endOfMonthDate) !== 6) {
+      totalWeeks = Math.max(1, totalWeeks - 1);
+    } 
+
+    return currentWeek / totalWeeks;
+  }
+
   return (
     <>
       <div className="DateNavigation">
         <button
           onClick={() => {
-            setMainMonthDate(new Date());
+            setMainMonthDate(months[0]);
             containerRef.current.scrollTop = boundMonthHeight + redundantScroll;
+          }}>
+          Previous Month
+        </button>
+
+        <button
+          onClick={() => {
+            setMainMonthDate(new Date());
+            containerRef.current.scrollTop = boundMonthHeight + redundantScroll + (boundMonthHeight * getWeekFractionInMonth(new Date()));
           }}>
           Today
         </button>
 
         <button
           onClick={() => {
-            setMainMonthDate(new Date());
+            setMainMonthDate(months[2]);
             containerRef.current.scrollTop = boundMonthHeight + redundantScroll;
           }}>
-          Today
-        </button>
-
-        <button
-          onClick={() => {
-            setMainMonthDate(new Date());
-            containerRef.current.scrollTop = boundMonthHeight + redundantScroll;
-          }}>
-          Today
+          Next Month
         </button>
       </div>
 
@@ -137,7 +163,10 @@ const CustomCalendar = ({ events, monthHeight, onEventClick, dateDisplay = null,
                 view="month"
                 toolbar={false}
                 date={month}
-                onSelectEvent={onEventClick}
+                selectable={true}
+                onSelectSlot={onDateClick}
+                onSelectEvent={onDateClick}
+                onDrillDown={onDateClick}
                 components={{
                   header: () => null,
                   dateCellWrapper: (props) => <DateCellWrapper {...props} monthIndex={idx} />,
