@@ -46,8 +46,8 @@ function QuickTaxi() {
     }
   }, [taxis, selectedTaxiIndex]);
 
-  const events = (taxi?.Trips || []).map((trip, index) => ({
-    id: trip.id || index,
+  const events = (taxi?.Trips || []).map((trip) => ({
+    id: trip.id,
     title: `${selectedTaxiIndex === -1 ? `${trip.Taxi?.name || `Taxi #${trip.TaxiId}`}:` : ""} ${trip.timeFrame || "Trip"}`,
     start: trip.day,
     end: trip.day,
@@ -55,8 +55,10 @@ function QuickTaxi() {
     originalTrip: trip,
   })).sort((a,b) => a.time.localeCompare(b.time)); // sort in event list so i never need to sort again
 
-  const handleTripClick = (trip) => {
-    setSelectedTrip(trip.originalTrip);
+  const handleTripClick = async (trip) => {
+    let result = await axiosAuth.get(`${backendURL}/trips/${trip.id}`)
+    .catch(error => alert(error));
+    setSelectedTrip(result.data);
     setViewType("Trip");
   };
 
@@ -120,17 +122,29 @@ function QuickTaxi() {
         <div className="day-view">
           <h3>Trip Details</h3>
           <p>
-            <strong>Date:</strong> {selectedTrip.day.toDateString()}
+            <strong>Date:</strong> {(new Date(selectedTrip.day?.split("T")[0].split("-")[0], selectedTrip.day?.split("T")[0].split("-")[1] - 1, selectedTrip.day?.split("T")[0].split("-")[2])).toDateString()}
           </p>
           <p>
-            <strong>Description:</strong> {selectedTrip.description}
+            <strong>Time:</strong> {((Number(selectedTrip.timeStart?.split(":")?.[0]) + 11) % 12) + 1}:{selectedTrip.timeStart?.split(":")?.[1]} {Number(selectedTrip.timeStart?.split(":")?.[0]) > 11 ? "PM" : "AM"}
           </p>
           <p>
-            <strong>Trip ID:</strong> {selectedTrip.id}
+            <strong>Locations:</strong> From: {selectedTrip.fromPlace}, To: {selectedTrip.toPlace}
           </p>
+            <strong>Reservations:</strong> {selectedTrip.Reservations?.map(reservation => {
+              
+              return (
+                <div style={{backgroundColor: "#eee", padding: 20, marginBottom: 10, borderRadius: 30}}>
+                  <p style={{margin:0}}>Leader: {reservation?.Group?.leader?.name}</p>
+                  <p style={{margin:0}}>Number of People: {reservation?.Group?.numberOfPeople}</p>
+                  <p style={{margin:0}}>Number of Boats: {reservation?.Boats?.reduce((sum, boat) => {
+                    return sum + (boat.isRented ? 0 : boat.numberOf);
+                  }, 0)}</p>
+                </div>
+              )
+            })}
           {selectedTrip.Taxi && (
             <p>
-              <strong>Taxi:</strong> {selectedTrip.Taxi.name || selectedTrip.Taxi.id}
+              <strong>Taxi id:</strong> {selectedTrip.Taxi.id}
             </p>
           )}
           <button onClick={() => setViewType("Date")}>Close</button>
