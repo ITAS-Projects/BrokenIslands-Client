@@ -61,37 +61,51 @@ const Navbar = () => {
             <img src="/logo192.png" alt="Logo" className="navbar-logo" />
           </Link>
 
-          <ul className="navbar-nav-list">
+          {/* Desktop-only navigation */}
+          <ul className="navbar-nav-list desktop-only">
             <li><Link to="/">Home</Link></li>
             <li><Link to="/quick">Quick View</Link></li>
           </ul>
 
+          {/* Dropdown for all screen sizes */}
           <div className="navbar-dropdown" ref={dropdownRef}>
             <button
               className="navbar-dropdown-toggle"
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
-              Manage ▼
+              <span className="desktop-only">Manage ▼</span>
+              <span className="mobile-only">Menu ▼</span>
             </button>
             <ul className={`navbar-dropdown-menu ${dropdownOpen ? "open" : ""}`}>
+              {/* Mobile-only links */}
+              <li className="mobile-only"><Link to="/" onClick={() => setDropdownOpen(false)}>Home</Link></li>
+              <li className="mobile-only"><Link to="/quick" onClick={() => setDropdownOpen(false)}>Quick View</Link></li>
+
+              {/* Shared links */}
               <li><Link to="/taxis" onClick={() => setDropdownOpen(false)}>Taxis</Link></li>
               <li><Link to="/users" onClick={() => setDropdownOpen(false)}>Users</Link></li>
+
+              {/* Mobile-only logout */}
+              <li className="mobile-only">
+                <button onClick={handleLogout} className="dropdown-logout-button">Logout</button>
+              </li>
             </ul>
           </div>
-        </nav>
 
-        <span className="navbar-user-manage">
-          <img
-            className="navbar-profile-pic"
-            src={userDetails.picture || "/225-default-avatar.png"}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = "/225-default-avatar.png";
-            }}
-            alt={`${userDetails.givenName || "User"}'s profile`}
-          />
-          <button onClick={handleLogout}>Logout</button>
-        </span>
+          {/* Desktop-only user info and logout */}
+          <span className="navbar-user-manage desktop-only">
+            <img
+              className="navbar-profile-pic"
+              src={userDetails.picture || "/225-default-avatar.png"}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/225-default-avatar.png";
+              }}
+              alt={`${userDetails.givenName || "User"}'s profile`}
+            />
+            <button onClick={handleLogout}>Logout</button>
+          </span>
+        </nav>
       </header>
 
       <main className="navbar-main">

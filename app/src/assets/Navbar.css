@@ -11,6 +11,7 @@
   display: flex;
   align-items: center;
   gap: 2rem;
+  width: 100%;
 }
 
 .navbar-logo {
@@ -75,6 +76,7 @@
 
 .navbar-dropdown {
   position: relative;
+  margin-left: auto;
 }
 
 .navbar-dropdown-toggle {
@@ -124,4 +126,51 @@
 .navbar-dropdown-menu li a:hover {
   background-color: #007bff;
   color: white;
+}
+
+.dropdown-logout-button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  text-align: left;
+  width: 100%;
+  padding: 10px 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dropdown-logout-button:hover {
+  background-color: #007bff;
+}
+
+/* Responsive handling */
+.desktop-only {
+  display: flex;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+  .navbar-nav {
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .navbar-header {
+    padding: 1rem;
+  }
+
+  .navbar-logo {
+    margin-right: 0;
+  }
 }

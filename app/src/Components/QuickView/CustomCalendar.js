@@ -5,16 +5,10 @@ import subMonths from "date-fns/subMonths";
 import format from "date-fns/format";
 import parse from "date-fns/parse";
 import getDay from "date-fns/getDay";
-import {
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  differenceInCalendarWeeks
-} from "date-fns";
+import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, differenceInCalendarWeeks } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
-import '../../assets/CustomCalender.css'
+import "../../assets/CustomCalender.css";
 
 const locales = {
   "en-US": require("date-fns/locale/en-US"),
@@ -31,13 +25,13 @@ const localizer = dateFnsLocalizer({
 const redundantScroll = 10000;
 
 const CustomCalendar = ({ events, monthHeight, onDateClick, onEventClick, dateDisplay = null, currentDate = new Date(), displayPopup = false, forceDisplay = false }) => {
-    const [mainMonthDate, setMainMonthDateHidden] = useState(currentDate);
-  const setMainMonthDate = (date) => {
+  const [mainMonthDate, setMainMonthDateHidden] = useState(currentDate);
+  const setMainMonthDate = (date, fromScroll = false) => {
     setMainMonthDateHidden(date);
     if (dateDisplay != null) {
-        dateDisplay(date);
+      dateDisplay(date, fromScroll);
     }
-  }
+  };
   const containerRef = useRef(null);
 
   const months = [subMonths(mainMonthDate, 1), mainMonthDate, addMonths(mainMonthDate, 1)];
@@ -49,12 +43,12 @@ const CustomCalendar = ({ events, monthHeight, onDateClick, onEventClick, dateDi
     const scrollTop = containerRef.current.scrollTop;
 
     if (scrollTop < 0.5 * boundMonthHeight + redundantScroll) {
-      setMainMonthDate(months[0]);
+      setMainMonthDate(months[0], true);
       setTimeout(() => {
         containerRef.current.scrollTop = scrollTop + boundMonthHeight;
       });
     } else if (scrollTop > 1.5 * boundMonthHeight + redundantScroll) {
-      setMainMonthDate(months[2]);
+      setMainMonthDate(months[2], true);
       setTimeout(() => {
         containerRef.current.scrollTop = scrollTop - boundMonthHeight;
       });
@@ -63,7 +57,7 @@ const CustomCalendar = ({ events, monthHeight, onDateClick, onEventClick, dateDi
 
   useEffect(() => {
     if (containerRef.current) {
-      containerRef.current.scrollTop = boundMonthHeight + redundantScroll + (boundMonthHeight * getWeekFractionInMonth(currentDate));
+      containerRef.current.scrollTop = boundMonthHeight + redundantScroll + boundMonthHeight * getWeekFractionInMonth(currentDate);
     }
   }, []);
 
@@ -92,7 +86,6 @@ const CustomCalendar = ({ events, monthHeight, onDateClick, onEventClick, dateDi
     return children;
   };
 
-
   const getWeekFractionInMonth = (date) => {
     const startOfMonthDate = startOfMonth(date);
     const endOfMonthDate = endOfMonth(date);
@@ -108,10 +101,10 @@ const CustomCalendar = ({ events, monthHeight, onDateClick, onEventClick, dateDi
     currentWeek = currentWeek - 1.1;
     if (getDay(endOfMonthDate) !== 6) {
       totalWeeks = Math.max(1, totalWeeks - 1);
-    } 
+    }
 
     return currentWeek / totalWeeks;
-  }
+  };
 
   return (
     <>
@@ -127,7 +120,7 @@ const CustomCalendar = ({ events, monthHeight, onDateClick, onEventClick, dateDi
         <button
           onClick={() => {
             setMainMonthDate(new Date());
-            containerRef.current.scrollTop = boundMonthHeight + redundantScroll + (boundMonthHeight * getWeekFractionInMonth(new Date()));
+            containerRef.current.scrollTop = boundMonthHeight + redundantScroll + boundMonthHeight * getWeekFractionInMonth(new Date());
           }}>
           Today
         </button>
@@ -150,9 +143,9 @@ const CustomCalendar = ({ events, monthHeight, onDateClick, onEventClick, dateDi
       </div>
 
       <div ref={containerRef} className="calendar-scroll-container" onScroll={onScroll} style={{ height: `${boundMonthHeight}px`, overflowY: "auto" }}>
-        <div className="monthContainer" style={{height: `${3*boundMonthHeight}px`, margin: `${redundantScroll}px 0px` }}>
+        <div className="monthContainer" style={{ height: `${3 * boundMonthHeight}px`, margin: `${redundantScroll}px 0px` }}>
           {months.map((month, idx) => (
-            <div className='calendar-container' style={{ height: `${boundMonthHeight}px` }}>
+            <div key={idx} className="calendar-container" style={{ height: `${boundMonthHeight}px` }}>
               <Calendar
                 localizer={localizer}
                 events={events}

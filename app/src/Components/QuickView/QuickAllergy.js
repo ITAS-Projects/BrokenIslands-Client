@@ -10,7 +10,7 @@ const backendURL = process.env.REACT_APP_API_BASE_URL;
 
 const monthHeight = 560;
 
-function QuickAllergy() {
+function QuickKitchen() {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState(new Date());
@@ -181,7 +181,7 @@ function QuickAllergy() {
       ) : viewType == "Date" ? (
         <>
           <div className="day-view">
-            <h3>Trips On {selectedDay.toDateString()}</h3>
+            <h3>Reservations During {selectedDay.toDateString()}</h3>
             <div className="DateNavigation">
               <button
                 onClick={() => {
@@ -238,4 +238,4 @@ function QuickAllergy() {
   );
 }
 
-export default QuickAllergy;
+export default QuickKitchen;

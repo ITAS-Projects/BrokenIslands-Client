@@ -6,6 +6,8 @@ import { subDays, addDays, min } from "date-fns";
 import CustomCalendar from "./CustomCalendar";
 import axiosAuth from "../authRequest";
 
+import "../../assets/QuickTaxi.css"
+
 const backendURL = process.env.REACT_APP_API_BASE_URL;
 
 const monthHeight = 560;
@@ -15,7 +17,14 @@ function QuickTaxi() {
   const [selectedTaxiIndex, setSelectedTaxiIndex] = useState(-1); // -1 = All
   const [taxi, setTaxi] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedDay, setSelectedDay] = useState(new Date());
+  const [selectedDay, setSelectedDayhidden] = useState(new Date());
+  const setSelectedDay = (date, fromScroll = false) => {
+    setSelectedDayhidden(date);
+    if (!fromScroll) {
+      setLastSelectedDay(date);
+    }
+  };
+  const [lastSelectedDay, setLastSelectedDay] = useState(new Date());
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [viewType, setViewType] = useState(null);
 
@@ -46,18 +55,19 @@ function QuickTaxi() {
     }
   }, [taxis, selectedTaxiIndex]);
 
-  const events = (taxi?.Trips || []).map((trip) => ({
-    id: trip.id,
-    title: `${selectedTaxiIndex === -1 ? `${trip.Taxi?.name || `Taxi #${trip.TaxiId}`}:` : ""} ${trip.timeFrame || "Trip"}`,
-    start: trip.day,
-    end: trip.day,
-    time: trip.timeStart,
-    originalTrip: trip,
-  })).sort((a,b) => a.time.localeCompare(b.time)); // sort in event list so i never need to sort again
+  const events = (taxi?.Trips || [])
+    .map((trip) => ({
+      id: trip.id,
+      title: `${selectedTaxiIndex === -1 ? `${trip.Taxi?.name || `Taxi #${trip.TaxiId}`}:` : ""} ${trip.timeFrame || "Trip"}`,
+      start: trip.day,
+      end: trip.day,
+      time: trip.timeStart,
+      originalTrip: trip,
+    }))
+    .sort((a, b) => a.time.localeCompare(b.time)); // sort in event list so i never need to sort again
 
   const handleTripClick = async (trip) => {
-    let result = await axiosAuth.get(`${backendURL}/trips/${trip.id}`)
-    .catch(error => alert(error));
+    let result = await axiosAuth.get(`${backendURL}/trips/${trip.id}`).catch((error) => alert(error));
     setSelectedTrip(result.data);
     setViewType("Trip");
   };
@@ -86,7 +96,6 @@ function QuickTaxi() {
     setSelectedDay(clickEvent.start);
     setViewType("Date");
   };
-
 
   const sortedTaxis = [...taxis].sort((a, b) => {
     const nameA = a.name || `Taxi #${a.id}`;
@@ -122,7 +131,7 @@ function QuickTaxi() {
         <div className="day-view">
           <h3>Trip Details</h3>
           <p>
-            <strong>Date:</strong> {(new Date(selectedTrip.day?.split("T")[0].split("-")[0], selectedTrip.day?.split("T")[0].split("-")[1] - 1, selectedTrip.day?.split("T")[0].split("-")[2])).toDateString()}
+            <strong>Date:</strong> {new Date(selectedTrip.day?.split("T")[0].split("-")[0], selectedTrip.day?.split("T")[0].split("-")[1] - 1, selectedTrip.day?.split("T")[0].split("-")[2]).toDateString()}
           </p>
           <p>
             <strong>Time:</strong> {((Number(selectedTrip.timeStart?.split(":")?.[0]) + 11) % 12) + 1}:{selectedTrip.timeStart?.split(":")?.[1]} {Number(selectedTrip.timeStart?.split(":")?.[0]) > 11 ? "PM" : "AM"}
@@ -130,18 +139,26 @@ function QuickTaxi() {
           <p>
             <strong>Locations:</strong> From: {selectedTrip.fromPlace}, To: {selectedTrip.toPlace}
           </p>
-            <strong>Reservations:</strong> {selectedTrip.Reservations?.map(reservation => {
-              
-              return (
-                <div style={{backgroundColor: "#eee", padding: 20, marginBottom: 10, borderRadius: 30}}>
-                  <p style={{margin:0}}>Leader: {reservation?.Group?.leader?.name}</p>
-                  <p style={{margin:0}}>Number of People: {reservation?.Group?.numberOfPeople}</p>
-                  <p style={{margin:0}}>Number of Boats: {reservation?.Boats?.reduce((sum, boat) => {
+          <strong>Reservations:</strong>{" "}
+          {selectedTrip.Reservations?.map((reservation) => {
+            return (
+              <div style={{ backgroundColor: "#eee", padding: 20, marginBottom: 10, borderRadius: 30 }}>
+                <p style={{ margin: 0 }}>Leader: {reservation?.Group?.leader?.name}</p>
+                {reservation?.Group?.notes && (
+                  <p style={{ margin: 0 }}>
+                    <strong>Notes: {reservation?.Group?.notes}</strong>
+                  </p>
+                )}
+                <p style={{ margin: 0 }}>Number of People: {reservation?.Group?.numberOfPeople}</p>
+                <p style={{ margin: 0 }}>
+                  Number of Boats:{" "}
+                  {reservation?.Boats?.reduce((sum, boat) => {
                     return sum + (boat.isRented ? 0 : boat.numberOf);
-                  }, 0)}</p>
-                </div>
-              )
-            })}
+                  }, 0)}
+                </p>
+              </div>
+            );
+          })}
           {selectedTrip.Taxi && (
             <p>
               <strong>Taxi id:</strong> {selectedTrip.Taxi.id}
@@ -188,18 +205,18 @@ function QuickTaxi() {
 
                 let displayTime = `${tempHours}:${tempMinutes} ${afterNoon ? "PM" : "AM"}`;
 
-                let numOfPeople = trip.originalTrip?.Reservations?.reduce((sum, reservation) => sum + (reservation?.Group?.numberOfPeople || 0) , 0);
+                let numOfPeople = trip.originalTrip?.Reservations?.reduce((sum, reservation) => sum + (reservation?.Group?.numberOfPeople || 0), 0);
                 let numOfBoats = trip.originalTrip?.Reservations?.reduce((sum, reservation) => {
-                  let numberOfBoatsInReservation = reservation.Boats?.reduce((recersiveSum, boat) => recersiveSum + ((!boat?.isRented && boat?.numberOf) || 0), 0)
+                  let numberOfBoatsInReservation = reservation.Boats?.reduce((recersiveSum, boat) => recersiveSum + ((!boat?.isRented && boat?.numberOf) || 0), 0);
                   return sum + (numberOfBoatsInReservation || 0);
                 }, 0);
 
                 return (
-                  <div
-                    key={idx}
-                    onClick={() => handleTripClick(trip)}
-                    style={{ backgroundColor: "#eee", padding: "10px", borderRadius: "10px", marginBottom: 10}}>
-                    <p style={{ margin: 0 }}>{selectedTaxiIndex === -1 ? `${trip.originalTrip?.Taxi?.name || `Taxi #${trip.originalTrip?.TaxiId}`}: ` : ""}{displayTime} ({numOfPeople > 1 ? `${numOfPeople} people` : "1 person"}, {`${numOfBoats} boat${numOfBoats !== 1 ? "s" : ""}`}) "{trip.originalTrip?.fromPlace}" to "{trip.originalTrip?.toPlace}"</p>
+                  <div key={idx} onClick={() => handleTripClick(trip)} style={{ backgroundColor: "#eee", padding: "10px", borderRadius: "10px", marginBottom: 10 }}>
+                    <p style={{ margin: 0 }}>
+                      {selectedTaxiIndex === -1 ? `${trip.originalTrip?.Taxi?.name || `Taxi #${trip.originalTrip?.TaxiId}`}: ` : ""}
+                      {displayTime} ({numOfPeople > 1 ? `${numOfPeople} people` : "1 person"}, {`${numOfBoats} boat${numOfBoats !== 1 ? "s" : ""}`}) "{trip.originalTrip?.fromPlace}" to "{trip.originalTrip?.toPlace}"
+                    </p>
                   </div>
                 );
               })}
@@ -207,7 +224,50 @@ function QuickTaxi() {
           </div>
         </>
       ) : (
-        <CustomCalendar events={events} monthHeight={monthHeight} onDateClick={handleDayClick} onEventClick={handleDayClick} dateDisplay={setSelectedDay} currentDate={selectedDay}/>
+        <CustomCalendar events={events} monthHeight={monthHeight} onDateClick={handleDayClick} onEventClick={handleDayClick} dateDisplay={setSelectedDay} selectedDate={setLastSelectedDay} currentDate={selectedDay} />
+      )}
+
+      {viewType != "Trip" && (
+        <div>
+          {viewType == "Date" && (
+            <>
+              <br />
+              <br />
+              <br />
+            </>
+          )}
+          {(() => {
+            let earliestDate = null;
+            const upcomingEvents = events
+              .sort((a, b) => a.start - b.start)
+              .filter((event) => event.start > lastSelectedDay)
+              .filter((event) => {
+                if (earliestDate === null || event.start.getTime() === earliestDate.getTime()) {
+                  earliestDate = event.start;
+                  return true;
+                }
+                return false;
+              })
+              .map((event, idx) => {
+                // Create a new Date to avoid mutating the original
+                return <p key={idx}>{event.title}</p>;
+              });
+
+            return earliestDate ? (
+              <div className="nextTrips">
+                <h2>Next Trips On {earliestDate.toDateString()}:</h2>
+                <div
+                  onClick={() => {
+                    setSelectedDay(earliestDate);
+                    setViewType("Date");
+                  }}
+                  style={{ backgroundColor: "#eee", padding: 10, borderRadius: 25 }}>
+                  {upcomingEvents}
+                </div>
+              </div>
+            ) : null;
+          })()}
+        </div>
       )}
       {loading && <p>loading taxis...</p>}
     </div>
