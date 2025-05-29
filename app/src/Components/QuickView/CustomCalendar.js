@@ -30,7 +30,7 @@ const localizer = dateFnsLocalizer({
 
 const redundantScroll = 10000;
 
-const CustomCalendar = ({ events, monthHeight, onDateClick, dateDisplay = null, currentDate = new Date() }) => {
+const CustomCalendar = ({ events, monthHeight, onDateClick, onEventClick, dateDisplay = null, currentDate = new Date(), displayPopup = false, forceDisplay = false }) => {
     const [mainMonthDate, setMainMonthDateHidden] = useState(currentDate);
   const setMainMonthDate = (date) => {
     setMainMonthDateHidden(date);
@@ -165,8 +165,10 @@ const CustomCalendar = ({ events, monthHeight, onDateClick, dateDisplay = null, 
                 date={month}
                 selectable={true}
                 onSelectSlot={onDateClick}
-                onSelectEvent={onDateClick}
+                onSelectEvent={onEventClick}
                 onDrillDown={onDateClick}
+                popup={displayPopup}
+                showAllEvents={forceDisplay}
                 components={{
                   header: () => null,
                   dateCellWrapper: (props) => <DateCellWrapper {...props} monthIndex={idx} />,

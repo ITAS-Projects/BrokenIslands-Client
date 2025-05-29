@@ -188,7 +188,6 @@ function QuickTaxi() {
 
                 let displayTime = `${tempHours}:${tempMinutes} ${afterNoon ? "PM" : "AM"}`;
 
-                console.log(trip.originalTrip);
                 let numOfPeople = trip.originalTrip?.Reservations?.reduce((sum, reservation) => sum + (reservation?.Group?.numberOfPeople || 0) , 0);
                 let numOfBoats = trip.originalTrip?.Reservations?.reduce((sum, reservation) => {
                   let numberOfBoatsInReservation = reservation.Boats?.reduce((recersiveSum, boat) => recersiveSum + ((!boat?.isRented && boat?.numberOf) || 0), 0)
@@ -208,7 +207,7 @@ function QuickTaxi() {
           </div>
         </>
       ) : (
-        <CustomCalendar events={events} monthHeight={monthHeight} onDateClick={handleDayClick} dateDisplay={setSelectedDay} currentDate={selectedDay} />
+        <CustomCalendar events={events} monthHeight={monthHeight} onDateClick={handleDayClick} onEventClick={handleDayClick} dateDisplay={setSelectedDay} currentDate={selectedDay}/>
       )}
       {loading && <p>loading taxis...</p>}
     </div>
