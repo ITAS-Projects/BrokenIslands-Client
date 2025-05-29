@@ -200,7 +200,7 @@ function QuickTaxi() {
                     key={idx}
                     onClick={() => handleTripClick(trip)}
                     style={{ backgroundColor: "#eee", padding: "10px", borderRadius: "10px", marginBottom: 10}}>
-                    <p style={{ margin: 0 }}>{selectedTaxiIndex === -1 ? `${trip.originalTrip?.Taxi?.name || `Taxi #${trip.originalTrip?.TaxiId}`}: ` : ""}{displayTime} ({numOfPeople > 1 ? `${numOfPeople} people` : "1 person"}, {`${numOfBoats} boat${numOfBoats !== 1 ? "s" : ""}`}) {trip.originalTrip?.fromPlace} to {trip.originalTrip?.toPlace}</p>
+                    <p style={{ margin: 0 }}>{selectedTaxiIndex === -1 ? `${trip.originalTrip?.Taxi?.name || `Taxi #${trip.originalTrip?.TaxiId}`}: ` : ""}{displayTime} ({numOfPeople > 1 ? `${numOfPeople} people` : "1 person"}, {`${numOfBoats} boat${numOfBoats !== 1 ? "s" : ""}`}) "{trip.originalTrip?.fromPlace}" to "{trip.originalTrip?.toPlace}"</p>
                   </div>
                 );
               })}
