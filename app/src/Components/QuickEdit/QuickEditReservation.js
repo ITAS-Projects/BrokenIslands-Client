@@ -150,7 +150,7 @@ function QuickEditReservation() {
     }
 
     useEffect(() => {
-        axiosAuth.get(`${backendURL}/reservations/${id}`)
+        axiosAuth.get(`${backendURL}/quick/${id}`)
             .then((response) => response.data)
             .then(data => {
                 setReservation(data);
@@ -437,13 +437,13 @@ function QuickEditReservation() {
                     {tripsShown && (
                         <div className="dropdown-content" style={{ marginTop: '10px' }}>
                             {trips.map((trip, index) => {
-                                let peopleOnTrip = taxis.find(taxifind => taxifind.id === prevTrips[index].TaxiId).Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => res?.Group?.numberOfPeople).reduce((sum, current) => sum + current, 0);;
-                                const boatsOnTrip = taxis.find(taxifind => taxifind.id === prevTrips[index].TaxiId).Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => {
+                                let peopleOnTrip = taxis.find(taxifind => taxifind.id === prevTrips[index].TaxiId)?.Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => res?.Group?.numberOfPeople).reduce((sum, current) => sum + current, 0);;
+                                const boatsOnTrip = taxis.find(taxifind => taxifind.id === prevTrips[index].TaxiId)?.Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => {
                                     return res.Boats?.map((boat) => Number(boat.numberOf)).reduce((sum, current) => sum + current, 0)
                                 }).reduce((sum, current) => sum + current, 0);
                                 return (
                                     <div key={index} className={`Trip-Object ${trip !== prevTrips[index] ? (trip.new ? "new" : "changed") : ""}`}>
-                                        <label>{index == 0 && "Arival" || "Departure"} {trip !== prevTrips[index] ? (trip.new ? "(new)" : "(changed)") : ""}:</label>
+                                        <label>{trip?.ReservationTrip?.typeOfTrip} {trip !== prevTrips[index] ? (trip.new ? "(new)" : "(changed)") : ""}:</label>
                                         {trip !== prevTrips[index] ? (
                                             <button type="button" className="next" onClick={() => {
                                                 clearInputs();
@@ -478,12 +478,12 @@ function QuickEditReservation() {
                                                 <option value="Custom">Custom</option>
                                                 <option value={index == 0 && "Secret to Lodge PM" || "Lodge to Secret PM"}>{index == 0 && "Secret to Lodge PM" || "Lodge to Secret PM"}</option>
                                                 <option value="Custom PM">Custom PM</option>
+                                                <option value={index == 0 && "Paddle In" || "Paddle Out"}>{index == 0 && "Paddle In" || "Paddle Out"}</option>
                                             </select>
                                         </label>
 
-                                        {trip.timeFrame?.includes("Custom") && (
-                                            <>
-                                                <label>Time:
+                                        {(trip.timeFrame?.includes("Custom") || trip.timeFrame?.includes("Paddle")) && (
+                                            <label>Time:
                                                 <input
                                                     className="editTripInputTime"
                                                     type="time"
@@ -492,8 +492,11 @@ function QuickEditReservation() {
                                                     onChange={e => editTripAtIndex(index, { timeStart: e.target.value })}
                                                     required
                                                 />
-                                                </label>
+                                            </label>
+                                        )}
 
+                                        {trip.timeFrame?.includes("Custom") && (
+                                            <>
                                                 <label>From Place:
                                                 <input
                                                     className="editTripInputText"
@@ -518,23 +521,25 @@ function QuickEditReservation() {
                                             </>
                                         )}
 
-                                        <label>Taxi:
-                                            <select
-                                                className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople <= peopleOnTrip ? "error" : ""}`}
-                                                id="taxi"
-                                                value={trip.TaxiId || ""}
-                                                onChange={e => editTripAtIndex(index, { TaxiId: Number(e.target.value) })}
-                                                required
-                                            >
-                                                <option value="" disabled>-- select a taxi --</option>
+                                        {!trip.timeFrame?.includes("Paddle") && (
+                                            <label>Taxi:
+                                                <select
+                                                    className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople <= peopleOnTrip ? "error" : ""}`}
+                                                    id="taxi"
+                                                    value={trip.TaxiId || ""}
+                                                    onChange={e => editTripAtIndex(index, { TaxiId: Number(e.target.value) })}
+                                                    required
+                                                    >
+                                                    <option value="" disabled>-- select a taxi --</option>
 
-                                                {taxis?.map((taxi, index) => {
-                                                    return (
-                                                        <option key={index} className={taxi.spaceForPeople <= peopleOnTrip ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {peopleOnTrip}/{taxi.spaceForPeople}, boats: {boatsOnTrip}/{taxi.spaceForKayaks}</option>
-                                                    )
-                                                })}
-                                            </select>
-                                        </label>
+                                                    {taxis?.map((taxi, index) => {
+                                                        return (
+                                                            <option key={index} className={taxi.spaceForPeople <= peopleOnTrip ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {peopleOnTrip}/{taxi.spaceForPeople}, boats: {boatsOnTrip}/{taxi.spaceForKayaks}</option>
+                                                        )
+                                                    })}
+                                                </select>
+                                            </label>
+                                        )}
                                     </div>
                                 )
                             })}
