@@ -83,7 +83,7 @@ function QuickTrip() {
     });
 
     const timeOrder = [
-        "Custom AM", "Lodge to Secret AM", "Secret to Lodge AM", "Custom", "Lodge to Secret PM", "Secret to Lodge PM", "Custom PM"
+        "Custom AM", "Lodge to Secret AM", "Secret to Lodge AM", "Custom", "Lodge to Secret PM", "Secret to Lodge PM", "Custom PM", "Paddle In", "Paddle Out"
     ]
 
     filteredTrips.sort((a, b) => {
@@ -212,7 +212,9 @@ function QuickTrip() {
                     let currentBoatsCapacity = trip.Taxi?.spaceForKayaks || 0;
 
                     if (currentPeople > currentPeopleCapacity || currentBoats > currentBoatsCapacity) {
-                        isOverCapacity = true;
+                        if (!trip.timeFrame.startsWith("Paddle")) {
+                            isOverCapacity = true;
+                        }
                     }
 
                     return (
@@ -233,9 +235,9 @@ function QuickTrip() {
                     <>
                         <h2>{selectedTrip.timeFrame}</h2>
                         <p><strong>Date:</strong> {formatDate(selectedTrip.day)}</p>
-                        <p><strong>Taxi ID:</strong> #{selectedTrip.Taxi?.id}</p>
-                        <p><strong>Taxi Capacity:</strong> {peopleCapacity} people / {boatsCapacity} boats</p>
-                        <p><strong>Used Capacity:</strong> {peopleUsed} people / {boatsUsed} boats</p>
+                        {!selectedTrip.timeFrame.startsWith("Paddle") && (<><p><strong>Taxi ID:</strong> #{selectedTrip.Taxi?.id}</p>
+                        <p><strong>Taxi Capacity:</strong> {peopleCapacity} people, {boatsCapacity} boats</p></>)}
+                        <p><strong>{selectedTrip.timeFrame.startsWith("Paddle") ? "Group" : "Used Capacity"}:</strong> {peopleUsed} people, {boatsUsed} boats</p>
 
                         <h3>Reservations:</h3>
                         <ol>

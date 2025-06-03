@@ -36,7 +36,7 @@ function QuickReservation() {
     const [selectedDay, setSelectedDay] = useState("all");
 
     useEffect(() => {
-        axiosAuth.get(`${backendURL}/reservations`)
+        axiosAuth.get(`${backendURL}/quick`)
             .then((response) => {
                 setReservations(response.data);
                 setLoading(false);
@@ -301,8 +301,7 @@ function QuickReservation() {
 
                         return (
                             <li key={i}>
-                                {i === 0 && <strong>[Arrival]</strong>}
-                                {i === 1 && <strong>[Departure]</strong>}
+                                <strong>[{trip?.ReservationTrip?.typeOfTrip}]</strong>
                                 {trip.timeFrame}{showTime && timeShown}, {trip.day.split("T")[0]}
                             </li>
                         )

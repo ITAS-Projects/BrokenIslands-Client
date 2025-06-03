@@ -98,7 +98,7 @@ const CustomCalendar = ({ events, monthHeight, onDateClick, onEventClick, dateDi
     let currentWeek = differenceInCalendarWeeks(currentWeekStart, monthStartWeek, { weekStartsOn: 0 });
     let totalWeeks = differenceInCalendarWeeks(monthEndWeek, monthStartWeek, { weekStartsOn: 0 }) + 1;
 
-    currentWeek = currentWeek - 1.1;
+    currentWeek = currentWeek - 0.1;
     if (getDay(endOfMonthDate) !== 6) {
       totalWeeks = Math.max(1, totalWeeks - 1);
     }

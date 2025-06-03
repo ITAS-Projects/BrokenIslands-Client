@@ -9,6 +9,7 @@ function QuickEditReservation() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
+    const [saveLoading, setSaveLoading] = useState(false);
     const [reservation, setReservation] = useState(null);
     const [numberOfPeople, setNumOfPeople] = useState(0);
     const [notes, setNotes] = useState("");
@@ -54,25 +55,72 @@ function QuickEditReservation() {
 
             return timeOrder.findIndex(item => item === a.timeFrame) - timeOrder.findIndex(item => item === b.timeFrame);
         });
-        setPrevTrips(newTrips);
-        setTrips(newTrips);
-    }
-    const editTripAtIndex = (index, newData) => {
-        const updatedTrips = [...trips];
-        updatedTrips[index] = { ...updatedTrips[index], ...newData };
-        setTrips(updatedTrips);
-    };
-    const deleteTrip = (index) => {
-        setTrips(deletingTrips =>
-            deletingTrips.map((trip, i) => (i === index ? { new: true, timeFrame: "", TaxiId: "" } : trip))
-        );
-    };
-    const resetTrip = (index) => {
-        setTrips(resettingTrips =>
-            resettingTrips.map((trip, i) => (i === index ? prevTrips[i] : trip))
-        );
-    };
+        const arrivalTrips = [];
+        const departureTrips = [];
 
+        newTrips.forEach(trip => {
+            const type = trip.ReservationTrip?.typeOfTrip;
+            if (type === "Arrival") {
+                arrivalTrips.push(trip);
+            } else {
+                departureTrips.push(trip);
+            }
+        });
+
+        setPrevTrips({arrival: arrivalTrips, departure: departureTrips});
+        setTrips({arrival: arrivalTrips, departure: departureTrips});
+    }
+    const editTripAtIndex = (type, index, newData) => {
+        setTrips(prevTrips => {
+            if (!prevTrips?.[type]) return prevTrips;
+
+            const updatedTypeTrips = prevTrips[type].map((trip, i) =>
+                i === index ? { ...trip, ...newData } : trip
+            );
+
+            return {
+                ...prevTrips,
+                [type]: updatedTypeTrips,
+            };
+        });
+    };
+    const deleteTrip = (type, index) => {
+        setTrips(deletingTrips => {
+            if (!deletingTrips?.[type]) return deletingTrips;
+
+            return {
+                ...deletingTrips,
+                [type]: deletingTrips[type].map((trip, i) =>
+                    i === index ? (index === 0 ? { new: true, timeFrame: "", TaxiId: "" } : undefined) : trip
+                ).filter(_ => _ !== undefined),
+            };
+        });
+    };
+    const createTrip = (type) => {
+        setTrips(newTrips => {
+            if (!newTrips?.[type]) return newTrips;
+
+            return {
+                ...newTrips,
+                [type]: [
+                    ...newTrips[type],
+                    { new: true, timeFrame: "", TaxiId: "" }
+                ],
+            };
+        });
+    };
+    const resetTrip = (type, index) => {
+        setTrips(resettingTrips => {
+            if (!resettingTrips?.[type]) return resettingTrips;
+
+            return {
+                ...resettingTrips,
+                [type]: resettingTrips[type].map((trip, i) =>
+                    i === index ? prevTrips[type]?.[i] : trip
+                ).filter(_ => _ !== undefined),
+            };
+        });
+    };
 
     const setupPeople = (newPeople, leaderId) => {
         const index = newPeople.findIndex(person => person.id === leaderId);
@@ -186,6 +234,7 @@ function QuickEditReservation() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSaveLoading(true);
 
         const updatedData = {
         trips: trips,
@@ -203,6 +252,8 @@ function QuickEditReservation() {
         } catch (error) {
         console.error("Error updating reservation:", error);
         alert(error.response?.data?.error || "There was an error while updating the reservation. Please try again.");
+        } finally {
+            setSaveLoading(false);
         }
     };
 
@@ -436,49 +487,62 @@ function QuickEditReservation() {
 
                     {tripsShown && (
                         <div className="dropdown-content" style={{ marginTop: '10px' }}>
-                            {trips.map((trip, index) => {
-                                let peopleOnTrip = taxis.find(taxifind => taxifind.id === prevTrips[index].TaxiId)?.Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => res?.Group?.numberOfPeople).reduce((sum, current) => sum + current, 0);;
-                                const boatsOnTrip = taxis.find(taxifind => taxifind.id === prevTrips[index].TaxiId)?.Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => {
+                            <p>Arrival:</p>
+                            {trips?.arrival?.map((trip, index) => {
+                                let numberOfBoats = boats?.map((boat) => Number(boat.numberOf)).reduce((sum, current) => sum + current, 0);
+                                let peopleOnTrip = taxis.find(taxifind => taxifind.id === prevTrips.arrival[index]?.TaxiId)?.Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => res?.Group?.numberOfPeople).reduce((sum, current) => sum + current, 0);;
+                                const boatsOnTrip = taxis.find(taxifind => taxifind.id === prevTrips.arrival[index]?.TaxiId)?.Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => {
                                     return res.Boats?.map((boat) => Number(boat.numberOf)).reduce((sum, current) => sum + current, 0)
                                 }).reduce((sum, current) => sum + current, 0);
                                 return (
-                                    <div key={index} className={`Trip-Object ${trip !== prevTrips[index] ? (trip.new ? "new" : "changed") : ""}`}>
-                                        <label>{trip?.ReservationTrip?.typeOfTrip} {trip !== prevTrips[index] ? (trip.new ? "(new)" : "(changed)") : ""}:</label>
-                                        {trip !== prevTrips[index] ? (
+                                    <div key={index} className={`Trip-Object ${trip !== prevTrips.arrival[index] ? (trip.new ? "new" : "changed") : ""}`}>
+                                        <label>{trip !== prevTrips.arrival[index] && (trip.new ? "(new)" : "(changed)")}</label>
+
+                                        {trip !== prevTrips.arrival[index] ? (
                                             <button type="button" className="next" onClick={() => {
                                                 clearInputs();
-                                                resetTrip(index);
+                                                resetTrip("arrival", index);
                                             }}>Reset to previous trip</button>) : (
-                                            <button type="button" className="next" onClick={() => {
-                                                clearInputs();
-                                                deleteTrip(index);
-                                            }}>Move to new trip</button>
+                                            index === 0 ? (
+                                                <button type="button" className="next" onClick={() => {
+                                                    clearInputs();
+                                                    deleteTrip("arrival", index);
+                                                }}>Move to new trip</button>
+                                            ) : (
+                                                <button type="button" className="next" onClick={() => {
+                                                    clearInputs();
+                                                    deleteTrip("arrival", index);
+                                                }}>Remove Additional Trip</button>
+                                            )
                                         )}
+
+                                        {index === 0 && (
                                         <label>
                                             day:
                                             <input
                                                 type="date"
                                                 value={trip.day?.split('T')[0]}
-                                                onChange={(e) => editTripAtIndex(index, { day: e.target.value })}
+                                                onChange={(e) => editTripAtIndex("arrival", index, { day: e.target.value })}
                                                 required
                                             />
                                         </label>
+                                        )}
 
                                         <label>Time Frame:
                                             <select
                                                 className="editTripInputSelect"
                                                 id="timeFrame"
                                                 value={trip.timeFrame}
-                                                onChange={e => editTripAtIndex(index, { timeFrame: e.target.value })}
+                                                onChange={e => editTripAtIndex("arrival", index, { timeFrame: e.target.value })}
                                                 required
                                             >
                                                 <option value="" disabled>-- select a timeframe --</option>
                                                 <option value="Custom AM">Custom AM</option>
-                                                <option value={index == 0 && "Secret to Lodge AM" || "Lodge to Secret AM"}>{index == 0 && "Secret to Lodge AM" || "Lodge to Secret AM"}</option>
+                                                <option value="Secret to Lodge AM">Secret to Lodge AM</option>
                                                 <option value="Custom">Custom</option>
-                                                <option value={index == 0 && "Secret to Lodge PM" || "Lodge to Secret PM"}>{index == 0 && "Secret to Lodge PM" || "Lodge to Secret PM"}</option>
+                                                <option value="Secret to Lodge PM">Secret to Lodge PM</option>
                                                 <option value="Custom PM">Custom PM</option>
-                                                <option value={index == 0 && "Paddle In" || "Paddle Out"}>{index == 0 && "Paddle In" || "Paddle Out"}</option>
+                                                <option value="Paddle In">Paddle In</option>
                                             </select>
                                         </label>
 
@@ -489,7 +553,7 @@ function QuickEditReservation() {
                                                     type="time"
                                                     id="timeStart"
                                                     value={trip.timeStart}
-                                                    onChange={e => editTripAtIndex(index, { timeStart: e.target.value })}
+                                                    onChange={e => editTripAtIndex("arrival", index, { timeStart: e.target.value })}
                                                     required
                                                 />
                                             </label>
@@ -503,7 +567,7 @@ function QuickEditReservation() {
                                                     type="text"
                                                     id="fromPlace"
                                                     value={trip.fromPlace}
-                                                    onChange={e => editTripAtIndex(index, { fromPlace: e.target.value })}
+                                                    onChange={e => editTripAtIndex("arrival", index, { fromPlace: e.target.value })}
                                                     required
                                                 />
                                                 </label>
@@ -514,7 +578,7 @@ function QuickEditReservation() {
                                                     type="text"
                                                     id="toPlace"
                                                     value={trip.toPlace}
-                                                    onChange={e => editTripAtIndex(index, { toPlace: e.target.value })}
+                                                    onChange={e => editTripAtIndex("arrival", index, { toPlace: e.target.value })}
                                                     required
                                                 />
                                                 </label>
@@ -522,23 +586,226 @@ function QuickEditReservation() {
                                         )}
 
                                         {!trip.timeFrame?.includes("Paddle") && (
-                                            <label>Taxi:
+                                            <><label>Taxi:
                                                 <select
-                                                    className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople <= peopleOnTrip ? "error" : ""}`}
+                                                    className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < peopleOnTrip ? "error" : ""}`}
                                                     id="taxi"
                                                     value={trip.TaxiId || ""}
-                                                    onChange={e => editTripAtIndex(index, { TaxiId: Number(e.target.value) })}
+                                                    onChange={e => editTripAtIndex("arrival", index, { TaxiId: Number(e.target.value) })}
                                                     required
                                                     >
                                                     <option value="" disabled>-- select a taxi --</option>
 
                                                     {taxis?.map((taxi, index) => {
                                                         return (
-                                                            <option key={index} className={taxi.spaceForPeople <= peopleOnTrip ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {peopleOnTrip}/{taxi.spaceForPeople}, boats: {boatsOnTrip}/{taxi.spaceForKayaks}</option>
+                                                            <option key={index} className={taxi.spaceForPeople < peopleOnTrip ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {peopleOnTrip}/{taxi.spaceForPeople}, boats: {boatsOnTrip}/{taxi.spaceForKayaks}</option>
                                                         )
                                                     })}
                                                 </select>
                                             </label>
+
+                                            {trips.arrival?.length > 1 && (
+                                                <>
+                                                <label>Number of people on trip:
+                                                    <input
+                                                        type="number"
+                                                        className="inline"
+                                                        value={trip.peopleOnTrip || 1}
+                                                        onChange={(e) =>
+                                                            editTripAtIndex("arrival", index, { peopleOnTrip: Number(e.target.value) })
+                                                        }
+                                                        min="1"
+                                                        max={numberOfPeople + trip.peopleOnTrip - trips.arrival.reduce((sum, trip) => sum + Math.max(1, trip.peopleOnTrip), 0)}
+                                                        required
+                                                    />
+                                                </label>
+
+                                                <label>Number of boats on trip:
+                                                    <input
+                                                        type="number"
+                                                        className="inline"
+                                                        value={trip.boatsOnTrip || 1}
+                                                        onChange={(e) =>
+                                                            editTripAtIndex("arrival", index, { boatsOnTrip: Number(e.target.value) })
+                                                        }
+                                                        min="1"
+                                                        max={numberOfBoats + trip.boatsOnTrip - trips.arrival.reduce((sum, trip) => sum + Math.max(1, trip.boatsOnTrip), 0)}
+                                                        required
+                                                    />
+                                                </label>
+                                                </>
+                                            )}
+
+                                            {taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < peopleOnTrip && (
+                                                <>
+                                                <button type="button" className="next" onClick={() => {
+                                                clearInputs();
+                                                createTrip("arrival", index);
+                                                }}>Create another trip</button>
+                                                </>
+                                            )}
+                                            </>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                            <p>Departure:</p>
+                            {trips?.departure?.map((trip, index) => {
+                                console.log(trips);
+                                let numberOfBoats = boats?.map((boat) => Number(boat.numberOf)).reduce((sum, current) => sum + current, 0);
+                                let peopleOnTrip = taxis.find(taxifind => taxifind.id === prevTrips.departure[index]?.TaxiId)?.Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => res?.Group?.numberOfPeople).reduce((sum, current) => sum + current, 0);;
+                                const boatsOnTrip = taxis.find(taxifind => taxifind.id === prevTrips.departure[index]?.TaxiId)?.Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => {
+                                    return res.Boats?.map((boat) => Number(boat.numberOf)).reduce((sum, current) => sum + current, 0)
+                                }).reduce((sum, current) => sum + current, 0);
+                                return (
+                                    <div key={index} className={`Trip-Object ${trip !== prevTrips.departure[index] ? (trip.new ? "new" : "changed") : ""}`}>
+                                        <label>{trip !== prevTrips.departure[index] && (trip.new ? "(new)" : "(changed)")}</label>
+                                        {trip !== prevTrips.departure[index] ? (
+                                            <button type="button" className="next" onClick={() => {
+                                                clearInputs();
+                                                resetTrip("departure", index);
+                                            }}>Reset to previous trip</button>) : (
+                                                index === 0 ? (
+                                                <button type="button" className="next" onClick={() => {
+                                                    clearInputs();
+                                                    deleteTrip("departure", index);
+                                                }}>Move to new trip</button>
+                                            ) : (
+                                                <button type="button" className="next" onClick={() => {
+                                                    clearInputs();
+                                                    deleteTrip("departure", index);
+                                                }}>Remove Additional Trip</button>
+                                            )
+                                        )}
+                                        {index === 0 && (
+                                        <label>
+                                            day:
+                                            <input
+                                                type="date"
+                                                value={trip.day?.split('T')[0]}
+                                                onChange={(e) => editTripAtIndex("departure", index, { day: e.target.value })}
+                                                required
+                                            />
+                                        </label>
+                                        )}
+
+                                        <label>Time Frame:
+                                            <select
+                                                className="editTripInputSelect"
+                                                id="timeFrame"
+                                                value={trip.timeFrame}
+                                                onChange={e => editTripAtIndex("departure", index, { timeFrame: e.target.value })}
+                                                required
+                                            >
+                                                <option value="" disabled>-- select a timeframe --</option>
+                                                <option value="Custom AM">Custom AM</option>
+                                                <option value="Lodge to Secret AM">Lodge to Secret AM</option>
+                                                <option value="Custom">Custom</option>
+                                                <option value="Lodge to Secret PM">Lodge to Secret PM</option>
+                                                <option value="Custom PM">Custom PM</option>
+                                                <option value="Paddle Out">Paddle Out</option>
+                                            </select>
+                                        </label>
+
+                                        {(trip.timeFrame?.includes("Custom") || trip.timeFrame?.includes("Paddle")) && (
+                                            <label>Time:
+                                                <input
+                                                    className="editTripInputTime"
+                                                    type="time"
+                                                    id="timeStart"
+                                                    value={trip.timeStart}
+                                                    onChange={e => editTripAtIndex("departure", index, { timeStart: e.target.value })}
+                                                    required
+                                                />
+                                            </label>
+                                        )}
+
+                                        {trip.timeFrame?.includes("Custom") && (
+                                            <>
+                                                <label>From Place:
+                                                <input
+                                                    className="editTripInputText"
+                                                    type="text"
+                                                    id="fromPlace"
+                                                    value={trip.fromPlace}
+                                                    onChange={e => editTripAtIndex("departure", index, { fromPlace: e.target.value })}
+                                                    required
+                                                />
+                                                </label>
+
+                                                <label>To Place:
+                                                <input
+                                                    className="editTripInputText"
+                                                    type="text"
+                                                    id="toPlace"
+                                                    value={trip.toPlace}
+                                                    onChange={e => editTripAtIndex("departure", index, { toPlace: e.target.value })}
+                                                    required
+                                                />
+                                                </label>
+                                            </>
+                                        )}
+
+                                        {!trip.timeFrame?.includes("Paddle") && (
+                                            <><label>Taxi:
+                                                <select
+                                                    className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < peopleOnTrip ? "error" : ""}`}
+                                                    id="taxi"
+                                                    value={trip.TaxiId || ""}
+                                                    onChange={e => editTripAtIndex("departure", index, { TaxiId: Number(e.target.value) })}
+                                                    required
+                                                    >
+                                                    <option value="" disabled>-- select a taxi --</option>
+
+                                                    {taxis?.map((taxi, index) => {
+                                                        return (
+                                                            <option key={index} className={taxi.spaceForPeople < peopleOnTrip ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {peopleOnTrip}/{taxi.spaceForPeople}, boats: {boatsOnTrip}/{taxi.spaceForKayaks}</option>
+                                                        )
+                                                    })}
+                                                </select>
+                                            </label>
+
+                                            {trips.departure?.length > 1 && (
+                                                <>
+                                                <label>Number of people on trip:
+                                                    <input
+                                                        type="number"
+                                                        className="inline"
+                                                        value={trip.peopleOnTrip || 0}
+                                                        onChange={(e) =>
+                                                            editTripAtIndex("departure", index, { peopleOnTrip: Number(e.target.value) })
+                                                        }
+                                                        min={trip.boatsOnTrip > 0 ? "0" : "1"}
+                                                        max={Math.max(0, numberOfPeople + (trip.peopleOnTrip || 0) - trips.departure.reduce((sum, trip) => sum + Math.max(0, trip.peopleOnTrip), 0))}
+                                                        required
+                                                    />
+                                                </label>
+
+                                                <label>Number of boats on trip:
+                                                    <input
+                                                        type="number"
+                                                        className="inline"
+                                                        value={trip.boatsOnTrip || 0}
+                                                        onChange={(e) =>
+                                                            editTripAtIndex("departure", index, { boatsOnTrip: Number(e.target.value) })
+                                                        }
+                                                        min={trip.peopleOnTrip > 0 ? "0" : "1"}
+                                                        max={Math.max(0, numberOfBoats + (trip.boatsOnTrip || 0) - trips.departure.reduce((sum, trip) => sum + Math.max(0, trip.boatsOnTrip), 0))}
+                                                        required
+                                                    />
+                                                </label>
+                                                </>
+                                            )}
+
+                                            {taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < peopleOnTrip && (
+                                                <>
+                                                <button type="button" className="next" onClick={() => {
+                                                clearInputs();
+                                                createTrip("departure", index);
+                                                }}>Create another trip</button>
+                                                </>
+                                            )}
+                                            </>
                                         )}
                                     </div>
                                 )
@@ -548,7 +815,7 @@ function QuickEditReservation() {
                 </div>
 
 
-                <button type="submit" className="next">Save Changes</button>
+                <button type="submit" className={!saveLoading && "next"} disabled={saveLoading}>{saveLoading ? "Loading..." : "Save Changes"}</button>
             </form>
         </div>
     );
