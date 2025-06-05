@@ -28,10 +28,26 @@ function QuickEditReservation() {
 
     const setupTrips = (newTrips) => {
         const timeOrder = [
-            "Custom AM", "Lodge to Secret AM", "Secret to Lodge AM", "Custom", "Lodge to Secret PM", "Secret to Lodge PM", "Custom PM"
+            "Custom AM", "Lodge to Secret AM", "Secret to Lodge AM", "Custom", "Lodge to Secret PM", "Secret to Lodge PM", "Custom PM", "Paddle In", "Paddle Out"
+        ]
+
+        const staticTime = [
+            "Lodge to Secret AM", "Secret to Lodge AM", "Lodge to Secret PM", "Secret to Lodge PM"
         ]
 
         newTrips?.sort((a, b) => {
+            if (staticTime.includes(a.timeFrame)) {
+                return -1;
+            } else if (staticTime.includes(b.timeFrame)) {
+                return 1;
+            }
+
+            if (a.timeFrame.startsWith("Paddle")) {
+                return 1;
+            } else if (b.timeFrame.startsWith("Paddle")) {
+                return -1;
+            }
+
             let dayData = a.day?.split('T')[0].split('-');
             let dayData2 = b.day?.split('T')[0].split('-');
 
@@ -59,6 +75,8 @@ function QuickEditReservation() {
         const departureTrips = [];
 
         newTrips.forEach(trip => {
+            trip.peopleOnTrip = trip.ReservationTrip?.peopleOnTrip;
+            trip.boatsOnTrip = trip.ReservationTrip?.boatsOnTrip;
             const type = trip.ReservationTrip?.typeOfTrip;
             if (type === "Arrival") {
                 arrivalTrips.push(trip);
@@ -489,7 +507,13 @@ function QuickEditReservation() {
                         <div className="dropdown-content" style={{ marginTop: '10px' }}>
                             <p>Arrival:</p>
                             {trips?.arrival?.map((trip, index) => {
-                                let numberOfBoats = boats?.map((boat) => Number(boat.numberOf)).reduce((sum, current) => sum + current, 0);
+                                let numberOfBoats = boats?.reduce((sum, boat) => {
+                                    if (boat.isRented) {
+                                        return sum;
+                                    } else {
+                                        return sum + Number(boat.numberOf);
+                                    }
+                                }, 0);                                
                                 let peopleOnTrip = taxis.find(taxifind => taxifind.id === prevTrips.arrival[index]?.TaxiId)?.Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => res?.Group?.numberOfPeople).reduce((sum, current) => sum + current, 0);;
                                 const boatsOnTrip = taxis.find(taxifind => taxifind.id === prevTrips.arrival[index]?.TaxiId)?.Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => {
                                     return res.Boats?.map((boat) => Number(boat.numberOf)).reduce((sum, current) => sum + current, 0)
@@ -559,7 +583,7 @@ function QuickEditReservation() {
                                             </label>
                                         )}
 
-                                        {trip.timeFrame?.includes("Custom") && (
+                                        {trip.timeFrame?.includes("Custom") && index === 0 && (
                                             <>
                                                 <label>From Place:
                                                 <input
@@ -588,7 +612,7 @@ function QuickEditReservation() {
                                         {!trip.timeFrame?.includes("Paddle") && (
                                             <><label>Taxi:
                                                 <select
-                                                    className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < peopleOnTrip ? "error" : ""}`}
+                                                    className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < (trips.arrival?.length > 1 ? trip.peopleOnTrip : peopleOnTrip) ? "error" : ""}`}
                                                     id="taxi"
                                                     value={trip.TaxiId || ""}
                                                     onChange={e => editTripAtIndex("arrival", index, { TaxiId: Number(e.target.value) })}
@@ -598,52 +622,53 @@ function QuickEditReservation() {
 
                                                     {taxis?.map((taxi, index) => {
                                                         return (
-                                                            <option key={index} className={taxi.spaceForPeople < peopleOnTrip ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {peopleOnTrip}/{taxi.spaceForPeople}, boats: {boatsOnTrip}/{taxi.spaceForKayaks}</option>
+                                                            <option key={index} className={taxi.spaceForPeople < (trips.arrival?.length > 1 ? trip.peopleOnTrip : peopleOnTrip) ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {(trips.arrival?.length > 1 ? trip.peopleOnTrip : peopleOnTrip)}/{taxi.spaceForPeople}, boats: {(trips.arrival?.length > 1 ? trip.boatsOnTrip : numberOfBoats)}/{taxi.spaceForKayaks}</option>
                                                         )
                                                     })}
                                                 </select>
                                             </label>
 
-                                            {trips.arrival?.length > 1 && (
-                                                <>
-                                                <label>Number of people on trip:
-                                                    <input
-                                                        type="number"
-                                                        className="inline"
-                                                        value={trip.peopleOnTrip || 1}
-                                                        onChange={(e) =>
-                                                            editTripAtIndex("arrival", index, { peopleOnTrip: Number(e.target.value) })
-                                                        }
-                                                        min="1"
-                                                        max={numberOfPeople + trip.peopleOnTrip - trips.arrival.reduce((sum, trip) => sum + Math.max(1, trip.peopleOnTrip), 0)}
-                                                        required
-                                                    />
-                                                </label>
 
-                                                <label>Number of boats on trip:
-                                                    <input
-                                                        type="number"
-                                                        className="inline"
-                                                        value={trip.boatsOnTrip || 1}
-                                                        onChange={(e) =>
-                                                            editTripAtIndex("arrival", index, { boatsOnTrip: Number(e.target.value) })
-                                                        }
-                                                        min="1"
-                                                        max={numberOfBoats + trip.boatsOnTrip - trips.arrival.reduce((sum, trip) => sum + Math.max(1, trip.boatsOnTrip), 0)}
-                                                        required
-                                                    />
-                                                </label>
-                                                </>
-                                            )}
-
-                                            {taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < peopleOnTrip && (
+                                            {taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < (trips.arrival?.length > 1 ? trip.peopleOnTrip : peopleOnTrip) && (
                                                 <>
                                                 <button type="button" className="next" onClick={() => {
-                                                clearInputs();
-                                                createTrip("arrival", index);
+                                                    clearInputs();
+                                                    createTrip("arrival", index);
                                                 }}>Create another trip</button>
                                                 </>
                                             )}
+                                            </>
+                                        )}
+                                        
+                                        {trips.arrival?.length > 1 && (
+                                            <>
+                                            <label>Number of people on trip:
+                                                <input
+                                                    type="number"
+                                                    className="inline"
+                                                    value={trip.peopleOnTrip || 0}
+                                                    onChange={(e) =>
+                                                        editTripAtIndex("arrival", index, { peopleOnTrip: Number(e.target.value) })
+                                                    }
+                                                    min={trip.boatsOnTrip > 0 ? "0" : "1"}
+                                                    max={Math.max(0, numberOfPeople + (trip.peopleOnTrip || 0) - trips.arrival.reduce((sum, trip) => sum + Math.max(0, trip.peopleOnTrip || 0), 0))}
+                                                    required
+                                                />
+                                            </label>
+
+                                            <label>Number of boats on trip:
+                                                <input
+                                                    type="number"
+                                                    className="inline"
+                                                    value={trip.boatsOnTrip || 0}
+                                                    onChange={(e) =>
+                                                        editTripAtIndex("arrival", index, { boatsOnTrip: Number(e.target.value) })
+                                                    }
+                                                    min={trip.peopleOnTrip > 0 ? "0" : "1"}
+                                                    max={Math.max(0, numberOfBoats + (trip.boatsOnTrip || 0) - trips.arrival.reduce((sum, trip) => sum + Math.max(0, trip.boatsOnTrip || 0), 0))}
+                                                    required
+                                                />
+                                            </label>
                                             </>
                                         )}
                                     </div>
@@ -652,7 +677,13 @@ function QuickEditReservation() {
                             <p>Departure:</p>
                             {trips?.departure?.map((trip, index) => {
                                 console.log(trips);
-                                let numberOfBoats = boats?.map((boat) => Number(boat.numberOf)).reduce((sum, current) => sum + current, 0);
+                                let numberOfBoats = boats?.reduce((sum, boat) => {
+                                    if (boat.isRented) {
+                                        return sum;
+                                    } else {
+                                        return sum + Number(boat.numberOf);
+                                    }
+                                }, 0);
                                 let peopleOnTrip = taxis.find(taxifind => taxifind.id === prevTrips.departure[index]?.TaxiId)?.Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => res?.Group?.numberOfPeople).reduce((sum, current) => sum + current, 0);;
                                 const boatsOnTrip = taxis.find(taxifind => taxifind.id === prevTrips.departure[index]?.TaxiId)?.Trips?.find(taxiTrip => taxiTrip.id === trip.id)?.Reservations?.map(res => {
                                     return res.Boats?.map((boat) => Number(boat.numberOf)).reduce((sum, current) => sum + current, 0)
@@ -720,7 +751,7 @@ function QuickEditReservation() {
                                             </label>
                                         )}
 
-                                        {trip.timeFrame?.includes("Custom") && (
+                                        {trip.timeFrame?.includes("Custom") && index === 0  && (
                                             <>
                                                 <label>From Place:
                                                 <input
@@ -749,7 +780,7 @@ function QuickEditReservation() {
                                         {!trip.timeFrame?.includes("Paddle") && (
                                             <><label>Taxi:
                                                 <select
-                                                    className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < peopleOnTrip ? "error" : ""}`}
+                                                    className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < (trips.departure?.length > 1 ? trip.peopleOnTrip : peopleOnTrip) ? "error" : ""}`}
                                                     id="taxi"
                                                     value={trip.TaxiId || ""}
                                                     onChange={e => editTripAtIndex("departure", index, { TaxiId: Number(e.target.value) })}
@@ -759,52 +790,53 @@ function QuickEditReservation() {
 
                                                     {taxis?.map((taxi, index) => {
                                                         return (
-                                                            <option key={index} className={taxi.spaceForPeople < peopleOnTrip ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {peopleOnTrip}/{taxi.spaceForPeople}, boats: {boatsOnTrip}/{taxi.spaceForKayaks}</option>
+                                                            <option key={index} className={taxi.spaceForPeople < (trips.departure?.length > 1 ? trip.peopleOnTrip : peopleOnTrip) ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {(trips.departure?.length > 1 ? trip.peopleOnTrip : peopleOnTrip)}/{taxi.spaceForPeople}, boats: {(trips.departure?.length > 1 ? trip.boatsOnTrip : numberOfBoats)}/{taxi.spaceForKayaks}</option>
                                                         )
                                                     })}
                                                 </select>
                                             </label>
 
-                                            {trips.departure?.length > 1 && (
-                                                <>
-                                                <label>Number of people on trip:
-                                                    <input
-                                                        type="number"
-                                                        className="inline"
-                                                        value={trip.peopleOnTrip || 0}
-                                                        onChange={(e) =>
-                                                            editTripAtIndex("departure", index, { peopleOnTrip: Number(e.target.value) })
-                                                        }
-                                                        min={trip.boatsOnTrip > 0 ? "0" : "1"}
-                                                        max={Math.max(0, numberOfPeople + (trip.peopleOnTrip || 0) - trips.departure.reduce((sum, trip) => sum + Math.max(0, trip.peopleOnTrip), 0))}
-                                                        required
-                                                    />
-                                                </label>
 
-                                                <label>Number of boats on trip:
-                                                    <input
-                                                        type="number"
-                                                        className="inline"
-                                                        value={trip.boatsOnTrip || 0}
-                                                        onChange={(e) =>
-                                                            editTripAtIndex("departure", index, { boatsOnTrip: Number(e.target.value) })
-                                                        }
-                                                        min={trip.peopleOnTrip > 0 ? "0" : "1"}
-                                                        max={Math.max(0, numberOfBoats + (trip.boatsOnTrip || 0) - trips.departure.reduce((sum, trip) => sum + Math.max(0, trip.boatsOnTrip), 0))}
-                                                        required
-                                                    />
-                                                </label>
-                                                </>
-                                            )}
-
-                                            {taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < peopleOnTrip && (
+                                            {taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < (trips.departure?.length > 1 ? trip.peopleOnTrip : peopleOnTrip) && (
                                                 <>
                                                 <button type="button" className="next" onClick={() => {
-                                                clearInputs();
-                                                createTrip("departure", index);
+                                                    clearInputs();
+                                                    createTrip("departure", index);
                                                 }}>Create another trip</button>
                                                 </>
                                             )}
+                                            </>
+                                        )}
+
+                                        {trips.departure?.length > 1 && (
+                                            <>
+                                            <label>Number of people on trip:
+                                                <input
+                                                    type="number"
+                                                    className="inline"
+                                                    value={trip.peopleOnTrip || 0}
+                                                    onChange={(e) =>
+                                                        editTripAtIndex("departure", index, { peopleOnTrip: Number(e.target.value) })
+                                                    }
+                                                    min={trip.boatsOnTrip > 0 ? "0" : "1"}
+                                                    max={Math.max(0, numberOfPeople + (trip.peopleOnTrip || 0) - trips.departure.reduce((sum, trip) => sum + Math.max(0, trip.peopleOnTrip || 0), 0))}
+                                                    required
+                                                />
+                                            </label>
+
+                                            <label>Number of boats on trip:
+                                                <input
+                                                    type="number"
+                                                    className="inline"
+                                                    value={trip.boatsOnTrip || 0}
+                                                    onChange={(e) =>
+                                                        editTripAtIndex("departure", index, { boatsOnTrip: Number(e.target.value) })
+                                                    }
+                                                    min={trip.peopleOnTrip > 0 ? "0" : "1"}
+                                                    max={Math.max(0, numberOfBoats + (trip.boatsOnTrip || 0) - trips.departure.reduce((sum, trip) => sum + Math.max(0, trip.boatsOnTrip || 0), 0))}
+                                                    required
+                                                />
+                                            </label>
                                             </>
                                         )}
                                     </div>
