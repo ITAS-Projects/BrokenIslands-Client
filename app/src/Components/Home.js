@@ -16,6 +16,9 @@ function Home() {
         <button onClick={() => navigate(`/quick/reservation/new`)}>
           New Reservation
         </button>
+        <button onClick={() => navigate(`/quick/trip/new`)}>
+          New Trip (not a reservation)
+        </button>
       </header>
     </div>
   );

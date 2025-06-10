@@ -22,6 +22,7 @@ import UserManager from "./Components/ManageUsers/UserManager.js";
 import CreateUser from "./Components/ManageUsers/CreateUser.js";
 import EditUser from "./Components/ManageUsers/EditUser.js";
 import QuickKitchen from "./Components/QuickView/QuickAllergy.js";
+import QuickCreateTrip from "./Components/QuickCreate/QuickCreateTrip.js";
 
 function App() {
   return (
@@ -44,6 +45,8 @@ function App() {
           <Route path="/quick/trip" element={<QuickTrip />} />
           <Route path="/quick/reservation/edit/:id" element={<QuickEditReservation />} />
           <Route path="/quick/reservation/new" element={<QuickCreateReservation />} />
+
+          <Route path="/quick/trip/new" element={<QuickCreateTrip />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>
