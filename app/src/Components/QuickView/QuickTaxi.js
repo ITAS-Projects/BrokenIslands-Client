@@ -6,7 +6,7 @@ import { subDays, addDays, min } from "date-fns";
 import CustomCalendar from "./CustomCalendar";
 import axiosAuth from "../authRequest";
 
-import "../../assets/QuickTaxi.css"
+import "../../assets/QuickTaxi.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
 
@@ -139,26 +139,49 @@ function QuickTaxi() {
           <p>
             <strong>Locations:</strong> From: {selectedTrip.fromPlace}, To: {selectedTrip.toPlace}
           </p>
-          <strong>Reservations:</strong>{" "}
-          {selectedTrip.Reservations?.map((reservation) => {
-            return (
+          {selectedTrip.Reservations?.length > 0 ? (
+            <>
+              <strong>Reservations: </strong>
+              {selectedTrip.Reservations?.map((reservation) => {
+                return (
+                  <div style={{ backgroundColor: "#eee", padding: 20, marginBottom: 10, borderRadius: 30 }}>
+                    <p style={{ margin: 0 }}>Leader: {reservation?.Group?.leader?.name}</p>
+                    {reservation?.Group?.notes && (
+                      <p style={{ margin: 0 }}>
+                        <strong>Notes: {reservation?.Group?.notes}</strong>
+                      </p>
+                    )}
+                    <p style={{ margin: 0 }}>Number of People: {reservation?.Group?.numberOfPeople}</p>
+                    <p style={{ margin: 0 }}>
+                      Number of Boats:{" "}
+                      {reservation?.Boats?.reduce((sum, boat) => {
+                        return sum + (boat.isRented ? 0 : boat.numberOf);
+                      }, 0)}
+                    </p>
+                  </div>
+                );
+              })}
+            </>
+          ) : (
+            <>
+              <strong>People: </strong>
               <div style={{ backgroundColor: "#eee", padding: 20, marginBottom: 10, borderRadius: 30 }}>
-                <p style={{ margin: 0 }}>Leader: {reservation?.Group?.leader?.name}</p>
-                {reservation?.Group?.notes && (
+                <p style={{ margin: 0 }}>Leader: {selectedTrip.People?.leader?.name}</p>
+                {selectedTrip.People?.notes && (
                   <p style={{ margin: 0 }}>
-                    <strong>Notes: {reservation?.Group?.notes}</strong>
+                    <strong>Notes/Reason: {selectedTrip.People?.notes}</strong>
                   </p>
                 )}
-                <p style={{ margin: 0 }}>Number of People: {reservation?.Group?.numberOfPeople}</p>
+                <p style={{ margin: 0 }}>Number of People: {selectedTrip.People?.numberOfPeople}</p>
                 <p style={{ margin: 0 }}>
                   Number of Boats:{" "}
-                  {reservation?.Boats?.reduce((sum, boat) => {
+                  {selectedTrip.People?.Boats?.reduce((sum, boat) => {
                     return sum + (boat.isRented ? 0 : boat.numberOf);
                   }, 0)}
                 </p>
               </div>
-            );
-          })}
+            </>
+          )}
           {selectedTrip.Taxi && (
             <p>
               <strong>Taxi id:</strong> {selectedTrip.Taxi.id}

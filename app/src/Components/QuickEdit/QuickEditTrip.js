@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from "react";
 import axiosAuth from "../authRequest";
 import { useNavigate, useParams } from "react-router-dom";
-import "../../assets/QuickCreateTrip.css";
+import "../../assets/QuickEditTrip.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
 
-function QuickCreateTrip() {
+function QuickEditTrip() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const [numberOfPeople, setNumOfPeople] = useState(1);
 
-  const [trip, setTrip] = useState({ timeFrame: "" });  
+  const [trip, setTrip] = useState({ timeFrame: "" });
   const [notes, setNotes] = useState("");
   const [people, setPeople] = useState([{}]);
   const [boats, setBoats] = useState([]);
   const [taxis, setTaxis] = useState([]);
+
+  const [numberOfBoats, setNumberOfBoats] = useState(0);
 
   const [loading, setLoading] = useState(false);
 
@@ -45,7 +48,7 @@ function QuickCreateTrip() {
     setBoats(updatedBoats);
   };
   const createBoat = () => {
-    const newBoatList = [...boats, { numberOf: "1", isRented: false }]; // create a new array with an empty object added
+    const newBoatList = [...boats, { numberOf: "1", isRented: false}]; // create a new array with an empty object added
     setBoats(newBoatList);
   };
 
@@ -69,16 +72,32 @@ function QuickCreateTrip() {
   };
 
   useEffect(() => {
-    axiosAuth
-      .get(`${backendURL}/taxis`)
-      .then((response) => response.data)
-      .then((data) => {
-        setTaxis(data || []);
-      })
-      .catch((error) => {
-        console.error("Error fetching taxis:", error);
-      });
-  }, []);
+        axiosAuth.get(`${backendURL}/trip/${id}`)
+            .then((response) => response.data)
+            .then(data => {
+              console.log(data);
+                setTrip(data);
+                setNotes(data?.People?.notes);
+                setNumOfPeople(data?.People?.numberOfPeople);
+                setPeople(data?.People?.People);
+                setBoats(data?.People?.Boats);
+                setLoading(false);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                setLoading(false);
+            });
+
+        axiosAuth
+          .get(`${backendURL}/taxis`)
+          .then((response) => response.data)
+          .then((data) => {
+            setTaxis(data || []);
+          })
+          .catch((error) => {
+            console.error("Error fetching taxis:", error);
+          });
+    }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -93,6 +112,7 @@ function QuickCreateTrip() {
         name: p.name,
       })),
       boats: boats.map((b) => ({
+        id: b.id,
         type: b.type,
         numberOf: Number(b.numberOf),
         isRented: false,
@@ -101,22 +121,29 @@ function QuickCreateTrip() {
 
     try {
       // Send the data to the backend for validation and creation
-      const response = await axiosAuth.post(`${backendURL}/trip`, payload);
+      const response = await axiosAuth.put(`${backendURL}/trip/${id}`, payload);
       // Handle success - inform the user and redirect
-      alert("Trip created successfully. Redirecting...");
+      alert("Trip updated successfully. Redirecting...");
       // navigate("/quick/trip");
     } catch (error) {
       // Handle error - show the error message from the backend
-      console.error("Error creating trip:", error);
+      console.error("Error updating trip:", error);
       // show error message, or default error if missing
-      alert(error.response?.data?.error || "An error occurred while creating the trip. Please try again.");
+      alert(error.response?.data?.error || "An error occurred while updating the trip. Please try again.");
     }
     setLoading(false);
   };
 
+  useEffect(() => {
+    const countedBoats = boats.reduce((sum, boat) => {
+      return (sum + Math.max(0, boat.numberOf || 0));
+    }, 0)
+    setNumberOfBoats(countedBoats);
+  }, [boats]);
+
   return (
     <div>
-      <h1>New Trip</h1>
+      <h1>Edit Trip</h1>
 
       <form className="quickTripForm" onSubmit={handleSubmit}>
         <label>
@@ -235,10 +262,6 @@ function QuickCreateTrip() {
                     </select>
                   </label>
                   <label>
-                    Boats are rented:
-                    <input type="checkbox" className="inline" checked={boat.isRented} onChange={(e) => editBoatAtIndex(index, { isRented: e.target.checked })} />
-                  </label>
-                  <label>
                     Number of Boats of this type:
                     <input
                       type="number"
@@ -263,12 +286,30 @@ function QuickCreateTrip() {
           )}
         </div>
 
+        <label>Taxi:
+          <select
+              className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < numberOfPeople ? "error" : ""}`}
+              id="taxi"
+              value={trip.TaxiId || ""}
+              onChange={e => editTrip({ TaxiId: Number(e.target.value) })}
+              required
+              >
+              <option value="" disabled>-- select a taxi --</option>
+
+              {taxis?.map((taxi, index) => {
+                  return (
+                      <option key={index} className={taxi.spaceForPeople < numberOfPeople ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {numberOfPeople}/{taxi.spaceForPeople}, boats: {numberOfBoats}/{taxi.spaceForKayaks}</option>
+                  )
+              })}
+          </select>
+      </label>
+
         <button type="submit" className={!loading && "next"} disabled={loading}>
-          {loading ? "Loading..." : "Create New Trip"}
+          {loading ? "Loading..." : "Save changes"}
         </button>
       </form>
     </div>
   );
 }
 
-export default QuickCreateTrip;
+export default QuickEditTrip;
