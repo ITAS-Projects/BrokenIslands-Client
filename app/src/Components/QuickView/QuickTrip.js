@@ -249,25 +249,25 @@ function QuickTrip() {
               <strong>{selectedTrip.timeFrame.startsWith("Paddle") ? "Group" : "Used Capacity"}:</strong> {peopleUsed} people, {boatsUsed} boats
             </p>
 
-            {selectedTrip.Reservations?.length > 0 ? (
+            {selectedTrip.Reservations?.length > 0 && (
               <>
                 <h3>Reservations:</h3>
                 <ol>
-                  {selectedTrip.Reservations.map((res) => (
-                    <a className="No-Style-Link" href={`/quick/reservation/edit/${res.id}`}>
-                      <li key={res.id}>
+                  {selectedTrip.Reservations.map((reservation) => (
+                    <a className="No-Style-Link" href={`/quick/reservation/edit/${reservation.id}`}>
+                      <li key={reservation.id}>
                         <div className="svg-container">
-                          Reserved by: {res.Group?.leader?.name}
-                          {res.Group?.numberOfPeople > 1 && <>, and {res.Group.numberOfPeople - 1} others.</>}
+                          Reserved by: {reservation.Group?.leader?.name}
+                          {reservation.Group?.numberOfPeople > 1 && <>, and {reservation.Group.numberOfPeople - 1} others.</>}
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="270 200 210 210">
                             <path d="M276.3 255L416.3 395M323.3 206.7L463.3 346.7M276 267L335 207M461.7 340.9V400.9M409.7 392.9H469.7" stroke="#000" stroke-width="17" fill="none" />
                           </svg>
                         </div>
-                        {res.Boats?.length > 0 && (
+                        {reservation.Boats?.length > 0 && (
                           <>
                             <span>Boats:</span>
                             <ul>
-                              {res.Boats.map((boat, i) => (
+                              {reservation.Boats.map((boat, i) => (
                                 <li key={i}>
                                   {boat.numberOf} × {boat.isRented ? "rented" : "personal"} {boat.type}
                                 </li>
@@ -280,25 +280,25 @@ function QuickTrip() {
                   ))}
                 </ol>
               </>
-            ) : (
+            )} {selectedTrip.Groups?.length > 0 && (
               <>
               <h3>People:</h3>
                 <ol>
-                  {((
-                    <a className="No-Style-Link" href={`/quick/trip/edit/${selectedTrip.id}`}>
-                      <li key={selectedTrip.People.id}>
+                  {selectedTrip.Groups.map((group) => (
+                    <a className="No-Style-Link" href={`/quick/trip/edit/${group.id}`}>
+                      <li key={group.id}>
                         <div className="svg-container">
-                          Trip scheduled for: {selectedTrip.People.leader?.name}
-                          {selectedTrip.People.numberOfPeople > 1 && <>, and {selectedTrip.People.numberOfPeople - 1} others.</>}
+                          Trip scheduled for: {group.leader?.name}
+                          {group.numberOfPeople > 1 && <>, and {group.numberOfPeople - 1} others.</>}
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="270 200 210 210">
                             <path d="M276.3 255L416.3 395M323.3 206.7L463.3 346.7M276 267L335 207M461.7 340.9V400.9M409.7 392.9H469.7" stroke="#000" stroke-width="17" fill="none" />
                           </svg>
                         </div>
-                        {selectedTrip.People.Boats?.length > 0 && (
+                        {group.Boats?.length > 0 && (
                           <>
                             <span>Boats:</span>
                             <ul>
-                              {selectedTrip.People.Boats.map((boat, i) => (
+                              {group.Boats.map((boat, i) => (
                                 <li key={i}>
                                   {boat.numberOf} × {boat.isRented ? "rented" : "personal"} {boat.type}
                                 </li>

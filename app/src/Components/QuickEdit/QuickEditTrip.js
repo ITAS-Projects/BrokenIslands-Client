@@ -48,7 +48,7 @@ function QuickEditTrip() {
     setBoats(updatedBoats);
   };
   const createBoat = () => {
-    const newBoatList = [...boats, { numberOf: "1", isRented: false}]; // create a new array with an empty object added
+    const newBoatList = [...boats, { numberOf: "1", isRented: false }]; // create a new array with an empty object added
     setBoats(newBoatList);
   };
 
@@ -72,32 +72,33 @@ function QuickEditTrip() {
   };
 
   useEffect(() => {
-        axiosAuth.get(`${backendURL}/trip/${id}`)
-            .then((response) => response.data)
-            .then(data => {
-              console.log(data);
-                setTrip(data);
-                setNotes(data?.People?.notes);
-                setNumOfPeople(data?.People?.numberOfPeople);
-                setPeople(data?.People?.People);
-                setBoats(data?.People?.Boats);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-                setLoading(false);
-            });
+    axiosAuth
+      .get(`${backendURL}/trip/${id}`)
+      .then((response) => response.data)
+      .then((data) => {
+        console.log(data);
+        setTrip(data?.Trip);
+        setNotes(data?.notes);
+        setNumOfPeople(data?.numberOfPeople);
+        setPeople(data?.People);
+        setBoats(data?.Boats);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      });
 
-        axiosAuth
-          .get(`${backendURL}/taxis`)
-          .then((response) => response.data)
-          .then((data) => {
-            setTaxis(data || []);
-          })
-          .catch((error) => {
-            console.error("Error fetching taxis:", error);
-          });
-    }, [id]);
+    axiosAuth
+      .get(`${backendURL}/taxis`)
+      .then((response) => response.data)
+      .then((data) => {
+        setTaxis(data || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching taxis:", error);
+      });
+  }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -136,8 +137,8 @@ function QuickEditTrip() {
 
   useEffect(() => {
     const countedBoats = boats.reduce((sum, boat) => {
-      return (sum + Math.max(0, boat.numberOf || 0));
-    }, 0)
+      return sum + Math.max(0, boat.numberOf || 0);
+    }, 0);
     setNumberOfBoats(countedBoats);
   }, [boats]);
 
@@ -286,23 +287,27 @@ function QuickEditTrip() {
           )}
         </div>
 
-        <label>Taxi:
+        <label>
+          Taxi:
           <select
-              className={`editTripInputSelect ${taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < numberOfPeople ? "error" : ""}`}
-              id="taxi"
-              value={trip.TaxiId || ""}
-              onChange={e => editTrip({ TaxiId: Number(e.target.value) })}
-              required
-              >
-              <option value="" disabled>-- select a taxi --</option>
+            className={`editTripInputSelect ${taxis.find((taxifind) => taxifind.id === trip.TaxiId)?.spaceForPeople < numberOfPeople ? "error" : ""}`}
+            id="taxi"
+            value={trip.TaxiId || ""}
+            onChange={(e) => editTrip({ TaxiId: Number(e.target.value) })}
+            required>
+            <option value="" disabled>
+              -- select a taxi --
+            </option>
 
-              {taxis?.map((taxi, index) => {
-                  return (
-                      <option key={index} className={taxi.spaceForPeople < numberOfPeople ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>people: {numberOfPeople}/{taxi.spaceForPeople}, boats: {numberOfBoats}/{taxi.spaceForKayaks}</option>
-                  )
-              })}
+            {taxis?.map((taxi, index) => {
+              return (
+                <option key={index} className={taxi.spaceForPeople < numberOfPeople ? "error" : "not-error"} disabled={!taxi.running} value={taxi.id}>
+                  people: {numberOfPeople}/{taxi.spaceForPeople}, boats: {numberOfBoats}/{taxi.spaceForKayaks}
+                </option>
+              );
+            })}
           </select>
-      </label>
+        </label>
 
         <button type="submit" className={!loading && "next"} disabled={loading}>
           {loading ? "Loading..." : "Save changes"}
