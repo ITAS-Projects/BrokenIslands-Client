@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axiosAuth from "../authRequest";
+import Confirmation from "../Confirmation";
 import "../../assets/QuickTrip.css";
 
 const backendURL = process.env.REACT_APP_API_BASE_URL;
@@ -11,6 +12,9 @@ function QuickTrip() {
   const [selectedYear, setSelectedYear] = useState("all");
   const [selectedMonth, setSelectedMonth] = useState("all");
   const [selectedDay, setSelectedDay] = useState("all");
+    const [showModal, setShowModal] = useState(false);
+    const [message, setMessage] = useState("");
+    const [currentTripId, setCurrentTripId] = useState(0);
 
   useEffect(() => {
     axiosAuth
@@ -144,6 +148,32 @@ function QuickTrip() {
 
   const peopleCapacity = selectedTrip?.Taxi?.spaceForPeople || 0;
   const boatsCapacity = selectedTrip?.Taxi?.spaceForKayaks || 0;
+
+  const handleDelete = (id) => {
+      setCurrentTripId(id);
+      setMessage("Are you sure you want to delete this trip and all groups in it?");
+      setShowModal(true);
+  };
+
+  const confirmDeletion = () => {
+      axiosAuth
+          .delete(`${backendURL}/trips/all/${currentTripId}`)
+          .then((response) => {
+              alert("Reservation successfully deleted.");
+              setTrips((prevTrips) =>
+                  prevTrips.filter((trip) => trip.id !== currentTripId)
+              );
+              setShowModal(false);
+          })
+          .catch((error) => {
+              alert(error.response?.data?.error || "There was an error while deleting the reservation. Please try again.");
+              setShowModal(false);
+          });
+  };
+
+  const cancelDeletion = () => {
+      setShowModal(false); // Close modal without deleting
+    };
 
   return (
     <div className="trip-container">
@@ -282,10 +312,15 @@ function QuickTrip() {
               </>
             )} {selectedTrip.Groups?.length > 0 && (
               <>
+              <button onClick={() => handleDelete(selectedTrip.id)}>
+                    <svg viewBox="0 0 190 240" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M40 227 L140 227 M165 20 L145 230 M15 20 L35 230 M0 20 L180 20 M75 5 L105 5 M105 0 L105 23 M75 0 L75 23" stroke="#000" strokeWidth="15" fill="none" />
+                    </svg>
+                    </button>
               <h3>People:</h3>
                 <ol>
                   {selectedTrip.Groups.map((group) => (
-                    <a className="No-Style-Link" href={`/quick/trip/edit/${group.id}`}>
+                    <><a className="No-Style-Link" href={`/quick/trip/edit/${group.id}`}>
                       <li key={group.id}>
                         <div className="svg-container">
                           Trip scheduled for: {group.leader?.name}
@@ -308,6 +343,8 @@ function QuickTrip() {
                         )}
                       </li>
                     </a>
+                    
+                    </>
                   ))}
                 </ol>
               </>
@@ -315,6 +352,14 @@ function QuickTrip() {
           </>
         )}
       </div>
+
+        {/* Confirmation Modal */}
+        <Confirmation
+            show={showModal}
+            onConfirm={confirmDeletion}
+            onCancel={cancelDeletion}
+            message={message}
+        />
     </div>
   );
 }

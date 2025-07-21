@@ -9,6 +9,7 @@ const Quick = () => {
       <div className="quick-links">
         <Link to="/quick/taxi" className="quick-link">Taxi</Link>
         <Link to="/quick/kitchen" className="quick-link">Kitchen</Link>
+        <Link to="/quick/rental" className="quick-link">Rental</Link>
         <Link to="/quick/reservation" className="quick-link">Reservation</Link>
         <Link to="/quick/trip" className="quick-link">Trip</Link>
       </div>

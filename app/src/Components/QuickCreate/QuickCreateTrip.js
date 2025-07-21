@@ -104,7 +104,7 @@ function QuickCreateTrip() {
       const response = await axiosAuth.post(`${backendURL}/trip`, payload);
       // Handle success - inform the user and redirect
       alert("Trip created successfully. Redirecting...");
-      // navigate("/quick/trip");
+      navigate("/quick/trip");
     } catch (error) {
       // Handle error - show the error message from the backend
       console.error("Error creating trip:", error);
