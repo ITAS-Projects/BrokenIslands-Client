@@ -156,14 +156,14 @@ function QuickRental() {
           <p>
             <strong>End Date:</strong> {selectedReservation.end.toDateString()}
           </p>
-          <strong>People with Allargies:</strong>{" "}
-          {selectedReservation.originalReservation?.Group?.People?.filter((person) => {
-            return person.allergies && person.allergies.trim() !== "";
-          }).map((person) => {
+          <strong>Boats rented:</strong>{" "}
+          {selectedReservation.originalReservation?.Boats?.filter((boat) => {
+            return boat.isRented;
+          }).map((boat) => {
             return (
               <div style={{ backgroundColor: "#eee", padding: 10, marginBottom: 10, borderRadius: 20 }}>
-                <p style={{ margin: 0 }}>Name: {person.name}</p>
-                <p style={{ margin: 0 }}>Allergies: {person?.allergies}</p>
+                <p style={{ margin: 0 }}>Type: {boat.type}</p>
+                <p style={{ margin: 0 }}>Number: {boat.numberOf}</p>
               </div>
             );
           })}
@@ -207,12 +207,18 @@ function QuickRental() {
             {events
               .filter((e) => e.end.setHours(23, 0, 0, 0) > selectedDay.setHours(12, 0, 0, 0) && e.start.setHours(0, 0, 0, 0) < selectedDay.setHours(12, 0, 0, 0))
               .map((reservation, idx) => {
-                const peopleWithAllergies = reservation.originalReservation?.Group?.People?.filter((person) => person.allergies && person.allergies.trim() !== "")?.length || 0;
+                const numberOfBoats = reservation.originalReservation?.Boats?.reduce((sum, current) => {
+                  if (current.isRented) {
+                    return sum + current.numberOf;
+                  } else {
+                    return sum;
+                  }
+                }, 0);
 
                 return (
                   <div key={idx} onClick={() => handleEventClick(reservation)} style={{ backgroundColor: "#eee", padding: "10px", borderRadius: "10px", marginBottom: 10 }}>
                     <p style={{ margin: 0 }}>
-                      Leader: {reservation.originalReservation?.Group?.leader?.name || "Unknown"}, People with allergies: {peopleWithAllergies}
+                      Leader: {reservation.originalReservation?.Group?.leader?.name || "Unknown"}, Number of boats rented: {numberOfBoats}
                     </p>
                   </div>
                 );
