@@ -151,7 +151,7 @@ function QuickTrip() {
 
   const handleDelete = (id) => {
       setCurrentTripId(id);
-      setMessage("Are you sure you want to delete this trip and all groups in it?");
+      setMessage("Are you sure you want to delete this trip and all groups in it? (reservations will be moved, not deleted)");
       setShowModal(true);
   };
 
@@ -262,6 +262,14 @@ function QuickTrip() {
         {selectedTrip && (
           <>
             <h2>{selectedTrip.timeFrame}</h2>
+            <div className="align-right">
+
+          <button onClick={() => handleDelete(selectedTrip.id)} className="Delete-Trip">
+                    <svg viewBox="0 0 190 240" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M40 227 L140 227 M165 20 L145 230 M15 20 L35 230 M0 20 L180 20 M75 5 L105 5 M105 0 L105 23 M75 0 L75 23" stroke="#000" strokeWidth="15" fill="none" />
+                    </svg>
+                    </button>
+            </div>
             <p>
               <strong>Date:</strong> {formatDate(selectedTrip.day)}
             </p>
@@ -312,11 +320,7 @@ function QuickTrip() {
               </>
             )} {selectedTrip.Groups?.length > 0 && (
               <>
-              <button onClick={() => handleDelete(selectedTrip.id)}>
-                    <svg viewBox="0 0 190 240" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M40 227 L140 227 M165 20 L145 230 M15 20 L35 230 M0 20 L180 20 M75 5 L105 5 M105 0 L105 23 M75 0 L75 23" stroke="#000" strokeWidth="15" fill="none" />
-                    </svg>
-                    </button>
+              
               <h3>People:</h3>
                 <ol>
                   {selectedTrip.Groups.map((group) => (
