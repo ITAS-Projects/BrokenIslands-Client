@@ -73,7 +73,7 @@ function QuickEditTrip() {
 
   useEffect(() => {
     axiosAuth
-      .get(`${backendURL}/trip/${id}`)
+      .get(`${backendURL}/oneWayTrips/${id}`)
       .then((response) => response.data)
       .then((data) => {
         console.log(data);
@@ -122,7 +122,7 @@ function QuickEditTrip() {
 
     try {
       // Send the data to the backend for validation and creation
-      const response = await axiosAuth.put(`${backendURL}/trip/${id}`, payload);
+      const response = await axiosAuth.put(`${backendURL}/oneWayTrips/${id}`, payload);
       // Handle success - inform the user and redirect
       alert("Trip updated successfully. Redirecting...");
       // navigate("/quick/trip");

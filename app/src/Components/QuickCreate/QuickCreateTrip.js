@@ -101,7 +101,7 @@ function QuickCreateTrip() {
 
     try {
       // Send the data to the backend for validation and creation
-      const response = await axiosAuth.post(`${backendURL}/trip`, payload);
+      const response = await axiosAuth.post(`${backendURL}/oneWayTrips`, payload);
       // Handle success - inform the user and redirect
       alert("Trip created successfully. Redirecting...");
       navigate("/quick/trip");

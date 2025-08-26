@@ -157,7 +157,7 @@ function QuickTrip() {
 
   const confirmDeletion = () => {
       axiosAuth
-          .delete(`${backendURL}/trips/all/${currentTripId}`)
+          .delete(`${backendURL}/trips/${currentTripId}`)
           .then((response) => {
               alert("Reservation successfully deleted.");
               setTrips((prevTrips) =>
