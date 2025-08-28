@@ -11,17 +11,25 @@ function QuickCreateReservation() {
   const [numberOfPeople, setNumOfPeople] = useState(1);
   const [notes, setNotes] = useState("");
 
-  const [trips, setTrips] = useState([{ timeFrame: "" }, { timeFrame: "" }]);
+  const [departureTrips, setDepartureTrips] = useState([{type: "departure", timeFrame: "" }]);
+  const [arrivalTrips, setArrivalTrips] = useState([{type: "arrival", timeFrame: "", People: 1 }, {type: "arrival", timeFrame: "", People: 1 }]);
   const [people, setPeople] = useState([{}]);
   const [boats, setBoats] = useState([]);
   const [taxis, setTaxis] = useState([]);
 
   const [loading, setLoading] = useState(false);
 
-  const editTripAtIndex = (index, newData) => {
-    const updatedTrips = [...trips];
-    updatedTrips[index] = { ...updatedTrips[index], ...newData };
-    setTrips(updatedTrips);
+  const editTripAtIndex = (type, index, newData) => {
+    let updatedTrips = [];
+    if (type == "arrival") {
+      updatedTrips = [...arrivalTrips]
+      updatedTrips[index] = { ...updatedTrips[index], ...newData };
+      setArrivalTrips(updatedTrips);
+    } else {
+      updatedTrips = [...departureTrips]
+      updatedTrips[index] = { ...updatedTrips[index], ...newData };
+      setDepartureTrips(updatedTrips);
+    }
   };
 
   const editPersonAtIndex = (index, newData) => {
@@ -92,16 +100,18 @@ function QuickCreateReservation() {
 
     // Prepare payload to send to the backend
     const payload = {
-      arrivalDay: trips?.[0]?.day,
-      departureDay: trips?.[1]?.day,
-      arrivalSchedule: trips?.[0]?.timeFrame,
-      departureSchedule: trips?.[1]?.timeFrame,
-      arrivalTime: (trips?.[0]?.timeFrame?.startsWith("Custom") || trips?.[0]?.timeFrame.startsWith("Paddle")) ? trips?.[0]?.timeStart : undefined,
-      departureTime: (trips?.[1]?.timeFrame.startsWith("Custom") || trips?.[1]?.timeFrame.startsWith("Paddle")) ? trips?.[1]?.timeStart : undefined,
-      arrivalFromPlace: trips?.[0]?.timeFrame?.startsWith("Custom") ? trips?.[0]?.fromPlace : undefined,
-      arrivalToPlace: trips?.[0]?.timeFrame?.startsWith("Custom") ? trips?.[0]?.toPlace : undefined,
-      departureFromPlace: trips?.[1]?.timeFrame.startsWith("Custom") ? trips?.[1]?.fromPlace : undefined,
-      departureToPlace: trips?.[1]?.timeFrame.startsWith("Custom") ? trips?.[1]?.toPlace : undefined,
+      arrivalTrips: arrivalTrips,
+      departureTrips: departureTrips,
+      // arrivalDay: trips?.[0]?.day,
+      // arrivalSchedule: trips?.[0]?.timeFrame,
+      // arrivalTime: (trips?.[0]?.timeFrame?.startsWith("Custom") || trips?.[0]?.timeFrame.startsWith("Paddle")) ? trips?.[0]?.timeStart : undefined,
+      // arrivalFromPlace: trips?.[0]?.timeFrame?.startsWith("Custom") ? trips?.[0]?.fromPlace : undefined,
+      // arrivalToPlace: trips?.[0]?.timeFrame?.startsWith("Custom") ? trips?.[0]?.toPlace : undefined,
+      // departureDay: trips?.[1]?.day,
+      // departureSchedule: trips?.[1]?.timeFrame,
+      // departureTime: (trips?.[1]?.timeFrame.startsWith("Custom") || trips?.[1]?.timeFrame.startsWith("Paddle")) ? trips?.[1]?.timeStart : undefined,
+      // departureFromPlace: trips?.[1]?.timeFrame.startsWith("Custom") ? trips?.[1]?.fromPlace : undefined,
+      // departureToPlace: trips?.[1]?.timeFrame.startsWith("Custom") ? trips?.[1]?.toPlace : undefined,
       numberOfPeople: numberOfPeople,
       notes: notes,
       people: people.map((p) => ({
@@ -120,7 +130,7 @@ function QuickCreateReservation() {
       const response = await axiosAuth.post(`${backendURL}/quick`, payload);
       // Handle success - inform the user and redirect
       alert("Reservation created successfully. Redirecting...");
-      navigate("/quick/reservation");
+      // navigate("/quick/reservation");
     } catch (error) {
       // Handle error - show the error message from the backend
       console.error("Error creating reservation:", error);
@@ -251,27 +261,32 @@ function QuickCreateReservation() {
 
           {tripsShown && (
             <div className="dropdown-content" style={{ marginTop: "10px" }}>
-              {trips.map((trip, index) => {
+              {[arrivalTrips, departureTrips].map((trips, idx) => {
+                let multipleTrips = false;
+                if (trips.length >= 2) {
+                  multipleTrips = true;
+                }
+              return (<div key={idx}> {idx == 1 && <br/>} { trips.map((trip, index) => {
                 return (
                   <div key={index} className={`Trip-Object`}>
-                    <label>{(index == 0 && "Arival") || "Departure"}:</label>
+                    <label>{(trip.type == "arrival" && "Arival") || "Departure"}:</label>
                     <label>
                       day:
-                      <input type="date" value={trip.day?.split("T")[0]} onChange={(e) => editTripAtIndex(index, { day: e.target.value })} required />
+                      <input type="date" value={trip.day?.split("T")[0]} onChange={(e) => editTripAtIndex(trip.type, index, { day: e.target.value })} required />
                     </label>
 
                     <label>
                       Time Frame:
-                      <select className="editTripInputSelect" id="timeFrame" value={trip.timeFrame} onChange={(e) => editTripAtIndex(index, { timeFrame: e.target.value })} required>
+                      <select className="editTripInputSelect" id="timeFrame" value={trip.timeFrame} onChange={(e) => editTripAtIndex(trip.type, index, { timeFrame: e.target.value })} required>
                         <option value="" disabled>
                           -- select a timeframe --
                         </option>
                         <option value="Custom AM">Custom AM</option>
-                        <option value={(index == 0 && "Secret to Lodge AM") || "Lodge to Secret AM"}>{(index == 0 && "Secret to Lodge AM") || "Lodge to Secret AM"}</option>
+                        <option value={(trip.type == "arrival" && "Secret to Lodge AM") || "Lodge to Secret AM"}>{(trip.type == "arrival" && "Secret to Lodge AM") || "Lodge to Secret AM"}</option>
                         <option value="Custom">Custom</option>
-                        <option value={(index == 0 && "Secret to Lodge PM") || "Lodge to Secret PM"}>{(index == 0 && "Secret to Lodge PM") || "Lodge to Secret PM"}</option>
+                        <option value={(trip.type == "arrival" && "Secret to Lodge PM") || "Lodge to Secret PM"}>{(trip.type == "arrival" && "Secret to Lodge PM") || "Lodge to Secret PM"}</option>
                         <option value="Custom PM">Custom PM</option>
-                        <option value={(index == 0 && "Paddle In") || "Paddle Out"}>{(index == 0 && "Paddle In") || "Paddle Out"}</option>
+                        <option value={(trip.type == "arrival" && "Paddle In") || "Paddle Out"}>{(trip.type == "arrival" && "Paddle In") || "Paddle Out"}</option>
                       </select>
                     </label>
 
@@ -279,31 +294,39 @@ function QuickCreateReservation() {
                       <>
                         <label>
                           Time:
-                          <input className="editTripInputTime" type="time" id="timeStart" value={trip.timeStart} onChange={(e) => editTripAtIndex(index, { timeStart: e.target.value })} required />
+                          <input className="editTripInputTime" type="time" id="timeStart" value={trip.timeStart} onChange={(e) => editTripAtIndex(trip.type, index, { timeStart: e.target.value })} required />
                         </label>
                         {trip.timeFrame?.startsWith("Custom") && (
                           <>
                             <label>
                               From Place:
-                              <input className="editTripInputText" type="text" id="fromPlace" value={trip.fromPlace} onChange={(e) => editTripAtIndex(index, { fromPlace: e.target.value })} required />
+                              <input className="editTripInputText" type="text" id="fromPlace" value={trip.fromPlace} onChange={(e) => editTripAtIndex(trip.type, index, { fromPlace: e.target.value })} required />
                             </label>
 
                             <label>
                               To Place:
-                              <input className="editTripInputText" type="text" id="toPlace" value={trip.toPlace} onChange={(e) => editTripAtIndex(index, { toPlace: e.target.value })} required />
+                              <input className="editTripInputText" type="text" id="toPlace" value={trip.toPlace} onChange={(e) => editTripAtIndex(trip.type, index, { toPlace: e.target.value })} required />
                             </label>
                           </>
                         )}
                       </>
                     )}
+
+                    {multipleTrips && (
+                    <label>Number of People on Trip:
+                    <input className="quickPeopleInputNumber" type="number" id="tripPeople" value={trip.People} onChange={(e) => editTripAtIndex(trip.type, index, { People: Number(e.target.value)})} min="1" required />
+                    </label>
+
+                    )
+                    }
                   </div>
                 );
-              })}
+              })}</div>)})}
             </div>
           )}
         </div>
 
-        <button type="submit" className={!loading && "next"} disabled={loading}>
+        <button type="submit" className={!loading && "next" || ""} disabled={loading}>
           {loading ? "Loading..." : "Create New Reservation"}
         </button>
       </form>
