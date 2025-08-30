@@ -266,10 +266,14 @@ function QuickCreateReservation() {
                 if (trips.length >= 2) {
                   multipleTrips = true;
                 }
+
+              let numberOfPeopleOnTrips = trips.reduce((sum, current) => {return (current.People || 1)+sum;}, 0);
               return (<div key={idx}> {idx == 1 && <br/>} { trips.map((trip, index) => {
                 return (
-                  <div key={index} className={`Trip-Object`}>
+                  <div key={index} className={`quick-create-Trip-Object ${index >= numberOfPeople && "error" || ""}`}>
                     <label>{(trip.type == "arrival" && "Arival") || "Departure"}:</label>
+
+                    {index >= numberOfPeople && (<>Cannot have more trips than people</>)}
                     <label>
                       day:
                       <input type="date" value={trip.day?.split("T")[0]} onChange={(e) => editTripAtIndex(trip.type, index, { day: e.target.value })} required />
@@ -312,9 +316,11 @@ function QuickCreateReservation() {
                       </>
                     )}
 
+                    {numberOfPeopleOnTrips > numberOfPeople && (<div className="warning">Warning: {numberOfPeopleOnTrips} / {numberOfPeople} people are chosen to go on these trips</div>)}
+
                     {multipleTrips && (
                     <label>Number of People on Trip:
-                    <input className="quickPeopleInputNumber" type="number" id="tripPeople" value={trip.People} onChange={(e) => editTripAtIndex(trip.type, index, { People: Number(e.target.value)})} min="1" required />
+                    <input className="quickPeopleInputNumber" max={numberOfPeople-numberOfPeopleOnTrips+trip.People} type="number" id="tripPeople" value={trip.People} onChange={(e) => editTripAtIndex(trip.type, index, { People: (Number(e.target.value) || 1)})} min="1" required />
                     </label>
 
                     )
