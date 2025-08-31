@@ -28,3 +28,15 @@ button.quick-create:has( + button) {
     color: rgb(179, 0, 0);
     font-weight: 900;
 }
+
+.space-left{
+    margin-left: 10px;
+}
+
+.red{
+    background-color: rgba(255, 0, 0, 0.178);
+}
+
+.blue{
+    background-color: rgba(0, 0, 255, 0.26);
+}

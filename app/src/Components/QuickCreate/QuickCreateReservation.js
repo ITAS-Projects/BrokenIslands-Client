@@ -11,14 +11,21 @@ function QuickCreateReservation() {
   const [numberOfPeople, setNumOfPeople] = useState(1);
   const [notes, setNotes] = useState("");
 
-  const [departureTrips, setDepartureTrips] = useState([{type: "departure", timeFrame: "" }]);
-  const [arrivalTrips, setArrivalTrips] = useState([{type: "arrival", timeFrame: "", People: 1 }, {type: "arrival", timeFrame: "", People: 1 }]);
+  const [departureTrips, setDepartureTrips] = useState([{type: "departure", timeFrame: "", People: 1, Boats: 0 }]);
+  const [arrivalTrips, setArrivalTrips] = useState([{type: "arrival", timeFrame: "", People: 1, Boats: 0 }]);
   const [people, setPeople] = useState([{}]);
   const [boats, setBoats] = useState([]);
   const [taxis, setTaxis] = useState([]);
 
   const [loading, setLoading] = useState(false);
 
+  const deleteTrip = (type, index) => {
+    if (type == "arrival") {
+      setArrivalTrips((prevTrips) => prevTrips.filter((_, i) => i !== index));
+    }else{
+      setDepartureTrips((prevTrips) => prevTrips.filter((_, i) => i !== index));
+    }
+  }
   const editTripAtIndex = (type, index, newData) => {
     let updatedTrips = [];
     if (type == "arrival") {
@@ -31,6 +38,14 @@ function QuickCreateReservation() {
       setDepartureTrips(updatedTrips);
     }
   };
+  const createTrip = (type, day) => {
+    let newTrip = { day: day, type: type, timeFrame: "", People: 1, Boats: 0 };
+    if (type == "arrival"){
+      setArrivalTrips([...arrivalTrips, newTrip]);
+    } else {
+      setDepartureTrips([...departureTrips, newTrip]);
+    }
+  }
 
   const editPersonAtIndex = (index, newData) => {
     const updatedPeople = [...people];
@@ -100,8 +115,26 @@ function QuickCreateReservation() {
 
     // Prepare payload to send to the backend
     const payload = {
-      arrivalTrips: arrivalTrips,
-      departureTrips: departureTrips,
+      arrivalTrips: arrivalTrips.map((at) => ({
+        day: at.day,
+        timeStart: at.timeStart,
+        fromPlace: at.fromPlace,
+        toPlace: at.toPlace,
+        type: "arrival",
+        timeFrame: at.timeFrame || "",
+        People: Number(at.People) || 1,
+        Boats: Number(at.Boats) || 0,
+      })),
+      departureTrips: departureTrips.map((dt) => ({
+        day: dt.day,
+        timeStart: dt.timeStart,
+        fromPlace: dt.fromPlace,
+        toPlace: dt.toPlace,
+        type: "departure",
+        timeFrame: dt.timeFrame || "",
+        People: Number(dt.People) || 1,
+        Boats: Number(dt.Boats) || 0,
+      })),
       // arrivalDay: trips?.[0]?.day,
       // arrivalSchedule: trips?.[0]?.timeFrame,
       // arrivalTime: (trips?.[0]?.timeFrame?.startsWith("Custom") || trips?.[0]?.timeFrame.startsWith("Paddle")) ? trips?.[0]?.timeStart : undefined,
@@ -112,16 +145,16 @@ function QuickCreateReservation() {
       // departureTime: (trips?.[1]?.timeFrame.startsWith("Custom") || trips?.[1]?.timeFrame.startsWith("Paddle")) ? trips?.[1]?.timeStart : undefined,
       // departureFromPlace: trips?.[1]?.timeFrame.startsWith("Custom") ? trips?.[1]?.fromPlace : undefined,
       // departureToPlace: trips?.[1]?.timeFrame.startsWith("Custom") ? trips?.[1]?.toPlace : undefined,
-      numberOfPeople: numberOfPeople,
-      notes: notes,
+      numberOfPeople: Number(numberOfPeople) || 1,
+      notes: notes || "",
       people: people.map((p) => ({
-        name: p.name,
+        name: p.name || "",
         allergies: p.allergies || "",
       })),
       boats: boats.map((b) => ({
-        type: b.type,
-        numberOf: Number(b.numberOf),
-        rented: b.isRented,
+        type: b.type || "",
+        numberOf: Number(b.numberOf) || 1,
+        rented: b.isRented || false,
       })),
     };
 
@@ -268,10 +301,21 @@ function QuickCreateReservation() {
                 }
 
               let numberOfPeopleOnTrips = trips.reduce((sum, current) => {return (current.People || 1)+sum;}, 0);
+              let numberOfBoatsOnTrips = trips.reduce((sum, current) => {return (current.Boats || 0)+sum;}, 0);
+              let numberOfPersonalBoats = boats.reduce((sum, current) => {
+                if (current.isRented) {
+                  return sum;
+                } else {
+                  return Number(sum + current.numberOf);
+                }
+              }, 0)
               return (<div key={idx}> {idx == 1 && <br/>} { trips.map((trip, index) => {
                 return (
                   <div key={index} className={`quick-create-Trip-Object ${index >= numberOfPeople && "error" || ""}`}>
-                    <label>{(trip.type == "arrival" && "Arival") || "Departure"}:</label>
+                    <h3>{(trip.type == "arrival" && "Arival") || "Departure"}:
+
+                    {index == 0 && (<button className="space-left blue" onClick={()=>{createTrip(trip.type, trip.day)}}>Add {(trip.type == "arrival" && "Arival") || "Departure"} Trip</button>)
+                    || (<button className="space-left red" onClick={()=>{deleteTrip(trip.type, index)}}>Remove Trip</button>)}</h3>
 
                     {index >= numberOfPeople && (<>Cannot have more trips than people</>)}
                     <label>
@@ -316,13 +360,19 @@ function QuickCreateReservation() {
                       </>
                     )}
 
-                    {numberOfPeopleOnTrips > numberOfPeople && (<div className="warning">Warning: {numberOfPeopleOnTrips} / {numberOfPeople} people are chosen to go on these trips</div>)}
-
                     {multipleTrips && (
+                      <>
+                    {numberOfPeopleOnTrips != numberOfPeople && (<div className="warning">Warning: {numberOfPeopleOnTrips} / {numberOfPeople} people are chosen to go on these trips</div>)}
                     <label>Number of People on Trip:
-                    <input className="quickPeopleInputNumber" max={numberOfPeople-numberOfPeopleOnTrips+trip.People} type="number" id="tripPeople" value={trip.People} onChange={(e) => editTripAtIndex(trip.type, index, { People: (Number(e.target.value) || 1)})} min="1" required />
+                    <input className="quickPeopleInputNumber" max={Math.max(numberOfPeople-numberOfPeopleOnTrips+trip.People, 1)} type="number" id="tripPeople" value={trip.People} onChange={(e) => editTripAtIndex(trip.type, index, { People: (Number(e.target.value) || 1)})} min="1" required />
                     </label>
 
+                    {numberOfBoatsOnTrips != numberOfPersonalBoats && (<div className="warning">Warning: {numberOfBoatsOnTrips} / {numberOfPersonalBoats} boats are chosen to go on these trips</div>)}
+                    {trip.timeFrame.startsWith("Paddle") && trip.Boats < 1 && (<div className="error">Warning: People Must have a boat to paddle {trip.type == "arrival" && "in" || "out"} on</div>)}
+                    <label>Number of Boats on Trip:
+                    <input className="quickPeopleInputNumber" max={Math.max(numberOfPersonalBoats-numberOfBoatsOnTrips+trip.Boats, 0)} type="number" id="tripBoats" value={trip.Boats} onChange={(e) => editTripAtIndex(trip.type, index, { Boats: (Number(e.target.value) || 0)})} min={trip.timeFrame.startsWith("Paddle") && 1 || 0} required />
+                    </label>
+                    </>
                     )
                     }
                   </div>
