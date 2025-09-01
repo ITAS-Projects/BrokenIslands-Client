@@ -163,7 +163,7 @@ function QuickCreateReservation() {
       const response = await axiosAuth.post(`${backendURL}/quick`, payload);
       // Handle success - inform the user and redirect
       alert("Reservation created successfully. Redirecting...");
-      // navigate("/quick/reservation");
+      navigate("/quick/reservation");
     } catch (error) {
       // Handle error - show the error message from the backend
       console.error("Error creating reservation:", error);
@@ -314,7 +314,7 @@ function QuickCreateReservation() {
                   <div key={index} className={`quick-create-Trip-Object ${index >= numberOfPeople && "error" || ""}`}>
                     <h3>{(trip.type == "arrival" && "Arival") || "Departure"}:
 
-                    {index == 0 && (<button className="space-left blue" onClick={()=>{createTrip(trip.type, trip.day)}}>Add {(trip.type == "arrival" && "Arival") || "Departure"} Trip</button>)
+                    {index == 0 && (<button type="button" className="space-left blue" onClick={()=>{createTrip(trip.type, trip.day)}}>Add {(trip.type == "arrival" && "Arival") || "Departure"} Trip</button>)
                     || (<button className="space-left red" onClick={()=>{deleteTrip(trip.type, index)}}>Remove Trip</button>)}</h3>
 
                     {index >= numberOfPeople && (<>Cannot have more trips than people</>)}
