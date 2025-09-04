@@ -27,56 +27,12 @@ function QuickEditReservation() {
     const [taxis, setTaxis] = useState([]);
 
     const setupTrips = (newTrips) => {
-        const timeOrder = [
-            "Custom AM", "Lodge to Secret AM", "Secret to Lodge AM", "Custom", "Lodge to Secret PM", "Secret to Lodge PM", "Custom PM", "Paddle In", "Paddle Out"
-        ]
-
-        const staticTime = [
-            "Lodge to Secret AM", "Secret to Lodge AM", "Lodge to Secret PM", "Secret to Lodge PM"
-        ]
-
-        newTrips?.sort((a, b) => {
-            if (staticTime.includes(a.timeFrame)) {
-                return -1;
-            } else if (staticTime.includes(b.timeFrame)) {
-                return 1;
-            }
-
-            if (a.timeFrame.startsWith("Paddle")) {
-                return 1;
-            } else if (b.timeFrame.startsWith("Paddle")) {
-                return -1;
-            }
-
-            let dayData = a.day?.split('T')[0].split('-');
-            let dayData2 = b.day?.split('T')[0].split('-');
-
-            if (!dayData || !dayData2) return 0;
-
-            // Compare year
-            if (dayData[0] !== dayData2[0]) {
-                return Number(dayData[0]) - Number(dayData2[0]);
-            }
-
-            // Compare month
-            if (dayData[1] !== dayData2[1]) {
-                return Number(dayData[1]) - Number(dayData2[1]);
-            }
-
-            // Compare day
-            if (dayData[2] !== dayData2[2]) {
-                return Number(dayData[2]) - Number(dayData2[2]);
-            }
-
-
-            return timeOrder.findIndex(item => item === a.timeFrame) - timeOrder.findIndex(item => item === b.timeFrame);
-        });
         const arrivalTrips = [];
         const departureTrips = [];
 
         newTrips.forEach(trip => {
-            trip.peopleOnTrip = trip.ReservationTrip?.peopleOnTrip;
-            trip.boatsOnTrip = trip.ReservationTrip?.boatsOnTrip;
+            trip.peopleOnTrip = trip.ReservationTrip?.peopleOnTrip || 1;
+            trip.boatsOnTrip = trip.ReservationTrip?.boatsOnTrip || 0;
             const type = trip.ReservationTrip?.typeOfTrip;
             if (type === "Arrival") {
                 arrivalTrips.push(trip);
@@ -114,7 +70,7 @@ function QuickEditReservation() {
             };
         });
     };
-    const createTrip = (type) => {
+    const createTrip = (type, ref) => {
         setTrips(newTrips => {
             if (!newTrips?.[type]) return newTrips;
 
@@ -122,7 +78,7 @@ function QuickEditReservation() {
                 ...newTrips,
                 [type]: [
                     ...newTrips[type],
-                    { new: true, timeFrame: "", TaxiId: "" }
+                    { day: ref.day, new: true, timeFrame: "", TaxiId: "", peopleOnTrip: 1, boatsOnTrip: 0 }
                 ],
             };
         });
@@ -242,6 +198,85 @@ function QuickEditReservation() {
             });
     }, [id]);
 
+    useEffect(() => {
+        const timeOrder = [
+            "Custom AM", "Lodge to Secret AM", "Secret to Lodge AM", "Custom", "Lodge to Secret PM", "Secret to Lodge PM", "Custom PM", "Paddle In", "Paddle Out"
+        ]
+
+        const staticTime = [
+            "Lodge to Secret AM", "Secret to Lodge AM", "Lodge to Secret PM", "Secret to Lodge PM"
+        ]
+
+        if (trips?.departure?.length > 0) {
+            Object.values(trips)?.forEach(tripList => {
+                tripList.sort((a,b) => {
+                    console.log(":");
+                    console.log(a);
+                    console.log(b);
+                    if (!a.new) {
+                        return -1;
+                    } else if (!b.new) {
+                        return 1;
+                    }
+                    console.log("1");
+
+                    // if (staticTime.includes(a.timeFrame)) {
+                    //     return -1;
+                    // } else if (staticTime.includes(b.timeFrame)) {
+                    //     return 1;
+                    // }
+                    
+                    // if (a.timeFrame.startsWith("Paddle")) {
+                    //     return 1;
+                    // } else if (b.timeFrame.startsWith("Paddle")) {
+                    //     return -1;
+                    // }
+                    
+                    let dayData = a.day?.split('T')[0].split('-');
+                    let dayData2 = b.day?.split('T')[0].split('-');
+                    
+                    if (!dayData?.[2]){
+                        return 1;
+                    } else if (!dayData2?.[2]) {
+                        return -1;
+                    }
+                    console.log(dayData);
+
+                    // Compare year
+                    if (dayData[0] !== dayData2[0]) {
+                        return Number(dayData[0]) - Number(dayData2[0]);
+                    }
+                    
+                    // Compare month
+                    if (dayData[1] !== dayData2[1]) {
+                        return Number(dayData[1]) - Number(dayData2[1]);
+                    }
+                    
+                    // Compare day
+                    if (dayData[2] !== dayData2[2]) {
+                        return Number(dayData[2]) - Number(dayData2[2]);
+                    }
+                    
+                    
+                    return timeOrder.findIndex(item => item === a.timeFrame) - timeOrder.findIndex(item => item === b.timeFrame);
+                });
+                
+                //         if (a.day == undefined) {
+                //             return 1;
+                //         }
+                //         if (a.day > b.day){
+                //             return 1;
+                //         } else if (a.day < b.day) {
+                //             return -1;
+                //         } else {
+                //             let 
+                //             let atime = 
+                //         }
+                //     })
+            });
+        }
+    }, [trips]);
+
     const compareTimes = (t1, t2) => {
         const [h1, m1] = t1.split(':').slice(0, 2).map(Number);
         const [h2, m2] = t2.split(':').slice(0, 2).map(Number);
@@ -255,11 +290,42 @@ function QuickEditReservation() {
         setSaveLoading(true);
 
         const updatedData = {
-        trips: trips,
-        numberOfPeople,
-        notes,
-        people,
-        boats
+            arrivalTrips: trips.arrival.map((at) => ({
+                id: at.id,
+                TaxiId: at.TaxiId || null,
+                day: at.day,
+                timeStart: at.timeStart,
+                fromPlace: at.fromPlace,
+                toPlace: at.toPlace,
+                type: "arrival",
+                timeFrame: at.timeFrame || "",
+                peopleOnTrip: Number(at.peopleOnTrip) || 1,
+                boatsOnTrip: Number(at.boatsOnTrip) || 0,
+            })),
+            departureTrips: trips.departure.map((dt) => ({
+                id: dt.id,
+                TaxiId: dt.TaxiId || null,
+                day: dt.day,
+                timeStart: dt.timeStart,
+                fromPlace: dt.fromPlace,
+                toPlace: dt.toPlace,
+                type: "departure",
+                timeFrame: dt.timeFrame || "",
+                peopleOnTrip: Number(dt.peopleOnTrip) || 1,
+                boatsOnTrip: Number(dt.boatsOnTrip) || 0,
+            })),
+            // trips: trips,
+            numberOfPeople: Number(numberOfPeople) || 0,
+            notes: notes || "",
+            people: people.map((p) => ({
+                name: p.name || "",
+                allergies: p.allergies || "",
+            })),
+            boats: boats.map((b) => ({
+                type: b.type || "",
+                numberOf: Number(b.numberOf) || 1,
+                rented: b.isRented || false,
+            })),
         };
 
         try {
@@ -540,7 +606,6 @@ function QuickEditReservation() {
                                             )
                                         )}
 
-                                        {index === 0 && (
                                         <label>
                                             day:
                                             <input
@@ -550,7 +615,6 @@ function QuickEditReservation() {
                                                 required
                                             />
                                         </label>
-                                        )}
 
                                         <label>Time Frame:
                                             <select
@@ -628,15 +692,11 @@ function QuickEditReservation() {
                                                 </select>
                                             </label>
 
-
-                                            {taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < (trips.arrival?.length > 1 ? trip.peopleOnTrip : peopleOnTrip) && (
-                                                <>
-                                                <button type="button" className="next" onClick={() => {
-                                                    clearInputs();
-                                                    createTrip("arrival", index);
-                                                }}>Create another trip</button>
-                                                </>
-                                            )}
+                                            <button type="button" className="next" onClick={() => {
+                                                clearInputs();
+                                                createTrip("arrival", trip);
+                                            }}>Create another trip</button>
+                                            
                                             </>
                                         )}
                                         
@@ -676,7 +736,7 @@ function QuickEditReservation() {
                             })}
                             <p>Departure:</p>
                             {trips?.departure?.map((trip, index) => {
-                                console.log(trips);
+                                // console.log(trips);
                                 let numberOfBoats = boats?.reduce((sum, boat) => {
                                     if (boat.isRented) {
                                         return sum;
@@ -796,15 +856,10 @@ function QuickEditReservation() {
                                                 </select>
                                             </label>
 
-
-                                            {taxis.find(taxifind => taxifind.id === trip.TaxiId)?.spaceForPeople < (trips.departure?.length > 1 ? trip.peopleOnTrip : peopleOnTrip) && (
-                                                <>
-                                                <button type="button" className="next" onClick={() => {
-                                                    clearInputs();
-                                                    createTrip("departure", index);
-                                                }}>Create another trip</button>
-                                                </>
-                                            )}
+                                            <button type="button" className="next" onClick={() => {
+                                                clearInputs();
+                                                createTrip("departure", trip);
+                                            }}>Create another trip</button>
                                             </>
                                         )}
 
@@ -847,7 +902,7 @@ function QuickEditReservation() {
                 </div>
 
 
-                <button type="submit" className={!saveLoading && "next"} disabled={saveLoading}>{saveLoading ? "Loading..." : "Save Changes"}</button>
+                <button type="submit" className={!saveLoading && "next" || ""} disabled={saveLoading}>{saveLoading ? "Loading..." : "Save Changes"}</button>
             </form>
         </div>
     );
