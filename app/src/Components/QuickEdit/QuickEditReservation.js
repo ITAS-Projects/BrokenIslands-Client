@@ -17,7 +17,18 @@ function QuickEditReservation() {
     const [prevTrips, setPrevTrips] = useState(null);
     const [prevBoats, setPrevBoats] = useState(null);
     const [prevPeople, setPrevPeople] = useState(null);
-    const [trips, setTrips] = useState(null);
+    const [trips, setTripsHidden] = useState(null);
+    const setTrips = (data) => {
+        let sortedTrips = {};
+        if (data && data?.arrival) {
+            Object.keys(data).forEach((key, index) => {
+                sortedTrips[key] = sortTrips(data[key]);
+            });
+        } else {
+            sortedTrips = data;
+        }
+        setTripsHidden(sortedTrips);
+    }
     const [people, setPeople] = useState([]);
     const [boats, setBoats] = useState([]);
     const setupBoats = (value) => {
@@ -519,6 +530,7 @@ function QuickEditReservation() {
 
                     {tripsShown && (
                         <div className="dropdown-content" style={{ marginTop: '10px' }}>
+                            {(()=>{console.log(trips);})()}
                             {Object.entries(trips)
                                 .sort(([keyA], [keyB]) => {
                                     if (keyA.toLowerCase() === "arrival") return -1;
@@ -526,8 +538,9 @@ function QuickEditReservation() {
                                     return 0;
                                 })
                                 .map(([keyTripType, tripList]) => {
-                                    const sorted = sortTrips(tripList);
-                                    return <>
+                                    // const sorted = sortTrips(tripList);
+                                    const sorted = tripList;
+                                    return <div key={keyTripType}>
                                         <p>{keyTripType[0].toUpperCase()}{keyTripType.slice(1).toLowerCase()}:</p>
                                         {sorted?.map((trip, index) => {
                                             let numberOfBoats = boats?.reduce((sum, boat) => {
@@ -691,7 +704,7 @@ function QuickEditReservation() {
                                                 </div>
                                             )
                                         })}
-                                    </>;
+                                    </div>;
                                 })}
                         </div>
                     )}
